@@ -1,0 +1,23 @@
+{
+  "Enabled": true,
+  "Tiers": [
+    {
+      "Perm": "styx.craft.master",
+      "CraftTimeMult": 0.1,
+      "OutputMult": 3.0,
+      "AutoShutdown": true
+    },
+    {
+      "Perm": "styx.craft.vip",
+      "CraftTimeMult": 0.25,
+      "OutputMult": 2.0,
+      "AutoShutdown": true
+    },
+    {
+      "Perm": "styx.craft.use",
+      "CraftTimeMult": 0.5,
+      "OutputMult": 1.25,
+      "AutoShutdown": false
+    }
+  ]
+}

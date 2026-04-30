@@ -1,0 +1,2595 @@
+{
+  "Enabled": true,
+  "SuppressOnBloodMoon": true,
+  "MaxItemsPerBag": 8,
+  "BagLifetimeSeconds": 300,
+  "NightBoostEnabled": true,
+  "NightStartHour": 22,
+  "NightEndHour": 6,
+  "DropTiers": [
+    {
+      "Perm": "styx.zloot.master",
+      "DropChance": 1.0,
+      "Quality": "master"
+    },
+    {
+      "Perm": "styx.zloot.vip",
+      "DropChance": 0.85,
+      "Quality": "vip"
+    },
+    {
+      "Perm": "styx.zloot.use",
+      "DropChance": 0.6,
+      "Quality": "basic"
+    }
+  ],
+  "TierOrder": [
+    "basic",
+    "vip",
+    "master"
+  ],
+  "QualityTiers": {
+    "basic": {
+      "Default": [
+        {
+          "Item": "foodCanSoup",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.35
+        },
+        {
+          "Item": "foodCanMiso",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.2
+        },
+        {
+          "Item": "drinkJarRiverWater",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.4
+        },
+        {
+          "Item": "resourceBone",
+          "MinCount": 1,
+          "MaxCount": 3,
+          "Chance": 0.35
+        },
+        {
+          "Item": "resourceCloth",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.3
+        },
+        {
+          "Item": "medicalBandage",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.2
+        },
+        {
+          "Item": "oldCash",
+          "MinCount": 1,
+          "MaxCount": 6,
+          "Chance": 0.4
+        },
+        {
+          "Item": "foodRottingFlesh",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.3
+        }
+      ],
+      "ByClass": {
+        "zombieNurse": [
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.55
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drugHerbalAntibiotics",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "medicalAloeCream",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "drinkJarRiverWater",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 5,
+            "Chance": 0.3
+          }
+        ],
+        "zombieFatCop": [
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 8,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          }
+        ],
+        "zombieCop": [
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.5
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 8,
+            "Chance": 0.4
+          }
+        ],
+        "zombieBusinessMan": [
+          {
+            "Item": "oldCash",
+            "MinCount": 5,
+            "MaxCount": 20,
+            "Chance": 0.85
+          },
+          {
+            "Item": "resourcePaper",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "foodCanMiso",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          }
+        ],
+        "zombieFatHawaiian": [
+          {
+            "Item": "foodCanChili",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodCanTuna",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "drinkJarYuccaJuice",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.3
+          }
+        ],
+        "zombieFemaleFat": [
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodPumpkinPie",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.35
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 5,
+            "Chance": 0.3
+          }
+        ],
+        "zombieBoe": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.5
+          },
+          {
+            "Item": "resourceWood",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.35
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.3
+          }
+        ],
+        "zombieJoe": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.35
+          },
+          {
+            "Item": "foodCanLamb",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "resourceLockPick",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          }
+        ],
+        "zombieMoe": [
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceLeather",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.25
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.3
+          }
+        ],
+        "zombieSteve": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarRiverWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          }
+        ],
+        "zombieArlene": [
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarRiverWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceBone",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 5,
+            "Chance": 0.35
+          }
+        ],
+        "zombieMarlene": [
+          {
+            "Item": "foodBakedPotato",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarRiverWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.3
+          }
+        ],
+        "zombieDarlene": [
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCanChili",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.4
+          }
+        ],
+        "zombieSpider": [
+          {
+            "Item": "resourceCloth",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceBone",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.25
+          }
+        ],
+        "zombieScreamer": [
+          {
+            "Item": "ammo762mmBulletBall",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          }
+        ],
+        "zombieLumberjack": [
+          {
+            "Item": "resourceWood",
+            "MinCount": 4,
+            "MaxCount": 10,
+            "Chance": 0.6
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 4,
+            "Chance": 0.3
+          }
+        ],
+        "zombieJanitor": [
+          {
+            "Item": "resourceOil",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceGlue",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.25
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          }
+        ],
+        "zombieBiker": [
+          {
+            "Item": "resourceLeather",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.55
+          },
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 2,
+            "MaxCount": 8,
+            "Chance": 0.3
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 5,
+            "Chance": 0.35
+          }
+        ],
+        "zombieSoldier": [
+          {
+            "Item": "ammo762mmBulletBall",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.5
+          },
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 4,
+            "MaxCount": 10,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCanLamb",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          }
+        ],
+        "zombieMutated": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.5
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 1,
+            "MaxCount": 5,
+            "Chance": 0.3
+          }
+        ]
+      }
+    },
+    "vip": {
+      "Default": [
+        {
+          "Item": "foodCanSham",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.45
+        },
+        {
+          "Item": "foodCanLamb",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.3
+        },
+        {
+          "Item": "drinkJarBoiledWater",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.5
+        },
+        {
+          "Item": "drinkJarBeer",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.4
+        },
+        {
+          "Item": "resourceBone",
+          "MinCount": 2,
+          "MaxCount": 4,
+          "Chance": 0.5
+        },
+        {
+          "Item": "resourceCloth",
+          "MinCount": 1,
+          "MaxCount": 4,
+          "Chance": 0.45
+        },
+        {
+          "Item": "resourceScrapIron",
+          "MinCount": 1,
+          "MaxCount": 5,
+          "Chance": 0.35
+        },
+        {
+          "Item": "medicalBandage",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.4
+        },
+        {
+          "Item": "drugPainkillers",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.15
+        },
+        {
+          "Item": "oldCash",
+          "MinCount": 3,
+          "MaxCount": 12,
+          "Chance": 0.55
+        },
+        {
+          "Item": "foodRottingFlesh",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.25
+        }
+      ],
+      "ByClass": {
+        "zombieNurse": [
+          {
+            "Item": "medicalBandage",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.85
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "drugAntibiotics",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugHerbalAntibiotics",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "medicalAloeCream",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "medicalSplint",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.45
+          }
+        ],
+        "zombieFatCop": [
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 10,
+            "MaxCount": 25,
+            "Chance": 0.75
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 3,
+            "MaxCount": 8,
+            "Chance": 0.45
+          },
+          {
+            "Item": "gunHandgunT1Pistol",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.12
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 12,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.2
+          }
+        ],
+        "zombieCop": [
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 12,
+            "MaxCount": 30,
+            "Chance": 0.8
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 3,
+            "MaxCount": 8,
+            "Chance": 0.5
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 12,
+            "Chance": 0.55
+          }
+        ],
+        "zombieBusinessMan": [
+          {
+            "Item": "oldCash",
+            "MinCount": 10,
+            "MaxCount": 35,
+            "Chance": 1.0
+          },
+          {
+            "Item": "resourcePaper",
+            "MinCount": 3,
+            "MaxCount": 8,
+            "Chance": 0.7
+          },
+          {
+            "Item": "bookArtOfMiningCoffee",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.25
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCanMiso",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          }
+        ],
+        "zombieFatHawaiian": [
+          {
+            "Item": "foodCanChili",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.65
+          },
+          {
+            "Item": "foodCanTuna",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "foodShamChowder",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.6
+          },
+          {
+            "Item": "drinkJarYuccaJuice",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 8,
+            "Chance": 0.4
+          }
+        ],
+        "zombieFemaleFat": [
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.6
+          },
+          {
+            "Item": "foodPumpkinPie",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCornBread",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 3,
+            "MaxCount": 5,
+            "Chance": 0.5
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 8,
+            "Chance": 0.4
+          }
+        ],
+        "zombieBoe": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 4,
+            "MaxCount": 10,
+            "Chance": 0.75
+          },
+          {
+            "Item": "resourceWood",
+            "MinCount": 3,
+            "MaxCount": 8,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodMeatStew",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 7,
+            "Chance": 0.4
+          }
+        ],
+        "zombieJoe": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 3,
+            "MaxCount": 8,
+            "Chance": 0.6
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceLockPick",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodCanLamb",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 7,
+            "Chance": 0.4
+          }
+        ],
+        "zombieMoe": [
+          {
+            "Item": "resourceCloth",
+            "MinCount": 3,
+            "MaxCount": 6,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceLeather",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          }
+        ],
+        "zombieSteve": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.5
+          },
+          {
+            "Item": "drinkJarRiverWater",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          }
+        ],
+        "zombieArlene": [
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "foodPumpkinPie",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "resourceBone",
+            "MinCount": 3,
+            "MaxCount": 6,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 9,
+            "Chance": 0.45
+          }
+        ],
+        "zombieMarlene": [
+          {
+            "Item": "foodBakedPotato",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCornBread",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.5
+          },
+          {
+            "Item": "medicalBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 8,
+            "Chance": 0.4
+          }
+        ],
+        "zombieDarlene": [
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.55
+          },
+          {
+            "Item": "foodCanChili",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.5
+          }
+        ],
+        "zombieSpider": [
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.6
+          },
+          {
+            "Item": "resourceBone",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.35
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          }
+        ],
+        "zombieScreamer": [
+          {
+            "Item": "ammo762mmBulletBall",
+            "MinCount": 5,
+            "MaxCount": 14,
+            "Chance": 0.55
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugRecog",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          }
+        ],
+        "zombieLumberjack": [
+          {
+            "Item": "resourceWood",
+            "MinCount": 8,
+            "MaxCount": 18,
+            "Chance": 0.75
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodHoboStew",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.2
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.35
+          }
+        ],
+        "zombieJanitor": [
+          {
+            "Item": "resourceOil",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceGlue",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "resourceAcid",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.5
+          },
+          {
+            "Item": "resourceLeather",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.25
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.4
+          }
+        ],
+        "zombieBiker": [
+          {
+            "Item": "resourceLeather",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.6
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.65
+          },
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugSteroids",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 9,
+            "Chance": 0.45
+          }
+        ],
+        "zombieSoldier": [
+          {
+            "Item": "ammo762mmBulletBall",
+            "MinCount": 8,
+            "MaxCount": 20,
+            "Chance": 0.7
+          },
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 6,
+            "MaxCount": 16,
+            "Chance": 0.55
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 3,
+            "MaxCount": 8,
+            "Chance": 0.3
+          },
+          {
+            "Item": "foodCanLamb",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "gunHandgunT1Pistol",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          }
+        ],
+        "zombieMutated": [
+          {
+            "Item": "resourceScrapIron",
+            "MinCount": 4,
+            "MaxCount": 10,
+            "Chance": 0.65
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 3,
+            "MaxCount": 6,
+            "Chance": 0.55
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "foodMeatStew",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 2,
+            "MaxCount": 8,
+            "Chance": 0.4
+          }
+        ]
+      }
+    },
+    "master": {
+      "Default": [
+        {
+          "Item": "foodCanSham",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.55
+        },
+        {
+          "Item": "foodCanLamb",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.4
+        },
+        {
+          "Item": "drinkJarBoiledWater",
+          "MinCount": 1,
+          "MaxCount": 3,
+          "Chance": 0.55
+        },
+        {
+          "Item": "drinkJarBeer",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.45
+        },
+        {
+          "Item": "resourceForgedIron",
+          "MinCount": 2,
+          "MaxCount": 6,
+          "Chance": 0.45
+        },
+        {
+          "Item": "resourceCloth",
+          "MinCount": 2,
+          "MaxCount": 5,
+          "Chance": 0.5
+        },
+        {
+          "Item": "resourceMechanicalParts",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.3
+        },
+        {
+          "Item": "medicalFirstAidBandage",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.4
+        },
+        {
+          "Item": "drugPainkillers",
+          "MinCount": 1,
+          "MaxCount": 2,
+          "Chance": 0.3
+        },
+        {
+          "Item": "oldCash",
+          "MinCount": 8,
+          "MaxCount": 25,
+          "Chance": 0.7
+        },
+        {
+          "Item": "foodRottingFlesh",
+          "MinCount": 1,
+          "MaxCount": 1,
+          "Chance": 0.2
+        }
+      ],
+      "ByClass": {
+        "zombieNurse": [
+          {
+            "Item": "medicalBandage",
+            "MinCount": 3,
+            "MaxCount": 6,
+            "Chance": 1.0
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.75
+          },
+          {
+            "Item": "medicalFirstAidKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "drugAntibiotics",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "drugHerbalAntibiotics",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.55
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "medicalAloeCream",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "medicalSplint",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugRecog",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 5,
+            "MaxCount": 18,
+            "Chance": 0.55
+          }
+        ],
+        "zombieFatCop": [
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 18,
+            "MaxCount": 40,
+            "Chance": 0.9
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 5,
+            "MaxCount": 14,
+            "Chance": 0.6
+          },
+          {
+            "Item": "gunHandgunT1Pistol",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.22
+          },
+          {
+            "Item": "gunShotgunT0PipeShotgun",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 5,
+            "MaxCount": 20,
+            "Chance": 0.65
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          }
+        ],
+        "zombieCop": [
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 20,
+            "MaxCount": 45,
+            "Chance": 0.95
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 5,
+            "MaxCount": 14,
+            "Chance": 0.65
+          },
+          {
+            "Item": "gunHandgunT1Pistol",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 5,
+            "MaxCount": 20,
+            "Chance": 0.65
+          }
+        ],
+        "zombieBusinessMan": [
+          {
+            "Item": "oldCash",
+            "MinCount": 20,
+            "MaxCount": 60,
+            "Chance": 1.0
+          },
+          {
+            "Item": "resourcePaper",
+            "MinCount": 5,
+            "MaxCount": 12,
+            "Chance": 0.85
+          },
+          {
+            "Item": "bookArtOfMiningCoffee",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "schematicMaster",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.18
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodCanMiso",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          }
+        ],
+        "zombieFatHawaiian": [
+          {
+            "Item": "foodCanChili",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.8
+          },
+          {
+            "Item": "foodCanTuna",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.65
+          },
+          {
+            "Item": "foodShamChowder",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodMeatStew",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.7
+          },
+          {
+            "Item": "drinkJarYuccaJuice",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.5
+          }
+        ],
+        "zombieFemaleFat": [
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.7
+          },
+          {
+            "Item": "foodPumpkinPie",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "foodCornBread",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 4,
+            "MaxCount": 7,
+            "Chance": 0.6
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.5
+          }
+        ],
+        "zombieBoe": [
+          {
+            "Item": "resourceForgedIron",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.8
+          },
+          {
+            "Item": "resourceMechanicalParts",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceWood",
+            "MinCount": 5,
+            "MaxCount": 12,
+            "Chance": 0.65
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "foodMeatStew",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.5
+          }
+        ],
+        "zombieJoe": [
+          {
+            "Item": "resourceForgedIron",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.7
+          },
+          {
+            "Item": "resourceMechanicalParts",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceLockPick",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.5
+          },
+          {
+            "Item": "foodCanLamb",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.5
+          }
+        ],
+        "zombieMoe": [
+          {
+            "Item": "resourceCloth",
+            "MinCount": 4,
+            "MaxCount": 8,
+            "Chance": 0.65
+          },
+          {
+            "Item": "resourceLeather",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.45
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 9,
+            "Chance": 0.45
+          }
+        ],
+        "zombieSteve": [
+          {
+            "Item": "resourceForgedIron",
+            "MinCount": 2,
+            "MaxCount": 6,
+            "Chance": 0.55
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.55
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 9,
+            "Chance": 0.45
+          }
+        ],
+        "zombieArlene": [
+          {
+            "Item": "foodCanSoup",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.65
+          },
+          {
+            "Item": "foodPumpkinPie",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceBone",
+            "MinCount": 4,
+            "MaxCount": 8,
+            "Chance": 0.6
+          },
+          {
+            "Item": "resourceSewingKit",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 5,
+            "MaxCount": 14,
+            "Chance": 0.55
+          }
+        ],
+        "zombieMarlene": [
+          {
+            "Item": "foodBakedPotato",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "foodCornBread",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodMeatStew",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drinkJarBoiledWater",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 3,
+            "MaxCount": 6,
+            "Chance": 0.6
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.5
+          }
+        ],
+        "zombieDarlene": [
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 3,
+            "Chance": 0.65
+          },
+          {
+            "Item": "foodCanChili",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "drugRecog",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.45
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 5,
+            "MaxCount": 16,
+            "Chance": 0.6
+          }
+        ],
+        "zombieSpider": [
+          {
+            "Item": "resourceCloth",
+            "MinCount": 3,
+            "MaxCount": 7,
+            "Chance": 0.7
+          },
+          {
+            "Item": "resourceBone",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.5
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugSteroids",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 10,
+            "Chance": 0.45
+          }
+        ],
+        "zombieScreamer": [
+          {
+            "Item": "ammo762mmBulletBall",
+            "MinCount": 12,
+            "MaxCount": 30,
+            "Chance": 0.75
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.55
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "drugRecog",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugSteroids",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "resourceElectricParts",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceMechanicalParts",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.2
+          }
+        ],
+        "zombieLumberjack": [
+          {
+            "Item": "resourceWood",
+            "MinCount": 12,
+            "MaxCount": 25,
+            "Chance": 0.85
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.65
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.55
+          },
+          {
+            "Item": "foodHoboStew",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "gunMGT0PipeMachineGun",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.05
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 9,
+            "Chance": 0.45
+          }
+        ],
+        "zombieJanitor": [
+          {
+            "Item": "resourceOil",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.6
+          },
+          {
+            "Item": "resourceGlue",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.45
+          },
+          {
+            "Item": "resourceAcid",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "resourceMetalPipe",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.5
+          },
+          {
+            "Item": "resourceMechanicalParts",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.25
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 2,
+            "MaxCount": 5,
+            "Chance": 0.55
+          },
+          {
+            "Item": "resourceLeather",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.35
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 3,
+            "MaxCount": 9,
+            "Chance": 0.5
+          }
+        ],
+        "zombieBiker": [
+          {
+            "Item": "resourceLeather",
+            "MinCount": 3,
+            "MaxCount": 7,
+            "Chance": 0.75
+          },
+          {
+            "Item": "drinkJarBeer",
+            "MinCount": 2,
+            "MaxCount": 4,
+            "Chance": 0.75
+          },
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 8,
+            "MaxCount": 18,
+            "Chance": 0.55
+          },
+          {
+            "Item": "gunHandgunT1Pistol",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.1
+          },
+          {
+            "Item": "foodCharredMeat",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "drugSteroids",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 4,
+            "MaxCount": 14,
+            "Chance": 0.55
+          }
+        ],
+        "zombieSoldier": [
+          {
+            "Item": "ammo762mmBulletBall",
+            "MinCount": 14,
+            "MaxCount": 32,
+            "Chance": 0.85
+          },
+          {
+            "Item": "ammo9mmBulletBall",
+            "MinCount": 8,
+            "MaxCount": 20,
+            "Chance": 0.65
+          },
+          {
+            "Item": "ammoShotgunShell",
+            "MinCount": 4,
+            "MaxCount": 10,
+            "Chance": 0.4
+          },
+          {
+            "Item": "foodCanLamb",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.5
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 3,
+            "Chance": 0.6
+          },
+          {
+            "Item": "medicalFirstAidKit",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.15
+          },
+          {
+            "Item": "drugAntibiotics",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.35
+          },
+          {
+            "Item": "drugPainkillers",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugSteroids",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.2
+          },
+          {
+            "Item": "gunHandgunT1Pistol",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.18
+          },
+          {
+            "Item": "resourceDuctTape",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          }
+        ],
+        "zombieMutated": [
+          {
+            "Item": "resourceForgedIron",
+            "MinCount": 5,
+            "MaxCount": 12,
+            "Chance": 0.75
+          },
+          {
+            "Item": "resourceForgedSteel",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.2
+          },
+          {
+            "Item": "resourceCloth",
+            "MinCount": 4,
+            "MaxCount": 7,
+            "Chance": 0.65
+          },
+          {
+            "Item": "resourceMechanicalParts",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.3
+          },
+          {
+            "Item": "drugFortBites",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "drugSteroids",
+            "MinCount": 1,
+            "MaxCount": 1,
+            "Chance": 0.25
+          },
+          {
+            "Item": "foodMeatStew",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "medicalFirstAidBandage",
+            "MinCount": 1,
+            "MaxCount": 2,
+            "Chance": 0.4
+          },
+          {
+            "Item": "oldCash",
+            "MinCount": 4,
+            "MaxCount": 12,
+            "Chance": 0.5
+          }
+        ]
+      }
+    }
+  }
+}

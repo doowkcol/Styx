@@ -1,0 +1,12 @@
+{
+  "Enabled": true,
+  "TickSeconds": 0.2,
+  "MaxRange": 3.0,
+  "ConeAngleDegrees": 5.0,
+  "EntityHitRadius": 0.7,
+  "RequirePerm": true,
+  "Perm": "styx.zhealth.use",
+  "ShowZombies": true,
+  "ShowAnimals": false,
+  "ShowOtherPlayers": true
+}

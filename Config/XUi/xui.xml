@@ -1,0 +1,24 @@
+<xui>
+    <!--
+        Register the styxHud window into the 'toolbelt' window_group.
+        That group is defined in vanilla xui.xml and is always open while the
+        HUD is enabled (it hosts the compass, tracker bars, toolbelt, etc.).
+        Appending our window here means it mounts at world-load and stays
+        mounted for the session — no open/close plumbing required.
+    -->
+    <append xpath="/xui/ruleset[@name='default']/window_group[@name='toolbelt']">
+        <window name="styxHud" />
+        <window name="styxMenu" />
+        <window name="styxPerms" />
+        <window name="styxLauncher" />
+        <window name="styxKits" />
+        <!-- <window name="styxRadar" /> --> <!-- Disabled 2026-04-23: zombie count now in StyxHud. Window definition kept in windows.xml; uncomment to re-enable the standalone big-number panel. -->
+        <window name="styxDonorBuffs" />
+        <window name="styxTeleport" />
+        <window name="styxAdminRadar" />
+        <window name="styxAdminTools" />
+        <window name="styxPermEditor" />
+        <window name="styxSrm" />
+        <window name="styxZombieHealth" />
+    </append>
+</xui>

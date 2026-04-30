@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+  <Name value="Styx" />
+  <DisplayName value="Styx Framework" />
+  <Version value="0.1.0" />
+  <Description value="Carbon-inspired plugin framework for 7 Days to Die" />
+  <Author value="Doowkcol / Rekt Game Servers" />
+  <Website value="" />
+</xml>

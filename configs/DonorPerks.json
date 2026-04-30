@@ -1,0 +1,73 @@
+{
+  "ReapplyIntervalSeconds": 1800,
+  "GroupBuffs": {
+    "vip": [
+      {
+        "Buff": "buffStyxVipUndead",
+        "DurationSeconds": 3600,
+        "DisplayName": "VIP: Undead Slayer",
+        "Description": "+100% damage to zombies",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_zombie"
+      },
+      {
+        "Buff": "buffStyxVipHarvest",
+        "DurationSeconds": 3600,
+        "DisplayName": "VIP: Harvest Master",
+        "Description": "+100% harvest yield, +50% block damage",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_wrench"
+      },
+      {
+        "Buff": "buffStyxVipToughness",
+        "DurationSeconds": 3600,
+        "DisplayName": "VIP: Toughness",
+        "Description": "+60 resist, +30% run speed, +40 carry, +50 HP",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_armor_iron"
+      },
+      {
+        "Buff": "buffDrugAtomJunkies",
+        "DurationSeconds": 3600,
+        "DisplayName": "Atom Junkies",
+        "Description": "Vanilla drug — periodic HP regen",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_medical"
+      },
+      {
+        "Buff": "buffDrugRecog",
+        "DurationSeconds": 1800,
+        "DisplayName": "Recog",
+        "Description": "Vanilla drug — loot quality bonus",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_loot_sack"
+      }
+    ],
+    "admin": [
+      {
+        "Buff": "buffDrugSteroids",
+        "DurationSeconds": 3600,
+        "DisplayName": "Steroids",
+        "Description": "Vanilla drug — +stamina regen, +damage",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_agility"
+      },
+      {
+        "Buff": "buffDrugAtomJunkies",
+        "DurationSeconds": 3600,
+        "DisplayName": "Atom Junkies",
+        "Description": "Vanilla drug — periodic HP regen",
+        "UserToggleable": true,
+        "Icon": "ui_game_symbol_medical"
+      }
+    ]
+  },
+  "GroupCVars": {
+    "vip": [
+      {
+        "Name": "$treatedCommando",
+        "Value": 0.5
+      }
+    ]
+  }
+}

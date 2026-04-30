@@ -1,0 +1,145 @@
+<configs>
+    <!--
+        Styx custom buffs for donor/VIP perks. Fixed-duration variant: no
+        CVar-driven timer, no display_value_format="time". Server applies
+        with a duration override (Player.ApplyBuff); client ticks it down
+        using standard buff machinery. Simpler and crash-free.
+    -->
+
+    <append xpath="/buffs">
+
+        <!-- +100% damage vs zombies -->
+        <buff name="buffStyxVipUndead"
+              name_key="buffStyxVipUndeadName"
+              description_key="buffStyxVipUndeadDesc"
+              icon="ui_game_symbol_fist">
+            <stack_type value="replace"/>
+            <duration value="3600"/>
+
+            <effect_group>
+                <passive_effect name="EntityDamage" operation="perc_add" value="1.0"/>
+                <requirement name="EntityTagCompare" target="other" tags="zombie"/>
+            </effect_group>
+        </buff>
+
+        <!-- +100% harvest yield + 50% block damage -->
+        <buff name="buffStyxVipHarvest"
+              name_key="buffStyxVipHarvestName"
+              description_key="buffStyxVipHarvestDesc"
+              icon="ui_game_symbol_tool">
+            <stack_type value="replace"/>
+            <duration value="3600"/>
+
+            <effect_group>
+                <passive_effect name="HarvestCount" operation="perc_add" value="1"/>
+                <passive_effect name="BlockDamage" operation="perc_add" value=".5"/>
+            </effect_group>
+        </buff>
+
+        <!-- Big visible toughness package -->
+        <buff name="buffStyxVipToughness"
+              name_key="buffStyxVipToughnessName"
+              description_key="buffStyxVipToughnessDesc"
+              icon="ui_game_symbol_armor_iron">
+            <stack_type value="replace"/>
+            <duration value="3600"/>
+
+            <effect_group>
+                <passive_effect name="PhysicalDamageResist" operation="base_add" value="60"/>
+                <passive_effect name="ElementalDamageResist" operation="base_add" value="60"/>
+                <passive_effect name="RunSpeed" operation="perc_add" value=".3"/>
+                <passive_effect name="CarryCapacity" operation="base_add" value="40"/>
+                <passive_effect name="HealthMax" operation="base_add" value="50"/>
+            </effect_group>
+        </buff>
+
+        <!--
+            Styx Input Probe — routes client-side player-input events to the server
+            via cvar writes. Relies on PlayerEntityStats.NetSync (every ~10 ticks,
+            ~0.5s) pushing EntityBuffs state (including cvars) from client to server
+            via NetPackageEntityStatsBuff.
+
+            Buff is applied permanently + hidden. Each input event writes a distinct
+            value to 'styx.input'; server plugin polls and reacts.
+
+            Values:  1=Jump, 2=Crouch, 3=ReloadStart, 4=PrimaryStart, 5=SecondaryStart
+        -->
+        <buff name="buffStyxInputProbe"
+              name_key="buffStyxInputProbeName"
+              description_key="buffStyxInputProbeDesc"
+              hidden="true">
+            <stack_type value="replace"/>
+            <!-- Long duration (not 0 — that triggers the CVar-driven-duration NRE
+                 trap at client load). Plugin reapplies on each spawn anyway. -->
+            <duration value="999999"/>
+
+            <effect_group>
+                <!--
+                    Instant-sync via CallGameEvent + allow_client_call.
+                    MinEventActionCallGameEvent.Execute on client calls
+                    GameEventManager.HandleAction which — on client — immediately
+                    sends NetPackageGameEventRequest to server. Server's
+                    Harmony Prefix (StyxInputRouter.cs) intercepts and writes
+                    styx.input.kind / styx.input.seq on the player entity.
+
+                    Latency: one network round-trip (~tens of ms) instead of
+                    the ~0.5-1s stats-buff sync tick that ModifyCVar relied on.
+                -->
+                <triggered_effect trigger="onSelfJump"                 action="CallGameEvent" event="styx_input_jump"      allow_client_call="true"/>
+                <triggered_effect trigger="onSelfCrouch"               action="CallGameEvent" event="styx_input_crouch"    allow_client_call="true"/>
+                <triggered_effect trigger="onReloadStart"              action="CallGameEvent" event="styx_input_reload"    allow_client_call="true"/>
+                <triggered_effect trigger="onSelfPrimaryActionStart"   action="CallGameEvent" event="styx_input_primary"   allow_client_call="true"/>
+                <triggered_effect trigger="onSelfSecondaryActionStart" action="CallGameEvent" event="styx_input_secondary" allow_client_call="true"/>
+            </effect_group>
+        </buff>
+
+        <!--
+            Full restorative buff — heal HP + refill food/water/stamina + cure
+            every injury and disease. Applied by StyxMenu's "Heal Full" action.
+
+            Mechanics:
+              1. RemoveAllNegativeBuffs — vanilla action that strips every
+                 buff marked is_negative (broken legs, sprains, bleeds,
+                 abrasions, stuns, infections, dysentery, food poisoning,
+                 hypothermia, etc.). Future-proof — also clears any modlet
+                 negative buffs without us having to enumerate them.
+              2. RemoveBuff for the lingering TREATMENT buffs (splints,
+                 casts, abrasion-treated). These aren't is_negative so they
+                 survive step 1, but a "full heal" should remove them too.
+              3. ModifyStats set 25000 — overshoots any reasonable max so the
+                 stats system clamps each to its own actual max (vanilla
+                 Health 100, Food/Water/Stamina 100, +mods). Same idiom the
+                 vanilla admin debug heal uses.
+
+            All actions go through the buff system — client-authoritative
+            safe (the heal can't be clobbered by the next PlayerData sync
+            because the AUTHORITATIVE write path is the buff trigger, same
+            as a bandage / first-aid-kit / Grandpa's Awesome Sauce).
+
+            Applied by plugins with a 1s duration via Player.ApplyBuff;
+            onSelfBuffStart fires once, all effects propagate, buff
+            self-removes when duration ends.
+        -->
+        <buff name="buffStyxHealFull"
+              name_key="buffStyxHealFullName"
+              hidden="true">
+            <stack_type value="replace"/>
+            <duration value="1"/>
+            <effect_group>
+                <!-- Wipe all negative buffs (injuries, infections, diseases) -->
+                <triggered_effect trigger="onSelfBuffStart" action="RemoveAllNegativeBuffs"/>
+
+                <!-- Wipe lingering treatment buffs (not is_negative so survives RemoveAllNegativeBuffs) -->
+                <triggered_effect trigger="onSelfBuffStart" action="RemoveBuff"
+                                  buff="buffInjuryAbrasionTreated,buffLegSplinted,buffLegCast,buffArmSplinted,buffArmCast"/>
+
+                <!-- Refill core stats to max (25000 = sentinel that the stats system clamps to actual max) -->
+                <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Health"  operation="set" value="25000"/>
+                <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Food"    operation="set" value="25000"/>
+                <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Water"   operation="set" value="25000"/>
+                <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Stamina" operation="set" value="25000"/>
+            </effect_group>
+        </buff>
+
+    </append>
+</configs>

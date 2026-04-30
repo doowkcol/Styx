@@ -1,0 +1,66 @@
+{
+  "Groups": {
+    "default": {
+      "Name": "default",
+      "Parent": null,
+      "Perms": [
+        "styx.kit.use",
+        "styx.kit.starter",
+        "styx.kit.daily",
+        "styx.tp.use",
+        "styx.radar.use",
+        "styx.donor.use",
+        "styx.zhealth.use"
+      ],
+      "Priority": 0,
+      "ChatTag": "[Survivor]",
+      "ChatTagColor": "cccccc"
+    },
+    "discord": {
+      "Name": "discord",
+      "Parent": "default",
+      "Perms": [],
+      "Priority": 25,
+      "ChatTag": "[Discord]",
+      "ChatTagColor": "5865f2"
+    },
+    "vip": {
+      "Name": "vip",
+      "Parent": "default",
+      "Perms": [
+        "styx.radar.vip",
+        "styx.kit.vip"
+      ],
+      "Priority": 50,
+      "ChatTag": "[VIP]",
+      "ChatTagColor": "ffaa00"
+    },
+    "admin": {
+      "Name": "admin",
+      "Parent": "vip",
+      "Perms": [
+        "styx.admin",
+        "styx.perm.admin",
+        "styx.admin.vanish",
+        "styx.admin.radar",
+        "styx.admin.tools",
+        "styx.donor.admin",
+        "styx.restart.admin",
+        "styx.radar.master",
+        "styx.kit.wheels",
+        "styx.donor.use",
+        "styx.kit.basic",
+        "styx.kit.master",
+        "styx.kit.use",
+        "styx.kit.vip",
+        "styx.craft.master",
+        "styx.backpack.master",
+        "styx.zhealth.use"
+      ],
+      "Priority": 100,
+      "ChatTag": "[Admin]",
+      "ChatTagColor": "ff6666"
+    }
+  },
+  "Players": {}
+}

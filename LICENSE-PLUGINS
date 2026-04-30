@@ -1,0 +1,77 @@
+Styx Restricted Plugin Licence v1.0
+Copyright (c) 2026 Doowkcol (Jack Lockwood). All rights reserved.
+
+This licence applies to source files in this repository that begin with the
+header line:
+
+    // SPDX-License-Identifier: LicenseRef-Styx-Plugin-Restricted
+
+Files marked with `// SPDX-License-Identifier: MIT` are governed by the
+separate LICENSE file in this directory and are NOT subject to the terms
+below.
+
+----------------------------------------------------------------------------
+
+1. PERSONAL USE
+
+You are permitted to install, run, and use the Software on game servers
+that you personally own or operate, free of charge, for non-commercial or
+small-scale community purposes. "Non-commercial" means: no fee charged for
+access to the server, no paid subscription required to play, no commercial
+advertising attached to play.
+
+2. MODIFICATION
+
+You are permitted to modify the Software for personal use on the servers
+described in section 1. Modified copies must retain this licence header,
+the copyright notice, and the SPDX identifier line.
+
+3. RESTRICTIONS
+
+Without a separate written commercial licence from the copyright holder,
+you may NOT:
+
+  a. Redistribute the Software, modified or unmodified, in any form
+     (source or compiled), publicly or privately, including via:
+       - mod-hosting sites (Nexus Mods, Mod.io, etc.)
+       - public or private GitHub / GitLab / similar forks
+       - Discord servers, file-share links, or peer-to-peer transfer
+       - hosting-panel plugin marketplaces or template offerings
+     The only sanctioned distribution channel is the original repository.
+
+  b. Sell, sublicense, lease, rent, or otherwise commercialise the
+     Software or any derivative work.
+
+  c. Use the Software as part of a paid hosting service, managed-server
+     offering, server-rental product, or any product or service for which
+     a fee is charged to end users — directly or indirectly.
+
+  d. Use the "Styx" name, logo, or branding to promote a derivative work
+     or to imply endorsement.
+
+4. CONTRIBUTIONS
+
+Bug reports and pull requests submitted against the original repository
+are welcome. Submissions, if accepted, are considered a contribution to
+the original work under the same licence, without transfer of ownership.
+
+5. NO WARRANTY
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. THE AUTHORS AND
+COPYRIGHT HOLDERS ARE NOT LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY
+ARISING FROM USE OF THE SOFTWARE.
+
+6. TERMINATION
+
+This licence terminates automatically if you breach any of its terms.
+On termination you must cease use of the Software and destroy all copies
+in your possession.
+
+----------------------------------------------------------------------------
+
+For commercial licensing enquiries, redistribution permission, or
+hosting-partnership enquiries, contact:
+
+    jacklockwood@outlook.com

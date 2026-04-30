@@ -1,0 +1,1933 @@
+<configs>
+    <!--
+        styxHud — always-on player HUD pinned top-left.
+
+        Driven by the StyxHud plugin (player count + rank) plus cvars from
+        sibling plugins (ServerRestartManager pushes wipe + restart
+        countdowns; StyxZombieRadar pushes count + radius). Sections gate on
+        visibility binding so a missing/disabled plugin auto-hides its row
+        without StyxHud needing to know about it.
+
+        Day/time deliberately omitted — the vanilla compass HUD already
+        shows it, no need to duplicate.
+
+        Layout (260x180):
+          STYX                       (header)
+          Online: N | Rank: ...      (player count + own group/owner tag)
+          ──────────                 (divider)
+          Next wipe: Xd Yh           (always visible — SRM)
+          ⚠ Restart in Hh Mm Ss      (visible only when restart_warning == 1)
+          Zombies (Rm): N            (visible only when radar tier granted)
+    -->
+    <append xpath="/windows">
+        <window name="styxHud"
+                anchor="LeftTop"
+                pos="10,-10"
+                width="260" height="200"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="-20">
+
+            <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,180"     type="sliced" width="260" height="200" />
+            <sprite depth="1" name="border" sprite="menu_empty3px" color="255,220,0,200" type="sliced" width="260" height="200" fillcenter="false" />
+
+            <!-- Header — text comes from StyxHud config (HeaderText) baked
+                 into runtime localization at last shutdown. Default "STYX". -->
+            <label depth="2" name="hdr"
+                   text="{#localization('styx_hud_header')}"
+                   font_size="20" justify="center" style="outline"
+                   color="255,220,0,255"
+                   pos="130,-6" width="260" height="22" pivot="top" />
+
+            <!-- Vanish badge — small indicator in the top-right corner of the
+                 panel, visible only when the local player has IsSpectator=true.
+                 StyxHud's tick pushes styx.hud.vanish_active = 1 when vanished. -->
+            <label depth="2" name="vanishBadge"
+                   text="VANISHED" font_size="11" style="outline"
+                   color="220,120,255,255"
+                   pos="195,-8" width="60" height="14"
+                   visible="{#cvar('styx.hud.vanish_active') == 1}" />
+
+            <!-- Optional subheader (e.g. "Survival Hardcore", "PvP"), visible
+                 only when StyxHud config Subheader is non-empty. -->
+            <label depth="2" name="subhdr"
+                   text="{#localization('styx_hud_subheader')}"
+                   font_size="13" justify="center"
+                   pos="130,-28" width="260" height="16" pivot="top"
+                   color="200,200,200,255"
+                   visible="{#cvar('styx.hud.subheader_visible') == 1}" />
+
+            <!-- Player count + rank on one line. Y=-50 reserves space for the
+                 optional subheader at -28 even when subheader is hidden — the
+                 visible/hidden state of subheader doesn't reflow downstream
+                 rows in XUi, so we always reserve. -->
+            <label depth="2" name="pcount"
+                   text="Online: {cvar(styx.world.players:0)}"
+                   font_size="14" pos="12,-50" width="120" height="18"
+                   color="180,220,255,255" />
+            <label depth="2" name="rankLbl"
+                   text="Rank:" font_size="14"
+                   pos="135,-50" width="50" height="18"
+                   color="180,220,255,255" />
+            <label depth="2" name="rankVal"
+                   text="{#localization('styx_rank_' + int(cvar('styx.hud.rank_id')))}"
+                   font_size="14" pos="180,-50" width="80" height="18"
+                   color="255,200,100,255" />
+
+            <!-- Divider -->
+            <sprite depth="2" name="div1" sprite="menu_empty" color="255,220,0,80"
+                    type="sliced" width="240" height="1" pos="10,-74" />
+
+            <!-- Server timing: wipe countdown (always shown) -->
+            <label depth="2" name="wipeLbl"
+                   text="Next wipe:" font_size="14"
+                   pos="12,-82" width="100" height="18"
+                   color="180,255,200,255" />
+            <label depth="2" name="wipeVal"
+                   text="{cvar(styx.srm.wipe_d:0)}d {cvar(styx.srm.wipe_h:0)}h"
+                   font_size="14" justify="right"
+                   pos="135,-82" width="115" height="18"
+                   color="240,240,240,255" />
+
+            <!-- Restart warning — visible only when SRM signals warning window -->
+            <label depth="2" name="warnIcon"
+                   text="*" font_size="14" color="255,80,80,255"
+                   pos="12,-104" width="14" height="18"
+                   visible="{#cvar('styx.srm.restart_warning') == 1}" />
+            <label depth="2" name="warnLbl"
+                   text="Restart in" font_size="14"
+                   pos="28,-104" width="80" height="18" color="255,160,80,255"
+                   visible="{#cvar('styx.srm.restart_warning') == 1}" />
+            <label depth="2" name="warnVal"
+                   text="{cvar(styx.srm.restart_h:0)}h {cvar(styx.srm.restart_m:0)}m {cvar(styx.srm.restart_s:00)}s"
+                   font_size="14" justify="right"
+                   pos="105,-104" width="145" height="18" color="255,200,100,255"
+                   visible="{#cvar('styx.srm.restart_warning') == 1}" />
+
+            <!-- Optional zombie-radar section -->
+            <label depth="2" name="zCntLbl"
+                   text="Zombies ({cvar(styx.radar.radius:0)}m):" font_size="14"
+                   pos="12,-128" width="160" height="18" color="255,180,180,255"
+                   visible="{#cvar('styx.radar.radius') &gt; 0}" />
+            <label depth="2" name="zCntVal"
+                   text="{cvar(styx.radar.count:0)}" font_size="14" justify="right"
+                   pos="180,-128" width="70" height="18" color="255,220,120,255"
+                   visible="{#cvar('styx.radar.radius') &gt; 0}" />
+
+            <!-- Hint footer -->
+            <label depth="2" name="hint"
+                   text="/m for menu" font_size="11" justify="center"
+                   pos="130,-185" width="260" height="14" pivot="top"
+                   color="160,160,160,255" />
+        </window>
+
+        <!--
+            styxMenu — interactive menu demo (2026-04-20).
+
+            Shows when cvar styx.menu.open == 1; hidden otherwise. All content
+            gated by visible binding so the window itself is always mounted
+            (can't Open/Close a window without a client-side controller method,
+            but we can freely hide its contents).
+
+            Row cursor ">" for row N is visible only when styx.menu.sel == N.
+            Labels pull from Localization.txt keys styxMenu_0..4.
+
+            Inputs handled by plugin StyxMenu.cs:
+              jump (1)   -> sel = (sel + 1) % 5
+              crouch (2) -> sel = (sel - 1 + 5) % 5
+              reload (3) -> confirm: execute action[sel]
+              primary(4) -> cancel: close menu
+        -->
+        <window name="styxMenu"
+                anchor="CenterCenter" pos="-250,125"
+                width="500" height="250"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="50">
+
+            <!-- The whole panel is gated by menu.open. One ncalc binding drives
+                 visibility of the wrapping rect; all children inherit. -->
+            <rect name="wrap" pos="0,0" width="500" height="250"
+                  visible="{#cvar('styx.menu.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,200"     type="sliced" width="500" height="250" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="100,255,180,220" type="sliced" width="500" height="250" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="STYX MENU"
+                       font_size="28" justify="center" style="outline"
+                       color="100,255,180,255"
+                       pos="250,-10" width="500" height="32" pivot="top" />
+
+                <!-- Row 0 -->
+                <label depth="3" name="c0" text="&gt;" font_size="22" color="100,255,180,255"
+                       pos="20,-50" width="20" height="24"
+                       visible="{#cvar('styx.menu.sel') == 0}" />
+                <label depth="3" name="o0" text="{#localization('styxMenu_0')}" font_size="20"
+                       pos="50,-50" width="430" height="24" color="240,240,240,255" />
+
+                <!-- Row 1 -->
+                <label depth="3" name="c1" text="&gt;" font_size="22" color="100,255,180,255"
+                       pos="20,-76" width="20" height="24"
+                       visible="{#cvar('styx.menu.sel') == 1}" />
+                <label depth="3" name="o1" text="{#localization('styxMenu_1')}" font_size="20"
+                       pos="50,-76" width="430" height="24" color="240,240,240,255" />
+
+                <!-- Row 2 -->
+                <label depth="3" name="c2" text="&gt;" font_size="22" color="100,255,180,255"
+                       pos="20,-102" width="20" height="24"
+                       visible="{#cvar('styx.menu.sel') == 2}" />
+                <label depth="3" name="o2" text="{#localization('styxMenu_2')}" font_size="20"
+                       pos="50,-102" width="430" height="24" color="240,240,240,255" />
+
+                <!-- Row 3 -->
+                <label depth="3" name="c3" text="&gt;" font_size="22" color="100,255,180,255"
+                       pos="20,-128" width="20" height="24"
+                       visible="{#cvar('styx.menu.sel') == 3}" />
+                <label depth="3" name="o3" text="{#localization('styxMenu_3')}" font_size="20"
+                       pos="50,-128" width="430" height="24" color="240,240,240,255" />
+
+                <!-- Row 4 -->
+                <label depth="3" name="c4" text="&gt;" font_size="22" color="100,255,180,255"
+                       pos="20,-154" width="20" height="24"
+                       visible="{#cvar('styx.menu.sel') == 4}" />
+                <label depth="3" name="o4" text="{#localization('styxMenu_4')}" font_size="20"
+                       pos="50,-154" width="430" height="24" color="240,240,240,255" />
+
+                <!-- Legend -->
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] confirm   [RMB] back"
+                       font_size="14" justify="center"
+                       pos="250,-220" width="500" height="20" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxDonorBuffs — DonorPerks v0.2.0 toggle UI.
+            Per-row name + ON/OFF status (visibility-gated labels) + a
+            description line that tracks the cursor. Same wiring as styxKits:
+            row content driven by styx.donor.rowK_id, styx.donor.rowK_status.
+        -->
+        <window name="styxDonorBuffs"
+                anchor="CenterCenter" pos="-250,180"
+                width="500" height="360"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="55">
+
+            <rect name="wrap" pos="0,0" width="500" height="360"
+                  visible="{#cvar('styx.donor.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="500" height="360" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="220,140,255,220"  type="sliced" width="500" height="360" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="MY BUFFS"
+                       font_size="26" justify="center" style="outline"
+                       color="220,140,255,255"
+                       pos="250,-10" width="500" height="30" pivot="top" />
+
+                <!-- 8 rows. Each row has: cursor, name label, and TWO status
+                     labels (ON/OFF), with visibility gated by row_K_status. -->
+                <label  depth="3" name="c0" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-52" width="20" height="22" visible="{#cvar('styx.donor.sel') == 0}" />
+                <sprite depth="3" name="i0"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row0_id')))}"
+                        pos="46,-52" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 0}" />
+                <label  depth="3" name="o0"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row0_id')))}"
+                        font_size="18" pos="76,-52" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 0}" />
+                <label depth="3" name="sOn0" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-54" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 0  and cvar('styx.donor.row0_status') == 1}" />
+                <label depth="3" name="sOff0" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-54" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 0  and cvar('styx.donor.row0_status') == 0}" />
+
+                <label  depth="3" name="c1" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-76" width="20" height="22" visible="{#cvar('styx.donor.sel') == 1}" />
+                <sprite depth="3" name="i1"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row1_id')))}"
+                        pos="46,-76" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 1}" />
+                <label  depth="3" name="o1"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row1_id')))}"
+                        font_size="18" pos="76,-76" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 1}" />
+                <label depth="3" name="sOn1" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-78" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 1  and cvar('styx.donor.row1_status') == 1}" />
+                <label depth="3" name="sOff1" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-78" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 1  and cvar('styx.donor.row1_status') == 0}" />
+
+                <label  depth="3" name="c2" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-100" width="20" height="22" visible="{#cvar('styx.donor.sel') == 2}" />
+                <sprite depth="3" name="i2"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row2_id')))}"
+                        pos="46,-100" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 2}" />
+                <label  depth="3" name="o2"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row2_id')))}"
+                        font_size="18" pos="76,-100" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 2}" />
+                <label depth="3" name="sOn2" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-102" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 2  and cvar('styx.donor.row2_status') == 1}" />
+                <label depth="3" name="sOff2" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-102" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 2  and cvar('styx.donor.row2_status') == 0}" />
+
+                <label  depth="3" name="c3" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-124" width="20" height="22" visible="{#cvar('styx.donor.sel') == 3}" />
+                <sprite depth="3" name="i3"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row3_id')))}"
+                        pos="46,-124" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 3}" />
+                <label  depth="3" name="o3"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row3_id')))}"
+                        font_size="18" pos="76,-124" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 3}" />
+                <label depth="3" name="sOn3" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-126" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 3  and cvar('styx.donor.row3_status') == 1}" />
+                <label depth="3" name="sOff3" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-126" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 3  and cvar('styx.donor.row3_status') == 0}" />
+
+                <label  depth="3" name="c4" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-148" width="20" height="22" visible="{#cvar('styx.donor.sel') == 4}" />
+                <sprite depth="3" name="i4"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row4_id')))}"
+                        pos="46,-148" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 4}" />
+                <label  depth="3" name="o4"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row4_id')))}"
+                        font_size="18" pos="76,-148" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 4}" />
+                <label depth="3" name="sOn4" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-150" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 4  and cvar('styx.donor.row4_status') == 1}" />
+                <label depth="3" name="sOff4" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-150" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 4  and cvar('styx.donor.row4_status') == 0}" />
+
+                <label  depth="3" name="c5" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-172" width="20" height="22" visible="{#cvar('styx.donor.sel') == 5}" />
+                <sprite depth="3" name="i5"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row5_id')))}"
+                        pos="46,-172" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 5}" />
+                <label  depth="3" name="o5"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row5_id')))}"
+                        font_size="18" pos="76,-172" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 5}" />
+                <label depth="3" name="sOn5" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-174" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 5  and cvar('styx.donor.row5_status') == 1}" />
+                <label depth="3" name="sOff5" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-174" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 5  and cvar('styx.donor.row5_status') == 0}" />
+
+                <label  depth="3" name="c6" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-196" width="20" height="22" visible="{#cvar('styx.donor.sel') == 6}" />
+                <sprite depth="3" name="i6"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row6_id')))}"
+                        pos="46,-196" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 6}" />
+                <label  depth="3" name="o6"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row6_id')))}"
+                        font_size="18" pos="76,-196" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 6}" />
+                <label depth="3" name="sOn6" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-198" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 6  and cvar('styx.donor.row6_status') == 1}" />
+                <label depth="3" name="sOff6" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-198" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 6  and cvar('styx.donor.row6_status') == 0}" />
+
+                <label  depth="3" name="c7" text="&gt;" font_size="22" color="220,140,255,255"
+                        pos="22,-220" width="20" height="22" visible="{#cvar('styx.donor.sel') == 7}" />
+                <sprite depth="3" name="i7"
+                        sprite="{#localization('donor_buff_icon_' + int(cvar('styx.donor.row7_id')))}"
+                        pos="46,-220" width="22" height="22"
+                        visible="{#cvar('styx.donor.count') &gt; 7}" />
+                <label  depth="3" name="o7"
+                        text="{#localization('donor_buff_name_' + int(cvar('styx.donor.row7_id')))}"
+                        font_size="18" pos="76,-220" width="320" height="22" color="240,240,240,255"
+                        visible="{#cvar('styx.donor.count') &gt; 7}" />
+                <label depth="3" name="sOn7" text="ON" font_size="14" color="100,220,120,255"
+                       pos="410,-222" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 7  and cvar('styx.donor.row7_status') == 1}" />
+                <label depth="3" name="sOff7" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="410,-222" width="70" height="20"
+                       visible="{#cvar('styx.donor.count') &gt; 7  and cvar('styx.donor.row7_status') == 0}" />
+
+                <!-- Description follows the cursor -->
+                <label depth="3" name="descsep" text="—" font_size="16" justify="center"
+                       color="220,140,255,180" pos="250,-252" width="500" height="18" pivot="top" />
+                <label depth="3" name="desc"
+                       text="{#localization('donor_buff_desc_' + int(cvar('styx.donor.desc_id')))}"
+                       font_size="14" justify="center"
+                       pos="250,-272" width="480" height="32" pivot="top"
+                       color="220,220,200,255" />
+
+                <label depth="3" name="hint"
+                       text="Toggles are persistent — disabled buffs won't reapply at the next tick."
+                       font_size="12" justify="center"
+                       pos="250,-308" width="500" height="16" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] toggle   [RMB] back"
+                       font_size="13" justify="center"
+                       pos="250,-330" width="500" height="18" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxRadar — zombie-count HUD driven by StyxZombieRadar plugin.
+            Compact panel top-right, cvar-bound count + radius. Visibility
+            gated by styx.radar.visible so the panel disappears when the
+            plugin is unloaded or the player lacks permission.
+        -->
+        <!-- Position: below the STYX HUD panel (which is LeftTop 280x280 at
+             pos=10,-10 → occupies y=-10 down to y=-290). Radar sits just below
+             that. Using LeftTop keeps it in the always-visible demo cluster. -->
+        <window name="styxRadar"
+                anchor="LeftTop" pos="10,-300"
+                width="220" height="56"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="40">
+
+            <rect name="wrap" pos="0,0" width="220" height="56"
+                  visible="{#cvar('styx.radar.visible') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,170"     type="sliced" width="220" height="56" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="200,60,60,200" type="sliced" width="220" height="56" fillcenter="false" />
+
+                <label depth="2" name="hdr"
+                       text="ZOMBIES ({cvar(styx.radar.radius:0)}m)"
+                       font_size="14" justify="center" style="outline"
+                       color="200,60,60,255"
+                       pos="110,-4" width="220" height="18" pivot="top" />
+
+                <label depth="2" name="cnt"
+                       text="{cvar(styx.radar.count:0)}"
+                       font_size="28" justify="center" style="outline"
+                       color="255,220,120,255"
+                       pos="110,-20" width="220" height="32" pivot="top" />
+            </rect>
+        </window>
+
+        <!--
+            styxPermEditor — UI for granting/revoking perms per group.
+            Two stages share one window via stage-cvar gating:
+              styx.pe.stage == 0 → group picker rect
+              styx.pe.stage == 1 → perm-toggle rect
+            Group + perm names render via static labels (perm_grp_N,
+            perm_def_N) registered by PermEditor.OnLoad and persisted to
+            StyxRuntime/Localization.txt.
+        -->
+        <window name="styxPermEditor"
+                anchor="CenterCenter" pos="-280,290"
+                width="560" height="580"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="55">
+
+            <!-- Whole window gated by .open -->
+            <rect name="wrap" pos="0,0" width="560" height="580"
+                  visible="{#cvar('styx.pe.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,220"        type="sliced" width="560" height="580" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="160,180,255,220"  type="sliced" width="560" height="580" fillcenter="false" />
+
+                <!-- ===== STAGE 0: GROUP PICKER ===== -->
+                <rect name="stage0" pos="0,0" width="560" height="580"
+                      visible="{#cvar('styx.pe.stage') == 0}">
+
+                    <label depth="2" name="hdr0" text="PERM EDITOR — pick a group"
+                           font_size="22" justify="center" style="outline"
+                           color="160,180,255,255"
+                           pos="280,-10" width="560" height="28" pivot="top" />
+
+                    <!-- 8 group rows. Y: -52, -78, -104, -130, -156, -182, -208, -234 (26px steps) -->
+                    <label depth="3" name="gc0" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-52" width="20" height="22" visible="{#cvar('styx.pe.sel') == 0}" />
+                    <label depth="3" name="go0" text="{#localization('perm_grp_' + int(cvar('styx.pe.group0_id')))}"
+                           font_size="20" pos="50,-52" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 0}" />
+
+                    <label depth="3" name="gc1" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-78" width="20" height="22" visible="{#cvar('styx.pe.sel') == 1}" />
+                    <label depth="3" name="go1" text="{#localization('perm_grp_' + int(cvar('styx.pe.group1_id')))}"
+                           font_size="20" pos="50,-78" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 1}" />
+
+                    <label depth="3" name="gc2" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-104" width="20" height="22" visible="{#cvar('styx.pe.sel') == 2}" />
+                    <label depth="3" name="go2" text="{#localization('perm_grp_' + int(cvar('styx.pe.group2_id')))}"
+                           font_size="20" pos="50,-104" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 2}" />
+
+                    <label depth="3" name="gc3" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-130" width="20" height="22" visible="{#cvar('styx.pe.sel') == 3}" />
+                    <label depth="3" name="go3" text="{#localization('perm_grp_' + int(cvar('styx.pe.group3_id')))}"
+                           font_size="20" pos="50,-130" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 3}" />
+
+                    <label depth="3" name="gc4" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-156" width="20" height="22" visible="{#cvar('styx.pe.sel') == 4}" />
+                    <label depth="3" name="go4" text="{#localization('perm_grp_' + int(cvar('styx.pe.group4_id')))}"
+                           font_size="20" pos="50,-156" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 4}" />
+
+                    <label depth="3" name="gc5" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-182" width="20" height="22" visible="{#cvar('styx.pe.sel') == 5}" />
+                    <label depth="3" name="go5" text="{#localization('perm_grp_' + int(cvar('styx.pe.group5_id')))}"
+                           font_size="20" pos="50,-182" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 5}" />
+
+                    <label depth="3" name="gc6" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-208" width="20" height="22" visible="{#cvar('styx.pe.sel') == 6}" />
+                    <label depth="3" name="go6" text="{#localization('perm_grp_' + int(cvar('styx.pe.group6_id')))}"
+                           font_size="20" pos="50,-208" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 6}" />
+
+                    <label depth="3" name="gc7" text="&gt;" font_size="22" color="160,180,255,255"
+                           pos="22,-234" width="20" height="22" visible="{#cvar('styx.pe.sel') == 7}" />
+                    <label depth="3" name="go7" text="{#localization('perm_grp_' + int(cvar('styx.pe.group7_id')))}"
+                           font_size="20" pos="50,-234" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.group_count') &gt; 7}" />
+
+                    <label depth="3" name="hint0"
+                           text="Group details (priority, tag, perm count) whispered to chat as you navigate."
+                           font_size="12" justify="center"
+                           pos="280,-340" width="560" height="16" pivot="top"
+                           color="200,200,160,255" />
+                    <label depth="3" name="legend0"
+                           text="[JUMP] next   [CROUCH] prev   [LMB] open group   [RMB] close"
+                           font_size="13" justify="center"
+                           pos="280,-370" width="560" height="18" pivot="top"
+                           color="180,180,180,255" />
+                </rect>
+
+                <!-- ===== STAGE 1: PLUGIN PICKER (12 rows) =====
+                     Picks which plugin's perms to show in stage 2. Row 0 is
+                     always "(All plugins)" — selecting it shows the full list.
+                     Labels come from perm_plugin_N registered by PermEditor. -->
+                <rect name="stage1" pos="0,0" width="560" height="580"
+                      visible="{#cvar('styx.pe.stage') == 1}">
+
+                    <label depth="2" name="hdr1"
+                           text="PICK A PLUGIN — filters perms shown next"
+                           font_size="22" justify="center" style="outline"
+                           color="255,200,140,255"
+                           pos="280,-10" width="560" height="28" pivot="top" />
+
+                    <label depth="2" name="hdr1b"
+                           text="group: {#localization('perm_grp_' + int(cvar('styx.pe.selected_group_id')))}"
+                           font_size="14" justify="center"
+                           color="160,255,180,255"
+                           pos="280,-38" width="560" height="18" pivot="top" />
+
+                    <!-- 12 plugin rows. Y: -68, -94, -120, -146, -172, -198, -224, -250, -276, -302, -328, -354 (26px steps) -->
+                    <label depth="3" name="ppc0" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-68" width="20" height="22" visible="{#cvar('styx.pe.sel') == 0}" />
+                    <label depth="3" name="ppo0" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin0_id')))}"
+                           font_size="20" pos="50,-68" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 0}" />
+
+                    <label depth="3" name="ppc1" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-94" width="20" height="22" visible="{#cvar('styx.pe.sel') == 1}" />
+                    <label depth="3" name="ppo1" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin1_id')))}"
+                           font_size="20" pos="50,-94" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 1}" />
+
+                    <label depth="3" name="ppc2" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-120" width="20" height="22" visible="{#cvar('styx.pe.sel') == 2}" />
+                    <label depth="3" name="ppo2" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin2_id')))}"
+                           font_size="20" pos="50,-120" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 2}" />
+
+                    <label depth="3" name="ppc3" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-146" width="20" height="22" visible="{#cvar('styx.pe.sel') == 3}" />
+                    <label depth="3" name="ppo3" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin3_id')))}"
+                           font_size="20" pos="50,-146" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 3}" />
+
+                    <label depth="3" name="ppc4" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-172" width="20" height="22" visible="{#cvar('styx.pe.sel') == 4}" />
+                    <label depth="3" name="ppo4" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin4_id')))}"
+                           font_size="20" pos="50,-172" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 4}" />
+
+                    <label depth="3" name="ppc5" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-198" width="20" height="22" visible="{#cvar('styx.pe.sel') == 5}" />
+                    <label depth="3" name="ppo5" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin5_id')))}"
+                           font_size="20" pos="50,-198" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 5}" />
+
+                    <label depth="3" name="ppc6" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-224" width="20" height="22" visible="{#cvar('styx.pe.sel') == 6}" />
+                    <label depth="3" name="ppo6" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin6_id')))}"
+                           font_size="20" pos="50,-224" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 6}" />
+
+                    <label depth="3" name="ppc7" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-250" width="20" height="22" visible="{#cvar('styx.pe.sel') == 7}" />
+                    <label depth="3" name="ppo7" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin7_id')))}"
+                           font_size="20" pos="50,-250" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 7}" />
+
+                    <label depth="3" name="ppc8" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-276" width="20" height="22" visible="{#cvar('styx.pe.sel') == 8}" />
+                    <label depth="3" name="ppo8" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin8_id')))}"
+                           font_size="20" pos="50,-276" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 8}" />
+
+                    <label depth="3" name="ppc9" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-302" width="20" height="22" visible="{#cvar('styx.pe.sel') == 9}" />
+                    <label depth="3" name="ppo9" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin9_id')))}"
+                           font_size="20" pos="50,-302" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 9}" />
+
+                    <label depth="3" name="ppc10" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-328" width="20" height="22" visible="{#cvar('styx.pe.sel') == 10}" />
+                    <label depth="3" name="ppo10" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin10_id')))}"
+                           font_size="20" pos="50,-328" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 10}" />
+
+                    <label depth="3" name="ppc11" text="&gt;" font_size="22" color="255,200,140,255"
+                           pos="22,-354" width="20" height="22" visible="{#cvar('styx.pe.sel') == 11}" />
+                    <label depth="3" name="ppo11" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin11_id')))}"
+                           font_size="20" pos="50,-354" width="480" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.plugin_count') &gt; 11}" />
+
+                    <label depth="3" name="hint1p"
+                           text="'(All plugins)' shows every registered perm. Perm count per plugin whispered as you navigate."
+                           font_size="12" justify="center"
+                           pos="280,-460" width="560" height="16" pivot="top"
+                           color="200,200,160,255" />
+                    <label depth="3" name="legend1p"
+                           text="[JUMP] next   [CROUCH] prev   [LMB] pick   [RMB] back to groups"
+                           font_size="13" justify="center"
+                           pos="280,-490" width="560" height="18" pivot="top"
+                           color="180,180,180,255" />
+                </rect>
+
+                <!-- ===== STAGE 2: GROUP CONFIG (3 rows) + PERM TOGGLES (16 rows) ===== -->
+                <rect name="stage2" pos="0,0" width="560" height="580"
+                      visible="{#cvar('styx.pe.stage') == 2}">
+
+                    <label depth="2" name="hdr2"
+                           text="EDITING: {#localization('perm_grp_' + int(cvar('styx.pe.selected_group_id')))} — {#localization('perm_plugin_' + int(cvar('styx.pe.selected_plugin_id')))}"
+                           font_size="22" justify="center" style="outline"
+                           color="160,255,180,255"
+                           pos="280,-8" width="560" height="24" pivot="top" />
+
+                    <!-- ===== Group config rows (sel 0..2) ===== -->
+
+                    <!-- Row 0: Priority -->
+                    <label depth="3" name="cfgC0" text="&gt;" font_size="20" color="255,180,80,255"
+                           pos="22,-32" width="20" height="20" visible="{#cvar('styx.pe.sel') == 0}" />
+                    <label depth="3" name="cfgL0" text="Priority"
+                           font_size="16" pos="50,-32" width="180" height="20" color="255,200,140,255" />
+                    <label depth="3" name="cfgV0" text="{cvar(styx.pe.cfg_priority:0)}"
+                           font_size="16" pos="240,-32" width="100" height="20" color="240,240,240,255" />
+                    <label depth="3" name="cfgH0" text="LMB cycles +10"
+                           font_size="12" justify="right" pos="450,-32" width="100" height="20" color="160,160,160,255" />
+
+                    <!-- Row 1: Chat Tag -->
+                    <label depth="3" name="cfgC1" text="&gt;" font_size="20" color="255,180,80,255"
+                           pos="22,-54" width="20" height="20" visible="{#cvar('styx.pe.sel') == 1}" />
+                    <label depth="3" name="cfgL1" text="Chat Tag"
+                           font_size="16" pos="50,-54" width="180" height="20" color="255,200,140,255" />
+                    <label depth="3" name="cfgV1"
+                           text="{#localization('perm_tag_' + int(cvar('styx.pe.cfg_tag_id')))}"
+                           font_size="16" pos="240,-54" width="180" height="20" color="240,240,240,255" />
+                    <label depth="3" name="cfgH1" text="LMB cycles preset"
+                           font_size="12" justify="right" pos="430,-54" width="120" height="20" color="160,160,160,255" />
+
+                    <!-- Row 2: Chat Color -->
+                    <label depth="3" name="cfgC2" text="&gt;" font_size="20" color="255,180,80,255"
+                           pos="22,-76" width="20" height="20" visible="{#cvar('styx.pe.sel') == 2}" />
+                    <label depth="3" name="cfgL2" text="Chat Color"
+                           font_size="16" pos="50,-76" width="180" height="20" color="255,200,140,255" />
+                    <label depth="3" name="cfgV2"
+                           text="{#localization('perm_color_' + int(cvar('styx.pe.cfg_color_id')))}"
+                           font_size="16" pos="240,-76" width="120" height="20" color="240,240,240,255" />
+                    <label depth="3" name="cfgH2" text="LMB cycles preset"
+                           font_size="12" justify="right" pos="430,-76" width="120" height="20" color="160,160,160,255" />
+
+                    <!-- Visual divider between config + perms -->
+                    <sprite depth="2" name="div1" sprite="menu_empty" color="160,255,180,80"
+                            type="sliced" width="540" height="1" pos="10,-94" />
+
+                    <!-- ===== Perm rows (sel 3..14) ===== -->
+                    <!-- Y starts at -106; 22px steps. Cursor sel offsets shifted by +3. -->
+                    <label depth="3" name="pc0" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-106" width="20" height="20" visible="{#cvar('styx.pe.sel') == 3}" />
+                    <label depth="3" name="pn0" text="{#localization('perm_def_' + int(cvar('styx.pe.perm0_id')))}"
+                           font_size="16" pos="50,-106" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 0}" />
+                    <label depth="3" name="pg0" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-108" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 0  and cvar('styx.pe.perm0_status') == 1}" />
+                    <label depth="3" name="pn0n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-108" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 0  and cvar('styx.pe.perm0_status') == 0}" />
+
+                    <label depth="3" name="pc1" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-128" width="20" height="20" visible="{#cvar('styx.pe.sel') == 4}" />
+                    <label depth="3" name="pn1" text="{#localization('perm_def_' + int(cvar('styx.pe.perm1_id')))}"
+                           font_size="16" pos="50,-128" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 1}" />
+                    <label depth="3" name="pg1" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-130" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 1  and cvar('styx.pe.perm1_status') == 1}" />
+                    <label depth="3" name="pn1n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-130" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 1  and cvar('styx.pe.perm1_status') == 0}" />
+
+                    <label depth="3" name="pc2" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-150" width="20" height="20" visible="{#cvar('styx.pe.sel') == 5}" />
+                    <label depth="3" name="pn2" text="{#localization('perm_def_' + int(cvar('styx.pe.perm2_id')))}"
+                           font_size="16" pos="50,-150" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 2}" />
+                    <label depth="3" name="pg2" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-152" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 2  and cvar('styx.pe.perm2_status') == 1}" />
+                    <label depth="3" name="pn2n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-152" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 2  and cvar('styx.pe.perm2_status') == 0}" />
+
+                    <label depth="3" name="pc3" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-172" width="20" height="20" visible="{#cvar('styx.pe.sel') == 6}" />
+                    <label depth="3" name="pn3" text="{#localization('perm_def_' + int(cvar('styx.pe.perm3_id')))}"
+                           font_size="16" pos="50,-172" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 3}" />
+                    <label depth="3" name="pg3" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-174" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 3  and cvar('styx.pe.perm3_status') == 1}" />
+                    <label depth="3" name="pn3n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-174" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 3  and cvar('styx.pe.perm3_status') == 0}" />
+
+                    <label depth="3" name="pc4" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-194" width="20" height="20" visible="{#cvar('styx.pe.sel') == 7}" />
+                    <label depth="3" name="pn4" text="{#localization('perm_def_' + int(cvar('styx.pe.perm4_id')))}"
+                           font_size="16" pos="50,-194" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 4}" />
+                    <label depth="3" name="pg4" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-196" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 4  and cvar('styx.pe.perm4_status') == 1}" />
+                    <label depth="3" name="pn4n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-196" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 4  and cvar('styx.pe.perm4_status') == 0}" />
+
+                    <label depth="3" name="pc5" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-216" width="20" height="20" visible="{#cvar('styx.pe.sel') == 8}" />
+                    <label depth="3" name="pn5" text="{#localization('perm_def_' + int(cvar('styx.pe.perm5_id')))}"
+                           font_size="16" pos="50,-216" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 5}" />
+                    <label depth="3" name="pg5" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-218" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 5  and cvar('styx.pe.perm5_status') == 1}" />
+                    <label depth="3" name="pn5n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-218" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 5  and cvar('styx.pe.perm5_status') == 0}" />
+
+                    <label depth="3" name="pc6" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-238" width="20" height="20" visible="{#cvar('styx.pe.sel') == 9}" />
+                    <label depth="3" name="pn6" text="{#localization('perm_def_' + int(cvar('styx.pe.perm6_id')))}"
+                           font_size="16" pos="50,-238" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 6}" />
+                    <label depth="3" name="pg6" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-240" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 6  and cvar('styx.pe.perm6_status') == 1}" />
+                    <label depth="3" name="pn6n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-240" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 6  and cvar('styx.pe.perm6_status') == 0}" />
+
+                    <label depth="3" name="pc7" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-260" width="20" height="20" visible="{#cvar('styx.pe.sel') == 10}" />
+                    <label depth="3" name="pn7" text="{#localization('perm_def_' + int(cvar('styx.pe.perm7_id')))}"
+                           font_size="16" pos="50,-260" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 7}" />
+                    <label depth="3" name="pg7" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-262" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 7  and cvar('styx.pe.perm7_status') == 1}" />
+                    <label depth="3" name="pn7n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-262" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 7  and cvar('styx.pe.perm7_status') == 0}" />
+
+                    <label depth="3" name="pc8" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-282" width="20" height="20" visible="{#cvar('styx.pe.sel') == 11}" />
+                    <label depth="3" name="pn8" text="{#localization('perm_def_' + int(cvar('styx.pe.perm8_id')))}"
+                           font_size="16" pos="50,-282" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 8}" />
+                    <label depth="3" name="pg8" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-284" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 8  and cvar('styx.pe.perm8_status') == 1}" />
+                    <label depth="3" name="pn8n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-284" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 8  and cvar('styx.pe.perm8_status') == 0}" />
+
+                    <label depth="3" name="pc9" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-304" width="20" height="20" visible="{#cvar('styx.pe.sel') == 12}" />
+                    <label depth="3" name="pn9" text="{#localization('perm_def_' + int(cvar('styx.pe.perm9_id')))}"
+                           font_size="16" pos="50,-304" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 9}" />
+                    <label depth="3" name="pg9" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-306" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 9  and cvar('styx.pe.perm9_status') == 1}" />
+                    <label depth="3" name="pn9n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-306" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 9  and cvar('styx.pe.perm9_status') == 0}" />
+
+                    <label depth="3" name="pc10" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-326" width="20" height="20" visible="{#cvar('styx.pe.sel') == 13}" />
+                    <label depth="3" name="pn10" text="{#localization('perm_def_' + int(cvar('styx.pe.perm10_id')))}"
+                           font_size="16" pos="50,-326" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 10}" />
+                    <label depth="3" name="pg10" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-328" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 10  and cvar('styx.pe.perm10_status') == 1}" />
+                    <label depth="3" name="pn10n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-328" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 10  and cvar('styx.pe.perm10_status') == 0}" />
+
+                    <label depth="3" name="pc11" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-348" width="20" height="20" visible="{#cvar('styx.pe.sel') == 14}" />
+                    <label depth="3" name="pn11" text="{#localization('perm_def_' + int(cvar('styx.pe.perm11_id')))}"
+                           font_size="16" pos="50,-348" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 11}" />
+                    <label depth="3" name="pg11" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-350" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 11  and cvar('styx.pe.perm11_status') == 1}" />
+                    <label depth="3" name="pn11n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-350" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 11  and cvar('styx.pe.perm11_status') == 0}" />
+
+                    <label depth="3" name="pc12" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-370" width="20" height="20" visible="{#cvar('styx.pe.sel') == 15}" />
+                    <label depth="3" name="pn12" text="{#localization('perm_def_' + int(cvar('styx.pe.perm12_id')))}"
+                           font_size="16" pos="50,-370" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 12}" />
+                    <label depth="3" name="pg12" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-372" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 12  and cvar('styx.pe.perm12_status') == 1}" />
+                    <label depth="3" name="pn12n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-372" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 12  and cvar('styx.pe.perm12_status') == 0}" />
+
+                    <label depth="3" name="pc13" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-392" width="20" height="20" visible="{#cvar('styx.pe.sel') == 16}" />
+                    <label depth="3" name="pn13" text="{#localization('perm_def_' + int(cvar('styx.pe.perm13_id')))}"
+                           font_size="16" pos="50,-392" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 13}" />
+                    <label depth="3" name="pg13" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-394" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 13  and cvar('styx.pe.perm13_status') == 1}" />
+                    <label depth="3" name="pn13n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-394" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 13  and cvar('styx.pe.perm13_status') == 0}" />
+
+                    <label depth="3" name="pc14" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-414" width="20" height="20" visible="{#cvar('styx.pe.sel') == 17}" />
+                    <label depth="3" name="pn14" text="{#localization('perm_def_' + int(cvar('styx.pe.perm14_id')))}"
+                           font_size="16" pos="50,-414" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 14}" />
+                    <label depth="3" name="pg14" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-416" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 14  and cvar('styx.pe.perm14_status') == 1}" />
+                    <label depth="3" name="pn14n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-416" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 14  and cvar('styx.pe.perm14_status') == 0}" />
+
+                    <label depth="3" name="pc15" text="&gt;" font_size="20" color="160,255,180,255"
+                           pos="22,-436" width="20" height="20" visible="{#cvar('styx.pe.sel') == 18}" />
+                    <label depth="3" name="pn15" text="{#localization('perm_def_' + int(cvar('styx.pe.perm15_id')))}"
+                           font_size="16" pos="50,-436" width="380" height="20" color="240,240,240,255"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 15}" />
+                    <label depth="3" name="pg15" text="GRANTED" font_size="13" color="100,220,120,255"
+                           pos="450,-438" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 15  and cvar('styx.pe.perm15_status') == 1}" />
+                    <label depth="3" name="pn15n" text="not granted" font_size="13" color="160,160,160,255"
+                           pos="450,-438" width="100" height="18"
+                           visible="{#cvar('styx.pe.perm_count') &gt; 15  and cvar('styx.pe.perm15_status') == 0}" />
+
+                    <label depth="3" name="hint1"
+                           text="Top 3 rows edit group identity. Below = perm grants. Description whispered as you navigate."
+                           font_size="12" justify="center"
+                           pos="280,-490" width="560" height="16" pivot="top"
+                           color="200,200,160,255" />
+                    <label depth="3" name="legend1"
+                           text="[JUMP] next   [CROUCH] prev   [LMB] cycle/toggle   [RMB] back to plugins"
+                           font_size="13" justify="center"
+                           pos="280,-540" width="560" height="18" pivot="top"
+                           color="180,180,180,255" />
+                </rect>
+            </rect>
+        </window>
+
+        <!--
+            styxSrm — Server Restart Manager admin sub-menu.
+            4 actionable rows + display footer. Driven by ServerRestartManager.cs:
+              styx.srm.open / sel — UI navigation
+              styx.srm.enabled — current Enabled state (ON/OFF badges)
+              styx.srm.cycle — current WipeCycleDays
+              styx.srm.last_wipe_d — days since last wipe (display)
+              styx.srm.confirm_pending — restart-now two-tap arm state
+              styx.srm.wipe_d / wipe_h — countdown to next wipe (display)
+              styx.srm.restart_d/h/m — countdown to next restart (display)
+        -->
+        <window name="styxSrm"
+                anchor="CenterCenter" pos="-260,180"
+                width="520" height="360"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="55">
+
+            <rect name="wrap" pos="0,0" width="520" height="360"
+                  visible="{#cvar('styx.srm.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,220"        type="sliced" width="520" height="360" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="255,180,80,220"   type="sliced" width="520" height="360" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="SERVER RESTART MANAGER"
+                       font_size="22" justify="center" style="outline"
+                       color="255,180,80,255"
+                       pos="260,-10" width="520" height="28" pivot="top" />
+
+                <!-- Row 0: Status (toggleable) -->
+                <label depth="3" name="c0" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="22,-50" width="20" height="22" visible="{#cvar('styx.srm.sel') == 0}" />
+                <label depth="3" name="o0" text="Status"
+                       font_size="18" pos="50,-50" width="200" height="22" color="240,240,240,255" />
+                <label depth="3" name="bOn" text="ENABLED" font_size="14" color="100,220,120,255"
+                       pos="380,-52" width="120" height="20"
+                       visible="{#cvar('styx.srm.enabled') == 1}" />
+                <label depth="3" name="bOff" text="DISABLED" font_size="14" color="220,120,100,255"
+                       pos="380,-52" width="120" height="20"
+                       visible="{#cvar('styx.srm.enabled') == 0}" />
+
+                <!-- Row 1: Wipe cycle (cycles preset) -->
+                <label depth="3" name="c1" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="22,-78" width="20" height="22" visible="{#cvar('styx.srm.sel') == 1}" />
+                <label depth="3" name="o1" text="Wipe cycle"
+                       font_size="18" pos="50,-78" width="200" height="22" color="240,240,240,255" />
+                <label depth="3" name="o1v" text="{cvar(styx.srm.cycle:0)} days"
+                       font_size="16" justify="right"
+                       pos="350,-80" width="150" height="20" color="255,220,140,255" />
+
+                <!-- Row 2: Reset last wipe to NOW -->
+                <label depth="3" name="c2" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="22,-106" width="20" height="22" visible="{#cvar('styx.srm.sel') == 2}" />
+                <label depth="3" name="o2" text="Reset last-wipe to NOW"
+                       font_size="18" pos="50,-106" width="320" height="22" color="240,240,240,255" />
+                <label depth="3" name="o2v" text="({cvar(styx.srm.last_wipe_d:0)}d ago)"
+                       font_size="14" justify="right"
+                       pos="350,-108" width="150" height="20" color="180,180,180,255" />
+
+                <!-- Row 3: Trigger restart NOW (two-tap confirm) -->
+                <label depth="3" name="c3" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="22,-134" width="20" height="22" visible="{#cvar('styx.srm.sel') == 3}" />
+                <label depth="3" name="o3" text="Trigger restart NOW"
+                       font_size="18" pos="50,-134" width="280" height="22" color="240,240,240,255" />
+                <label depth="3" name="o3idle" text="(two-tap LMB to confirm)" font_size="13"
+                       pos="320,-136" width="180" height="20" color="160,160,160,255"
+                       visible="{#cvar('styx.srm.confirm_pending') == 0}" />
+                <label depth="3" name="o3pend" text="CONFIRM ?" font_size="14" color="255,80,80,255"
+                       pos="380,-136" width="120" height="20"
+                       visible="{#cvar('styx.srm.confirm_pending') == 1}" />
+
+                <!-- Divider + display section -->
+                <sprite depth="2" name="div1" sprite="menu_empty" color="255,180,80,80"
+                        type="sliced" width="500" height="1" pos="10,-170" />
+
+                <label depth="3" name="dispNextWipe"
+                       text="Next wipe in:   {cvar(styx.srm.wipe_d:0)}d {cvar(styx.srm.wipe_h:0)}h"
+                       font_size="14" pos="22,-184" width="400" height="20" color="180,255,200,255" />
+
+                <label depth="3" name="dispNextRestart"
+                       text="Next restart in: {cvar(styx.srm.restart_d:0)}d {cvar(styx.srm.restart_h:0)}h {cvar(styx.srm.restart_m:0)}m"
+                       font_size="14" pos="22,-206" width="400" height="20" color="180,220,255,255" />
+
+                <!-- Hint + legend -->
+                <label depth="3" name="hint"
+                       text="Toggling Status pauses scheduled restarts. Reset last-wipe after performing an actual wipe."
+                       font_size="12" justify="center"
+                       pos="260,-280" width="520" height="16" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] act   [RMB] back to launcher"
+                       font_size="13" justify="center"
+                       pos="260,-320" width="520" height="18" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxAdminTools — sub-menu opened from /m → "Admin Tools".
+            Two rows currently (Vanish, Admin Radar) — extensible by adding
+            rows here + a case in AdminTools.cs ToggleRow + RowCount bump.
+            Each row: cursor + label + ON/OFF status (gated visibility).
+        -->
+        <window name="styxAdminTools"
+                anchor="CenterCenter" pos="-220,140"
+                width="440" height="220"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="55">
+
+            <rect name="wrap" pos="0,0" width="440" height="220"
+                  visible="{#cvar('styx.adt.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="440" height="220" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="255,160,80,220"   type="sliced" width="440" height="220" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="ADMIN TOOLS"
+                       font_size="24" justify="center" style="outline"
+                       color="255,160,80,255"
+                       pos="220,-10" width="440" height="28" pivot="top" />
+
+                <!-- Row 0 — Vanish -->
+                <label depth="3" name="c0" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="22,-58" width="20" height="22" visible="{#cvar('styx.adt.sel') == 0}" />
+                <label depth="3" name="o0" text="Vanish"
+                       font_size="20" pos="50,-58" width="280" height="22" color="240,240,240,255" />
+                <label depth="3" name="sOn0" text="ON" font_size="14" color="100,220,120,255"
+                       pos="350,-60" width="70" height="20"
+                       visible="{#cvar('styx.adt.vanish_status') == 1}" />
+                <label depth="3" name="sOff0" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="350,-60" width="70" height="20"
+                       visible="{#cvar('styx.adt.vanish_status') == 0}" />
+
+                <!-- Row 1 — Admin Radar -->
+                <label depth="3" name="c1" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="22,-86" width="20" height="22" visible="{#cvar('styx.adt.sel') == 1}" />
+                <label depth="3" name="o1" text="Admin Radar"
+                       font_size="20" pos="50,-86" width="280" height="22" color="240,240,240,255" />
+                <label depth="3" name="sOn1" text="ON" font_size="14" color="100,220,120,255"
+                       pos="350,-88" width="70" height="20"
+                       visible="{#cvar('styx.adt.radar_status') == 1}" />
+                <label depth="3" name="sOff1" text="OFF" font_size="14" color="220,120,100,255"
+                       pos="350,-88" width="70" height="20"
+                       visible="{#cvar('styx.adt.radar_status') == 0}" />
+
+                <!-- Hint + legend -->
+                <label depth="3" name="hint"
+                       text="Vanish: invisible to players + ignored by AI."
+                       font_size="12" justify="center"
+                       pos="220,-150" width="440" height="16" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="hint2"
+                       text="Admin Radar: through-walls entity readout."
+                       font_size="12" justify="center"
+                       pos="220,-168" width="440" height="16" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] toggle   [RMB] back"
+                       font_size="13" justify="center"
+                       pos="220,-194" width="440" height="18" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxAdminRadar — through-walls entity readout for admins.
+            Five categories (players / zombies / animals / items / vehicles),
+            each with count + nearest distance. All cvars driven by AdminRadar
+            plugin. Visibility gated by styx.aradar.visible so the panel
+            disappears for non-admins or when the plugin's perm check fails.
+
+            Position: stacks below styxRadar (which sits at LeftTop, pos
+            10,-300, height 56 → ends at y=-356). Admin radar starts a few px
+            below at y=-365. Width 280 to fit "ANIMALS 99 nearest 999m".
+        -->
+        <window name="styxAdminRadar"
+                anchor="LeftTop" pos="10,-365"
+                width="280" height="148"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="40">
+
+            <rect name="wrap" pos="0,0" width="280" height="148"
+                  visible="{#cvar('styx.aradar.visible') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,180"     type="sliced" width="280" height="148" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="120,200,255,200" type="sliced" width="280" height="148" fillcenter="false" />
+
+                <label depth="2" name="hdr"
+                       text="ADMIN RADAR ({cvar(styx.aradar.radius:0)}m)"
+                       font_size="13" justify="center" style="outline"
+                       color="120,200,255,255"
+                       pos="140,-4" width="280" height="16" pivot="top" />
+
+                <!-- Row layout per category:
+                       label "CATEGORY"   (left)
+                       count value        (centre)
+                       "n NNm" distance   (right)
+                     Y positions: -22, -42, -62, -82, -102 -->
+
+                <!-- PLAYERS -->
+                <label depth="2" name="lblP" text="PLAYERS" font_size="14" color="200,220,255,255"
+                       pos="10,-22" width="80" height="18" />
+                <label depth="2" name="cntP" text="{cvar(styx.aradar.players_count:0)}"
+                       font_size="14" justify="center" color="255,255,200,255"
+                       pos="140,-22" width="40" height="18" pivot="top" />
+                <label depth="2" name="distP"
+                       text="{cvar(styx.aradar.players_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.players_dir')))}"
+                       font_size="13" justify="right" color="200,200,200,255"
+                       pos="190,-22" width="80" height="18"
+                       visible="{#cvar('styx.aradar.players_count') &gt; 0}" />
+
+                <!-- ZOMBIES -->
+                <label depth="2" name="lblZ" text="ZOMBIES" font_size="14" color="255,180,180,255"
+                       pos="10,-42" width="80" height="18" />
+                <label depth="2" name="cntZ" text="{cvar(styx.aradar.zombies_count:0)}"
+                       font_size="14" justify="center" color="255,255,200,255"
+                       pos="140,-42" width="40" height="18" pivot="top" />
+                <label depth="2" name="distZ"
+                       text="{cvar(styx.aradar.zombies_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.zombies_dir')))}"
+                       font_size="13" justify="right" color="200,200,200,255"
+                       pos="190,-42" width="80" height="18"
+                       visible="{#cvar('styx.aradar.zombies_count') &gt; 0}" />
+
+                <!-- ANIMALS -->
+                <label depth="2" name="lblA" text="ANIMALS" font_size="14" color="180,255,180,255"
+                       pos="10,-62" width="80" height="18" />
+                <label depth="2" name="cntA" text="{cvar(styx.aradar.animals_count:0)}"
+                       font_size="14" justify="center" color="255,255,200,255"
+                       pos="140,-62" width="40" height="18" pivot="top" />
+                <label depth="2" name="distA"
+                       text="{cvar(styx.aradar.animals_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.animals_dir')))}"
+                       font_size="13" justify="right" color="200,200,200,255"
+                       pos="190,-62" width="80" height="18"
+                       visible="{#cvar('styx.aradar.animals_count') &gt; 0}" />
+
+                <!-- ITEMS (loot bags + dropped) -->
+                <label depth="2" name="lblI" text="ITEMS" font_size="14" color="255,220,140,255"
+                       pos="10,-82" width="80" height="18" />
+                <label depth="2" name="cntI" text="{cvar(styx.aradar.items_count:0)}"
+                       font_size="14" justify="center" color="255,255,200,255"
+                       pos="140,-82" width="40" height="18" pivot="top" />
+                <label depth="2" name="distI"
+                       text="{cvar(styx.aradar.items_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.items_dir')))}"
+                       font_size="13" justify="right" color="200,200,200,255"
+                       pos="190,-82" width="80" height="18"
+                       visible="{#cvar('styx.aradar.items_count') &gt; 0}" />
+
+                <!-- VEHICLES -->
+                <label depth="2" name="lblV" text="VEHICLES" font_size="14" color="200,180,255,255"
+                       pos="10,-102" width="80" height="18" />
+                <label depth="2" name="cntV" text="{cvar(styx.aradar.vehicles_count:0)}"
+                       font_size="14" justify="center" color="255,255,200,255"
+                       pos="140,-102" width="40" height="18" pivot="top" />
+                <label depth="2" name="distV"
+                       text="{cvar(styx.aradar.vehicles_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.vehicles_dir')))}"
+                       font_size="13" justify="right" color="200,200,200,255"
+                       pos="190,-102" width="80" height="18"
+                       visible="{#cvar('styx.aradar.vehicles_count') &gt; 0}" />
+
+                <label depth="2" name="hint" text="/aradar to toggle"
+                       font_size="11" justify="center" color="160,160,160,255"
+                       pos="140,-128" width="280" height="14" pivot="top" />
+            </rect>
+        </window>
+
+        <!--
+            styxKits — Kit plugin's in-game picker (Kit.cs v0.2.0).
+
+            Demonstrates the Styx.Ui.Labels pattern: kit names and descriptions
+            are registered at Kit.OnLoad, baked into Mods/StyxRuntime/Config/
+            Localization.txt at server shutdown, and the next boot's engine
+            loads them as static localization keys. XUi rows reference them via
+            `{#localization('kit_name_' + int(cvar('styx.kits.rowK_id')))}`.
+
+            Description label tracks the highlighted row via styx.kits.desc_id,
+            so as the player navigates, the description updates live too.
+        -->
+        <window name="styxKits"
+                anchor="CenterCenter" pos="-260,240"
+                width="520" height="500"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="55">
+
+            <rect name="wrap" pos="0,0" width="520" height="500"
+                  visible="{#cvar('styx.kits.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="520" height="500" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="120,255,180,220"  type="sliced" width="520" height="500" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="STYX KITS"
+                       font_size="28" justify="center" style="outline"
+                       color="120,255,180,255"
+                       pos="260,-10" width="520" height="32" pivot="top" />
+
+                <!-- 8 rows, count-gated. v0.3 layout — taller rows for 40x40 icons:
+                        cursor (x=22, font 28)  icon (x=52, 40x40)  name (x=104, font 20)
+                     Row spacing 44px (icon+4px gutter). Labels vertically
+                     centred against the icon. Sprite name resolved via Labels
+                     lookup — plugin registers kit_icon_N with an
+                     ItemIconAtlas sprite name (item name like "foodCanChili"
+                     or fallback to first item).  Empty icon = transparent. -->
+                <label  depth="3" name="c0" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-52" width="24" height="40" visible="{#cvar('styx.kits.sel') == 0}" />
+                <sprite depth="3" name="i0" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row0_id')))}"
+                        pos="52,-52" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 0}" />
+                <label  depth="3" name="o0"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row0_id')))}"
+                        font_size="20" pos="104,-60" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 0}" />
+
+                <label  depth="3" name="c1" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-96" width="24" height="40" visible="{#cvar('styx.kits.sel') == 1}" />
+                <sprite depth="3" name="i1" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row1_id')))}"
+                        pos="52,-96" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 1}" />
+                <label  depth="3" name="o1"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row1_id')))}"
+                        font_size="20" pos="104,-104" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 1}" />
+
+                <label  depth="3" name="c2" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-140" width="24" height="40" visible="{#cvar('styx.kits.sel') == 2}" />
+                <sprite depth="3" name="i2" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row2_id')))}"
+                        pos="52,-140" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 2}" />
+                <label  depth="3" name="o2"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row2_id')))}"
+                        font_size="20" pos="104,-148" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 2}" />
+
+                <label  depth="3" name="c3" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-184" width="24" height="40" visible="{#cvar('styx.kits.sel') == 3}" />
+                <sprite depth="3" name="i3" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row3_id')))}"
+                        pos="52,-184" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 3}" />
+                <label  depth="3" name="o3"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row3_id')))}"
+                        font_size="20" pos="104,-192" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 3}" />
+
+                <label  depth="3" name="c4" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-228" width="24" height="40" visible="{#cvar('styx.kits.sel') == 4}" />
+                <sprite depth="3" name="i4" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row4_id')))}"
+                        pos="52,-228" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 4}" />
+                <label  depth="3" name="o4"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row4_id')))}"
+                        font_size="20" pos="104,-236" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 4}" />
+
+                <label  depth="3" name="c5" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-272" width="24" height="40" visible="{#cvar('styx.kits.sel') == 5}" />
+                <sprite depth="3" name="i5" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row5_id')))}"
+                        pos="52,-272" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 5}" />
+                <label  depth="3" name="o5"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row5_id')))}"
+                        font_size="20" pos="104,-280" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 5}" />
+
+                <label  depth="3" name="c6" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-316" width="24" height="40" visible="{#cvar('styx.kits.sel') == 6}" />
+                <sprite depth="3" name="i6" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row6_id')))}"
+                        pos="52,-316" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 6}" />
+                <label  depth="3" name="o6"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row6_id')))}"
+                        font_size="20" pos="104,-324" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 6}" />
+
+                <label  depth="3" name="c7" text="&gt;" font_size="28" color="120,255,180,255"
+                        pos="22,-360" width="24" height="40" visible="{#cvar('styx.kits.sel') == 7}" />
+                <sprite depth="3" name="i7" atlas="ItemIconAtlas"
+                        sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row7_id')))}"
+                        pos="52,-360" width="40" height="40"
+                        visible="{#cvar('styx.kits.count') &gt; 7}" />
+                <label  depth="3" name="o7"
+                        text="{#localization('kit_name_' + int(cvar('styx.kits.row7_id')))}"
+                        font_size="20" pos="104,-368" width="400" height="24" color="240,240,240,255"
+                        visible="{#cvar('styx.kits.count') &gt; 7}" />
+
+                <!-- Description follows the highlighted row. -->
+                <label depth="3" name="descsep" text="—" font_size="16" justify="center"
+                       color="120,255,180,180" pos="260,-410" width="520" height="18" pivot="top" />
+                <label depth="3" name="desc"
+                       text="{#localization('kit_desc_' + int(cvar('styx.kits.desc_id')))}"
+                       font_size="14" justify="center"
+                       pos="260,-430" width="500" height="32" pivot="top"
+                       color="220,220,200,255" />
+
+                <label depth="3" name="hint"
+                       text="Whisper shows cooldown/permission status as you navigate."
+                       font_size="12" justify="center"
+                       pos="260,-460" width="520" height="16" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] claim   [RMB] back"
+                       font_size="13" justify="center"
+                       pos="260,-480" width="520" height="18" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxLauncher — top-level plugin launcher driven by the framework's
+            LauncherService (see src/Styx.Core/Ui/LauncherService.cs). Opened
+            via /m. Shows up to 8 numbered rows; count-driven visibility hides
+            empty rows. Whispers to chat provide the actual entry labels since
+            XUi can't paint dynamic strings — row shows the position, chat shows
+            the full name.
+        -->
+        <window name="styxLauncher"
+                anchor="CenterCenter" pos="-200,275"
+                width="400" height="540"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="60">
+
+            <rect name="wrap" pos="0,0" width="400" height="540"
+                  visible="{#cvar('styx.launcher.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,220"       type="sliced" width="400" height="540" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="255,160,80,220"  type="sliced" width="400" height="540" fillcenter="false" />
+
+                <label depth="2" name="hdr"
+                       text="{#localization('styx_launcher_header')}"
+                       font_size="26" justify="center" style="outline"
+                       color="255,160,80,255"
+                       pos="200,-10" width="400" height="30" pivot="top" />
+                <label depth="2" name="sub"
+                       text="/m  —  navigate with jump/crouch, LMB select"
+                       font_size="12" justify="center"
+                       pos="200,-42" width="400" height="18" pivot="top"
+                       color="200,200,200,255" />
+
+                <!-- 8 rows. Label comes from the per-row id cvar that the
+                     LauncherService sets per-player when /m opens:
+                       styx.launcher.rowK_id  → index into styxLauncherPlugin_N
+                     The plugin labels live in the StyxRuntime mod's
+                     Localization.txt, written at last shutdown from the
+                     plugin-profile registry.
+                     Rows are visibility-gated by count so empty slots hide. -->
+                <label depth="3" name="c0" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-68" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 0}" />
+                <label depth="3" name="o0"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row0_id')))}"
+                       font_size="20" pos="56,-68" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 0}" />
+
+                <label depth="3" name="c1" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-94" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 1}" />
+                <label depth="3" name="o1"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row1_id')))}"
+                       font_size="20" pos="56,-94" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 1}" />
+
+                <label depth="3" name="c2" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-120" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 2}" />
+                <label depth="3" name="o2"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row2_id')))}"
+                       font_size="20" pos="56,-120" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 2}" />
+
+                <label depth="3" name="c3" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-146" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 3}" />
+                <label depth="3" name="o3"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row3_id')))}"
+                       font_size="20" pos="56,-146" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 3}" />
+
+                <label depth="3" name="c4" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-172" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 4}" />
+                <label depth="3" name="o4"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row4_id')))}"
+                       font_size="20" pos="56,-172" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 4}" />
+
+                <label depth="3" name="c5" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-198" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 5}" />
+                <label depth="3" name="o5"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row5_id')))}"
+                       font_size="20" pos="56,-198" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 5}" />
+
+                <label depth="3" name="c6" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-224" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 6}" />
+                <label depth="3" name="o6"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row6_id')))}"
+                       font_size="20" pos="56,-224" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 6}" />
+
+                <label depth="3" name="c7" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-250" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 7}" />
+                <label depth="3" name="o7"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row7_id')))}"
+                       font_size="20" pos="56,-250" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 7}" />
+
+                <label depth="3" name="c8" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-276" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 8}" />
+                <label depth="3" name="o8"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row8_id')))}"
+                       font_size="20" pos="56,-276" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 8}" />
+
+                <label depth="3" name="c9" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-302" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 9}" />
+                <label depth="3" name="o9"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row9_id')))}"
+                       font_size="20" pos="56,-302" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 9}" />
+
+                <label depth="3" name="c10" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-328" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 10}" />
+                <label depth="3" name="o10"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row10_id')))}"
+                       font_size="20" pos="56,-328" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 10}" />
+
+                <label depth="3" name="c11" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-354" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 11}" />
+                <label depth="3" name="o11"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row11_id')))}"
+                       font_size="20" pos="56,-354" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 11}" />
+
+                <label depth="3" name="c12" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-380" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 12}" />
+                <label depth="3" name="o12"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row12_id')))}"
+                       font_size="20" pos="56,-380" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 12}" />
+
+                <label depth="3" name="c13" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-406" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 13}" />
+                <label depth="3" name="o13"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row13_id')))}"
+                       font_size="20" pos="56,-406" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 13}" />
+
+                <label depth="3" name="c14" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-432" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 14}" />
+                <label depth="3" name="o14"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row14_id')))}"
+                       font_size="20" pos="56,-432" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 14}" />
+
+                <label depth="3" name="c15" text="&gt;" font_size="22" color="255,200,120,255"
+                       pos="28,-458" width="20" height="22"
+                       visible="{#cvar('styx.launcher.sel') == 15}" />
+                <label depth="3" name="o15"
+                       text="{#localization('styxLauncherPlugin_' + int(cvar('styx.launcher.row15_id')))}"
+                       font_size="20" pos="56,-458" width="300" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.launcher.count') &gt; 15}" />
+
+                <!-- Hint + legend -->
+                <label depth="3" name="hint"
+                       text="See chat — plugin names are whispered as you navigate."
+                       font_size="13" justify="center"
+                       pos="200,-490" width="400" height="18" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] select   [RMB] close"
+                       font_size="13" justify="center"
+                       pos="200,-516" width="400" height="18" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxTeleport — StyxTeleport plugin picker (homes / trader / death).
+
+            Heterogeneous rows: each row is one of {home, trader, death, empty}.
+            Plugin sets per-row cvars row{K}_kind (0=home, 1=trader, 2=death,
+            3=empty), row{K}_id (label index inside that kind's namespace),
+            and row{K}_status (1=set/ready, 0=empty/unavailable).
+
+            Each row in XUi has THREE label variants stacked at the same pos,
+            each gated by its kind. Only one fires per row at a time.
+
+            Status badges (right edge): SET / empty for home rows, READY for
+            trader/death when status==1. Cooldown details + daily counter are
+            whispered to chat as the cursor moves (cleaner than packing more
+            cvars into a static panel).
+        -->
+        <window name="styxTeleport"
+                anchor="CenterCenter" pos="-260,180"
+                width="520" height="360"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="55">
+
+            <rect name="wrap" pos="0,0" width="520" height="360"
+                  visible="{#cvar('styx.tp.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="520" height="360" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="120,200,255,220"  type="sliced" width="520" height="360" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="TELEPORT"
+                       font_size="26" justify="center" style="outline"
+                       color="120,200,255,255"
+                       pos="260,-10" width="520" height="30" pivot="top" />
+
+                <!-- 8 rows. Each row K has:
+                       cursor "&gt;" gated by sel == K
+                       three label variants gated by row{K}_kind == 0|1|2
+                       two status badges (SET / empty) for home rows; READY for
+                       trader/death when status == 1
+                     Y positions for rows 0..7: -52, -76, -100, -124, -148, -172, -196, -220 -->
+
+                <!-- Row 0 -->
+                <label depth="3" name="c0" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-52" width="20" height="22" visible="{#cvar('styx.tp.sel') == 0}" />
+                <label depth="3" name="hn0"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row0_id')))}"
+                       font_size="18" pos="50,-52" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 0}" />
+                <label depth="3" name="tn0"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row0_id')))}"
+                       font_size="18" pos="50,-52" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 1}" />
+                <label depth="3" name="dn0"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-52" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 2}" />
+                <label depth="3" name="bSet0" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-54" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 0  and cvar('styx.tp.row0_status') == 1}" />
+                <label depth="3" name="bEmpty0" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-54" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 0  and cvar('styx.tp.row0_status') == 0}" />
+                <label depth="3" name="bReady0" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-54" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') &gt; 0  and cvar('styx.tp.row0_status') == 1}" />
+                <label depth="3" name="bNone0" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-54" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 2  and cvar('styx.tp.row0_status') == 0}" />
+
+                <!-- Row 1 -->
+                <label depth="3" name="c1" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-76" width="20" height="22" visible="{#cvar('styx.tp.sel') == 1}" />
+                <label depth="3" name="hn1"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row1_id')))}"
+                       font_size="18" pos="50,-76" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 0}" />
+                <label depth="3" name="tn1"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row1_id')))}"
+                       font_size="18" pos="50,-76" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 1}" />
+                <label depth="3" name="dn1"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-76" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 2}" />
+                <label depth="3" name="bSet1" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-78" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 0  and cvar('styx.tp.row1_status') == 1}" />
+                <label depth="3" name="bEmpty1" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-78" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 0  and cvar('styx.tp.row1_status') == 0}" />
+                <label depth="3" name="bReady1" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-78" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') &gt; 0  and cvar('styx.tp.row1_status') == 1}" />
+                <label depth="3" name="bNone1" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-78" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 2  and cvar('styx.tp.row1_status') == 0}" />
+
+                <!-- Row 2 -->
+                <label depth="3" name="c2" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-100" width="20" height="22" visible="{#cvar('styx.tp.sel') == 2}" />
+                <label depth="3" name="hn2"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row2_id')))}"
+                       font_size="18" pos="50,-100" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 0}" />
+                <label depth="3" name="tn2"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row2_id')))}"
+                       font_size="18" pos="50,-100" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 1}" />
+                <label depth="3" name="dn2"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-100" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 2}" />
+                <label depth="3" name="bSet2" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-102" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 0  and cvar('styx.tp.row2_status') == 1}" />
+                <label depth="3" name="bEmpty2" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-102" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 0  and cvar('styx.tp.row2_status') == 0}" />
+                <label depth="3" name="bReady2" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-102" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') &gt; 0  and cvar('styx.tp.row2_status') == 1}" />
+                <label depth="3" name="bNone2" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-102" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 2  and cvar('styx.tp.row2_status') == 0}" />
+
+                <!-- Row 3 -->
+                <label depth="3" name="c3" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-124" width="20" height="22" visible="{#cvar('styx.tp.sel') == 3}" />
+                <label depth="3" name="hn3"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row3_id')))}"
+                       font_size="18" pos="50,-124" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 0}" />
+                <label depth="3" name="tn3"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row3_id')))}"
+                       font_size="18" pos="50,-124" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 1}" />
+                <label depth="3" name="dn3"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-124" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 2}" />
+                <label depth="3" name="bSet3" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-126" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 0  and cvar('styx.tp.row3_status') == 1}" />
+                <label depth="3" name="bEmpty3" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-126" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 0  and cvar('styx.tp.row3_status') == 0}" />
+                <label depth="3" name="bReady3" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-126" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') &gt; 0  and cvar('styx.tp.row3_status') == 1}" />
+                <label depth="3" name="bNone3" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-126" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 2  and cvar('styx.tp.row3_status') == 0}" />
+
+                <!-- Row 4 -->
+                <label depth="3" name="c4" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-148" width="20" height="22" visible="{#cvar('styx.tp.sel') == 4}" />
+                <label depth="3" name="hn4"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row4_id')))}"
+                       font_size="18" pos="50,-148" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 0}" />
+                <label depth="3" name="tn4"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row4_id')))}"
+                       font_size="18" pos="50,-148" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 1}" />
+                <label depth="3" name="dn4"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-148" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 2}" />
+                <label depth="3" name="bSet4" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-150" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 0  and cvar('styx.tp.row4_status') == 1}" />
+                <label depth="3" name="bEmpty4" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-150" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 0  and cvar('styx.tp.row4_status') == 0}" />
+                <label depth="3" name="bReady4" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-150" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') &gt; 0  and cvar('styx.tp.row4_status') == 1}" />
+                <label depth="3" name="bNone4" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-150" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 2  and cvar('styx.tp.row4_status') == 0}" />
+
+                <!-- Row 5 -->
+                <label depth="3" name="c5" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-172" width="20" height="22" visible="{#cvar('styx.tp.sel') == 5}" />
+                <label depth="3" name="hn5"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row5_id')))}"
+                       font_size="18" pos="50,-172" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 0}" />
+                <label depth="3" name="tn5"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row5_id')))}"
+                       font_size="18" pos="50,-172" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 1}" />
+                <label depth="3" name="dn5"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-172" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 2}" />
+                <label depth="3" name="bSet5" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-174" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 0  and cvar('styx.tp.row5_status') == 1}" />
+                <label depth="3" name="bEmpty5" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-174" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 0  and cvar('styx.tp.row5_status') == 0}" />
+                <label depth="3" name="bReady5" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-174" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') &gt; 0  and cvar('styx.tp.row5_status') == 1}" />
+                <label depth="3" name="bNone5" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-174" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 2  and cvar('styx.tp.row5_status') == 0}" />
+
+                <!-- Row 6 -->
+                <label depth="3" name="c6" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-196" width="20" height="22" visible="{#cvar('styx.tp.sel') == 6}" />
+                <label depth="3" name="hn6"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row6_id')))}"
+                       font_size="18" pos="50,-196" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 0}" />
+                <label depth="3" name="tn6"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row6_id')))}"
+                       font_size="18" pos="50,-196" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 1}" />
+                <label depth="3" name="dn6"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-196" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 2}" />
+                <label depth="3" name="bSet6" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-198" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 0  and cvar('styx.tp.row6_status') == 1}" />
+                <label depth="3" name="bEmpty6" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-198" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 0  and cvar('styx.tp.row6_status') == 0}" />
+                <label depth="3" name="bReady6" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-198" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') &gt; 0  and cvar('styx.tp.row6_status') == 1}" />
+                <label depth="3" name="bNone6" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-198" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 2  and cvar('styx.tp.row6_status') == 0}" />
+
+                <!-- Row 7 -->
+                <label depth="3" name="c7" text="&gt;" font_size="22" color="120,200,255,255"
+                       pos="22,-220" width="20" height="22" visible="{#cvar('styx.tp.sel') == 7}" />
+                <label depth="3" name="hn7"
+                       text="{#localization('tp_home_' + int(cvar('styx.tp.row7_id')))}"
+                       font_size="18" pos="50,-220" width="320" height="22" color="240,240,240,255"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 0}" />
+                <label depth="3" name="tn7"
+                       text="{#localization('tp_trader_' + int(cvar('styx.tp.row7_id')))}"
+                       font_size="18" pos="50,-220" width="320" height="22" color="200,230,255,255"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 1}" />
+                <label depth="3" name="dn7"
+                       text="{#localization('tp_death')}"
+                       font_size="18" pos="50,-220" width="320" height="22" color="255,200,200,255"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 2}" />
+                <label depth="3" name="bSet7" text="SET" font_size="14" color="100,220,120,255"
+                       pos="430,-222" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 0  and cvar('styx.tp.row7_status') == 1}" />
+                <label depth="3" name="bEmpty7" text="empty" font_size="14" color="160,160,160,255"
+                       pos="430,-222" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 0  and cvar('styx.tp.row7_status') == 0}" />
+                <label depth="3" name="bReady7" text="READY" font_size="14" color="100,220,120,255"
+                       pos="430,-222" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') &gt; 0  and cvar('styx.tp.row7_status') == 1}" />
+                <label depth="3" name="bNone7" text="none" font_size="14" color="160,160,160,255"
+                       pos="430,-222" width="70" height="20"
+                       visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 2  and cvar('styx.tp.row7_status') == 0}" />
+
+                <!-- Hint + legend -->
+                <label depth="3" name="hint"
+                       text="Cooldown / daily-limit details whispered to chat as you navigate."
+                       font_size="13" justify="center"
+                       pos="260,-272" width="520" height="18" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="hint2"
+                       text="Quest active? Press LMB twice within 5s to confirm."
+                       font_size="12" justify="center"
+                       pos="260,-292" width="520" height="16" pivot="top"
+                       color="220,180,140,255" />
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] confirm   [RMB] back"
+                       font_size="13" justify="center"
+                       pos="260,-322" width="520" height="18" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
+            styxPerms — PermManager interactive UI.
+
+            Admin-only (gated via 'styx.perm.admin' permission in plugin).
+            Action-launcher pattern: pick an action with jump/crouch + LMB, the
+            plugin whispers the formatted result to the admin's chat.
+
+            Names (players, groups, perms) are dynamic strings, which XUi labels
+            can't carry without a client-DLL-resolvable binding token, so we
+            route those through chat whisper instead of trying to paint them on
+            the panel. Grant/revoke uses existing /perm chat commands which
+            already handle name resolution.
+        -->
+        <window name="styxPerms"
+                anchor="CenterCenter" pos="-260,140"
+                width="520" height="280"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="50">
+
+            <rect name="wrap" pos="0,0" width="520" height="280"
+                  visible="{#cvar('styx.perms.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,210"        type="sliced" width="520" height="280" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="160,180,255,220"  type="sliced" width="520" height="280" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="STYX PERM MANAGER"
+                       font_size="28" justify="center" style="outline"
+                       color="160,180,255,255"
+                       pos="260,-10" width="520" height="32" pivot="top" />
+
+                <!-- 5 rows, row.sel cvar drives the cursor position -->
+                <label depth="3" name="pc0" text="&gt;" font_size="22" color="160,180,255,255"
+                       pos="20,-50" width="20" height="24"
+                       visible="{#cvar('styx.perms.sel') == 0}" />
+                <label depth="3" name="po0" text="{#localization('styxPerms_0')}" font_size="20"
+                       pos="50,-50" width="460" height="24" color="240,240,240,255" />
+
+                <label depth="3" name="pc1" text="&gt;" font_size="22" color="160,180,255,255"
+                       pos="20,-76" width="20" height="24"
+                       visible="{#cvar('styx.perms.sel') == 1}" />
+                <label depth="3" name="po1" text="{#localization('styxPerms_1')}" font_size="20"
+                       pos="50,-76" width="460" height="24" color="240,240,240,255" />
+
+                <label depth="3" name="pc2" text="&gt;" font_size="22" color="160,180,255,255"
+                       pos="20,-102" width="20" height="24"
+                       visible="{#cvar('styx.perms.sel') == 2}" />
+                <label depth="3" name="po2" text="{#localization('styxPerms_2')}" font_size="20"
+                       pos="50,-102" width="460" height="24" color="240,240,240,255" />
+
+                <label depth="3" name="pc3" text="&gt;" font_size="22" color="160,180,255,255"
+                       pos="20,-128" width="20" height="24"
+                       visible="{#cvar('styx.perms.sel') == 3}" />
+                <label depth="3" name="po3" text="{#localization('styxPerms_3')}" font_size="20"
+                       pos="50,-128" width="460" height="24" color="240,240,240,255" />
+
+                <label depth="3" name="pc4" text="&gt;" font_size="22" color="160,180,255,255"
+                       pos="20,-154" width="20" height="24"
+                       visible="{#cvar('styx.perms.sel') == 4}" />
+                <label depth="3" name="po4" text="{#localization('styxPerms_4')}" font_size="20"
+                       pos="50,-154" width="460" height="24" color="240,240,240,255" />
+
+                <!-- Hint line -->
+                <label depth="3" name="hint"
+                       text="Grant/revoke uses /perm grant &lt;player&gt; &lt;perm&gt; in chat."
+                       font_size="14" justify="center"
+                       pos="260,-200" width="520" height="18" pivot="top"
+                       color="200,200,160,255" />
+                <label depth="3" name="hint2"
+                       text="Whispers show the result of each action."
+                       font_size="14" justify="center"
+                       pos="260,-220" width="520" height="18" pivot="top"
+                       color="200,200,160,255" />
+
+                <label depth="3" name="legend"
+                       text="[JUMP] next   [CROUCH] prev   [LMB] confirm   [RMB] back"
+                       font_size="14" justify="center"
+                       pos="260,-248" width="520" height="20" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+    </append>
+
+    <!--
+        StyxZombieHealth — crosshair entity-health HUD readout, mounted under
+        the compass at top-center. Visibility + content driven entirely by
+        per-player cvars set from StyxZombieHealth.cs every tick:
+          styx.zhealth.visible — 0/1, panel visibility gate
+          styx.zhealth.classid — int EntityClass id; binds to localized name
+                                 via {#localization('styx_zh_e_' + int(cvar))}
+          styx.zhealth.hp_curr — current HP (rounded int)
+          styx.zhealth.hp_max  — max HP (rounded int)
+          styx.zhealth.hp_pct  — current/max as 0..100 (reserved for future bar)
+
+        Plugin not loaded → cvars never set → root rect's visible expression
+        evaluates false → panel hidden. No XUi-side load-order dependency.
+    -->
+    <append xpath="/windows">
+        <!-- StyxZombieHealth panel — crosshair entity-health HUD, top-center
+             under the compass.
+             Position math: width=320, anchor=LeftTop with pos x=800 puts the
+             centre of the panel at 800+160 = 960 = screen-center on a 1920
+             reference resolution. y=-80 sits just below the compass HUD
+             (compass occupies ~0..-50 area).
+
+             Mounting requires BOTH this window definition AND a registration
+             entry in xui.xml under the toolbelt window_group — without the
+             xui.xml entry the window exists but is never displayed (learned
+             this the hard way).
+
+             Element names are zh_-prefixed to keep them distinct from any
+             same-named children in other Styx panels (no observed conflicts
+             but cheap defensive measure). -->
+        <window name="styxZombieHealth"
+                anchor="LeftTop"
+                pos="800,-80"
+                width="320" height="60"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="-15">
+
+            <!-- Wrap rect with cvar-gated visibility. Plugin sets
+                 styx.zhealth.visible = 1 when targeting an entity, 0 otherwise.
+                 Same pattern as styxRadar. -->
+            <rect name="zh_wrap" pos="0,0" width="320" height="60"
+                  visible="{#cvar('styx.zhealth.visible') == 1}">
+
+                <sprite depth="0" name="zh_bg"
+                        sprite="menu_empty" type="sliced"
+                        color="0,0,0,180"
+                        width="320" height="60" />
+                <sprite depth="1" name="zh_border"
+                        sprite="menu_empty3px" type="sliced"
+                        color="220,80,80,220"
+                        width="320" height="60" fillcenter="false" />
+
+                <!-- Entity name (top line). Indexed-localization binding:
+                     int cvar styx.zhealth.classid is concatenated into key
+                     "styx_zh_e_<classid>" via NCalc, looked up against the
+                     ~292 labels StyxZombieHealth.cs registers (one per
+                     EntityClass). Class IDs are hashed ints (often negative)
+                     — the key resolves fine either way. -->
+                <label depth="2" name="zh_name"
+                       text="{#localization('styx_zh_e_' + int(cvar('styx.zhealth.classid')))}"
+                       font_size="18" justify="center" style="outline"
+                       color="255,210,210,255"
+                       pos="160,-6" width="300" height="22" pivot="top" />
+
+                <!-- HP numeric (bottom line). Bar version is v0.3 candidate. -->
+                <label depth="2" name="zh_hp"
+                       text="HP: {cvar(styx.zhealth.hp_curr)} / {cvar(styx.zhealth.hp_max)}"
+                       font_size="14" justify="center" style="outline"
+                       color="255,255,255,255"
+                       pos="160,-32" width="300" height="18" pivot="top" />
+            </rect>
+        </window>
+    </append>
+
+    <!--
+        Player-inventory dump-into-container buttons (btnMoveFillAndSmart +
+        btnMoveAll) — vanilla gates them on `lootingorvehiclestorage`, which
+        only fires for block-based loot (`EntityId == -1`), vehicle storage,
+        or drone storage. Entity-backed containers like our StyxBackpack are
+        excluded by the same check that excludes vanilla death bags.
+        Switching visibility to always-true means the buttons render whenever
+        the inventory panel is open. They're inert when no container is open
+        (no target to dump to), which is a tiny cosmetic wart but the only
+        way to get the dump-buttons working for our stash without distributing
+        a client-side mod (the binding is evaluated client-side — a server
+        Harmony patch can't reach it).
+
+        Side-effect: the buttons are also visible for vanilla EntityBackpack
+        death bags now (vanilla excluded them on UX grounds — "you don't
+        usually dump-into your own death bag"). Harmless: the buttons work
+        correctly there too, just rarely useful.
+    -->
+    <setattribute xpath="/windows/window[@name='windowBackpack']/panel[@name='header']/rect[@controller='ContainerStandardControls']/rect[@visible='{lootingorvehiclestorage}']" name="visible">true</setattribute>
+</configs>

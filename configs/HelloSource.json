@@ -1,0 +1,10 @@
+{
+  "Greeting": "Greetings from a source plugin",
+  "Signoff": "Edit my .cs file (or configs/HelloSource.json) and save.",
+  "Shout": false,
+  "AnnounceJoins": true,
+  "LogChatToConsole": false,
+  "LogItemDrops": false,
+  "LogDamage": false,
+  "LogBlockDestroy": false
+}

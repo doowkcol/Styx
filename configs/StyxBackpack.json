@@ -1,0 +1,23 @@
+{
+  "Enabled": true,
+  "Cols": 8,
+  "SizeByPerm": [
+    {
+      "Perm": "styx.backpack.master",
+      "Rows": 6
+    },
+    {
+      "Perm": "styx.backpack.vip",
+      "Rows": 4
+    },
+    {
+      "Perm": "styx.backpack.use",
+      "Rows": 3
+    }
+  ],
+  "KeepOnDeathPerm": "styx.backpack.keep_on_death",
+  "DropLifetimeSeconds": 1800,
+  "AutosaveSeconds": 2.0,
+  "PollSeconds": 0.5,
+  "VerboseAutosave": false
+}

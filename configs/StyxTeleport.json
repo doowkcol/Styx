@@ -1,0 +1,22 @@
+{
+  "MaxHomes": 3,
+  "TraderEnabled": true,
+  "LastDeathEnabled": true,
+  "QuestWarning": true,
+  "TwoTapConfirmSeconds": 5.0,
+  "PreserveInjuriesOnTeleport": true,
+  "Cooldowns": {
+    "default": {
+      "PerUseSeconds": 600,
+      "DailyLimit": 5
+    },
+    "vip": {
+      "PerUseSeconds": 60,
+      "DailyLimit": -1
+    },
+    "admin": {
+      "PerUseSeconds": 0,
+      "DailyLimit": -1
+    }
+  }
+}

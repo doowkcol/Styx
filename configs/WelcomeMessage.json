@@ -1,0 +1,24 @@
+{
+  "WelcomeDelaySeconds": 5.0,
+  "MessageDelaySeconds": 2.0,
+  "RequireBaseUsePermission": false,
+  "MessageDepthLimit": 0,
+  "Prefix": "[55aaff][Welcome][-] ",
+  "PermissionMessages": {
+    "welcomemessage.vip": {
+      "Message": "Welcome VIP! Use [ffaa00]/kit vip[-] to claim your donor loadout.",
+      "Enabled": false,
+      "Rank": 20
+    },
+    "welcomemessage.discord": {
+      "Message": "Join our Discord at [55aaff]discord.gg/rekt[-] for updates and community chat.",
+      "Enabled": true,
+      "Rank": 5
+    },
+    "welcomemessage.default": {
+      "Message": "Welcome to the server! Type [ffaa00]/kit starter[-] to grab a starter kit.",
+      "Enabled": true,
+      "Rank": 1
+    }
+  }
+}

@@ -1,0 +1,169 @@
+{
+  "KitPerms": {
+    "styx.kit.basic": "Standard kits available to everyone",
+    "styx.kit.vip": "VIP-tier kit access (donor / supporter)",
+    "styx.kit.master": "Admin-tier kit access (everything)"
+  },
+  "Kits": {
+    "starter": {
+      "Description": "Basic survival gear",
+      "CooldownSeconds": 0,
+      "Perm": "styx.kit.basic",
+      "Icon": "",
+      "Items": [
+        {
+          "Item": "drinkJarBoiledWater",
+          "Count": 4,
+          "Quality": 1
+        },
+        {
+          "Item": "foodCanChili",
+          "Count": 4,
+          "Quality": 1
+        },
+        {
+          "Item": "meleeToolRepairT0StoneAxe",
+          "Count": 1,
+          "Quality": 2
+        },
+        {
+          "Item": "meleeToolTorch",
+          "Count": 2,
+          "Quality": 1
+        }
+      ]
+    },
+    "daily": {
+      "Description": "Daily loot (24h cooldown)",
+      "CooldownSeconds": 86400,
+      "Perm": "styx.kit.basic",
+      "Icon": "",
+      "Items": [
+        {
+          "Item": "resourceScrapIron",
+          "Count": 20,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceDuctTape",
+          "Count": 5,
+          "Quality": 1
+        }
+      ]
+    },
+    "deployables": {
+      "Description": "Crafting deployables — forge, workbench, chem station, etc.",
+      "CooldownSeconds": 604800,
+      "Perm": "styx.kit.basic",
+      "Icon": "workbench",
+      "Items": [
+        {
+          "Item": "forge",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "workbench",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "chemistryStation",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "cementMixer",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "campfire",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "toolCookingGrill",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "toolCookingPot",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "bedroll",
+          "Count": 1,
+          "Quality": 1
+        },
+        {
+          "Item": "cntWoodWritableCrate",
+          "Count": 2,
+          "Quality": 1
+        }
+      ]
+    },
+    "vip": {
+      "Description": "VIP loadout — T3 weapons, full armour, ammo & meds",
+      "CooldownSeconds": 0,
+      "Perm": "styx.kit.vip",
+      "Icon": "",
+      "Items": [
+        {
+          "Item": "gunMGT3M60",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "gunHandgunT3DesertVulture",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "ammo762mmBulletBall",
+          "Count": 200,
+          "Quality": 1
+        },
+        {
+          "Item": "ammo44MagnumBulletBall",
+          "Count": 50,
+          "Quality": 1
+        },
+        {
+          "Item": "armorCommandoHelmet",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorCommandoOutfit",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorCommandoGloves",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorCommandoBoots",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "medicalFirstAidKit",
+          "Count": 3,
+          "Quality": 1
+        },
+        {
+          "Item": "drugPainkillers",
+          "Count": 3,
+          "Quality": 1
+        }
+      ]
+    }
+  },
+  "ColourReady": "[00ff66]",
+  "ColourCooldown": "[ffaa00]",
+  "ColourError": "[ff6666]"
+}

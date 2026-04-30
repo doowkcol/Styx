@@ -1,0 +1,17 @@
+{
+  "RadiusByPerm": [
+    {
+      "Perm": "styx.radar.master",
+      "Radius": 60.0
+    },
+    {
+      "Perm": "styx.radar.vip",
+      "Radius": 30.0
+    },
+    {
+      "Perm": "styx.radar.use",
+      "Radius": 10.0
+    }
+  ],
+  "TickSeconds": 1.0
+}

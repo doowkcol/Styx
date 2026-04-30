@@ -1,0 +1,32 @@
+{
+  "Enabled": true,
+  "Restart Times (24h)": [
+    {
+      "Hour": 6,
+      "Minute": 0
+    },
+    {
+      "Hour": 14,
+      "Minute": 0
+    },
+    {
+      "Hour": 22,
+      "Minute": 0
+    }
+  ],
+  "Warning Start Minutes": 20,
+  "Warning Messages (minute -> message, {0} = minutes left)": {
+    "20": "[ff3030]Server restart in [ffffff]{0}[ff3030] minutes.[-]",
+    "15": "[ff3030]Server restart in [ffffff]{0}[ff3030] minutes.[-]",
+    "10": "[ff3030]Server restart in [ffffff]{0}[ff3030] minutes.[-]",
+    "5": "[ff3030]Server restart in [ffffff]{0}[ff3030] minutes — wrap up![-]",
+    "1": "[ff0000]Server restart in 1 minute![-]"
+  },
+  "Final Countdown Start (seconds)": 30,
+  "Final Countdown Every (seconds)": 5,
+  "Shutdown Command": "shutdown",
+  "Shutdown Broadcast": "[ff0000]Server restarting NOW![-]",
+  "Last Wipe (Unix UTC seconds)": 1777220920,
+  "Wipe Cycle Days": 7,
+  "HUD Restart Warning Window Minutes": 60
+}
