@@ -15,7 +15,7 @@
 //   /kit <name>             — claim it
 //
 // UI (/m → "Kits"):
-//   jump/crouch navigate, LMB claim, RMB back to launcher.
+//   scroll wheel navigate, LMB claim, RMB back to launcher.
 //
 // PERMISSION MODEL (v0.3):
 //   Old model auto-generated one perm per kit (`styx.kit.<name>`), so a

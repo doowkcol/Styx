@@ -195,7 +195,7 @@
 
                 <!-- Legend -->
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] confirm   [RMB] back"
+                       text="[SCROLL] navigate   [LMB] confirm   [RMB] back"
                        font_size="14" justify="center"
                        pos="250,-220" width="500" height="20" pivot="top"
                        color="180,180,180,255" />
@@ -379,7 +379,7 @@
                        pos="250,-308" width="500" height="16" pivot="top"
                        color="200,200,160,255" />
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] toggle   [RMB] back"
+                       text="[SCROLL] navigate   [LMB] toggle   [RMB] back"
                        font_size="13" justify="center"
                        pos="250,-330" width="500" height="18" pivot="top"
                        color="180,180,180,255" />
@@ -509,7 +509,7 @@
                            pos="280,-340" width="560" height="16" pivot="top"
                            color="200,200,160,255" />
                     <label depth="3" name="legend0"
-                           text="[JUMP] next   [CROUCH] prev   [LMB] open group   [RMB] close"
+                           text="[SCROLL] navigate   [LMB] open group   [RMB] close"
                            font_size="13" justify="center"
                            pos="280,-370" width="560" height="18" pivot="top"
                            color="180,180,180,255" />
@@ -613,7 +613,7 @@
                            pos="280,-460" width="560" height="16" pivot="top"
                            color="200,200,160,255" />
                     <label depth="3" name="legend1p"
-                           text="[JUMP] next   [CROUCH] prev   [LMB] pick   [RMB] back to groups"
+                           text="[SCROLL] navigate   [LMB] pick   [RMB] back to groups"
                            font_size="13" justify="center"
                            pos="280,-490" width="560" height="18" pivot="top"
                            color="180,180,180,255" />
@@ -867,7 +867,7 @@
                            pos="280,-490" width="560" height="16" pivot="top"
                            color="200,200,160,255" />
                     <label depth="3" name="legend1"
-                           text="[JUMP] next   [CROUCH] prev   [LMB] cycle/toggle   [RMB] back to plugins"
+                           text="[SCROLL] navigate   [LMB] cycle/toggle   [RMB] back to plugins"
                            font_size="13" justify="center"
                            pos="280,-540" width="560" height="18" pivot="top"
                            color="180,180,180,255" />
@@ -965,7 +965,7 @@
                        pos="260,-280" width="520" height="16" pivot="top"
                        color="200,200,160,255" />
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] act   [RMB] back to launcher"
+                       text="[SCROLL] navigate   [LMB] act   [RMB] back to launcher"
                        font_size="13" justify="center"
                        pos="260,-320" width="520" height="18" pivot="top"
                        color="180,180,180,255" />
@@ -1032,7 +1032,7 @@
                        pos="220,-168" width="440" height="16" pivot="top"
                        color="200,200,160,255" />
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] toggle   [RMB] back"
+                       text="[SCROLL] navigate   [LMB] toggle   [RMB] back"
                        font_size="13" justify="center"
                        pos="220,-194" width="440" height="18" pivot="top"
                        color="180,180,180,255" />
@@ -1281,7 +1281,7 @@
                        pos="260,-460" width="520" height="16" pivot="top"
                        color="200,200,160,255" />
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] claim   [RMB] back"
+                       text="[SCROLL] navigate   [LMB] claim   [RMB] back"
                        font_size="13" justify="center"
                        pos="260,-480" width="520" height="18" pivot="top"
                        color="180,180,180,255" />
@@ -1315,7 +1315,7 @@
                        color="255,160,80,255"
                        pos="200,-10" width="400" height="30" pivot="top" />
                 <label depth="2" name="sub"
-                       text="/m  —  navigate with jump/crouch, LMB select"
+                       text="/m  —  navigate with scroll wheel, LMB select"
                        font_size="12" justify="center"
                        pos="200,-42" width="400" height="18" pivot="top"
                        color="200,200,200,255" />
@@ -1462,7 +1462,7 @@
                        pos="200,-490" width="400" height="18" pivot="top"
                        color="200,200,160,255" />
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] select   [RMB] close"
+                       text="[SCROLL] navigate   [LMB] select   [RMB] close"
                        font_size="13" justify="center"
                        pos="200,-516" width="400" height="18" pivot="top"
                        color="180,180,180,255" />
@@ -1746,7 +1746,7 @@
                        pos="260,-292" width="520" height="16" pivot="top"
                        color="220,180,140,255" />
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] confirm   [RMB] back"
+                       text="[SCROLL] navigate   [LMB] confirm   [RMB] back"
                        font_size="13" justify="center"
                        pos="260,-322" width="520" height="18" pivot="top"
                        color="180,180,180,255" />
@@ -1757,7 +1757,7 @@
             styxPerms — PermManager interactive UI.
 
             Admin-only (gated via 'styx.perm.admin' permission in plugin).
-            Action-launcher pattern: pick an action with jump/crouch + LMB, the
+            Action-launcher pattern: pick an action with scroll wheel + LMB, the
             plugin whispers the formatted result to the admin's chat.
 
             Names (players, groups, perms) are dynamic strings, which XUi labels
@@ -1828,7 +1828,7 @@
                        color="200,200,160,255" />
 
                 <label depth="3" name="legend"
-                       text="[JUMP] next   [CROUCH] prev   [LMB] confirm   [RMB] back"
+                       text="[SCROLL] navigate   [LMB] confirm   [RMB] back"
                        font_size="14" justify="center"
                        pos="260,-248" width="520" height="20" pivot="top"
                        color="180,180,180,255" />

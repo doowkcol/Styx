@@ -13,7 +13,7 @@
 // framework Ui.Input subsystem — plugin receives OnPlayerInput hook-bus
 // events instead of polling cvars manually.
 //
-// Action-launcher pattern: admin navigates fixed options with jump/crouch +
+// Action-launcher pattern: admin navigates fixed options with scroll wheel +
 // LMB, each action whispers formatted results to chat. Grant/revoke uses
 // existing /perm chat commands (name resolution already wired there).
 //
@@ -53,7 +53,7 @@ public class StyxPerms : StyxPlugin
             { Close(p); ctx.Reply("[ffaa00]perms closed[-]"); return; }
 
             Open(p);
-            ctx.Reply("[00ff66]perms open — JUMP/CROUCH navigate, LMB confirm, RMB close[-]");
+            ctx.Reply("[00ff66]perms open — SCROLL navigate, LMB confirm, RMB close[-]");
         });
 
         // Show up in /m for admins only. Permission gate is evaluated when

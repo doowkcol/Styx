@@ -20,8 +20,7 @@
 // STYX_CAPABILITIES.md §10b (UI output) + §10c (UI input).
 //
 // Controls (while menu open):
-//   JUMP (space)         next option
-//   CROUCH (C)           previous option
+//   SCROLL WHEEL         navigate options (up = prev, down = next)
 //   PRIMARY (LMB)        confirm — execute action for selected row
 //   SECONDARY (RMB)      cancel  — close menu with no action
 //
@@ -59,7 +58,7 @@ public class StyxMenu : StyxPlugin
             { Close(p); ctx.Reply("[ffaa00]menu closed[-]"); return; }
 
             Open(p);
-            ctx.Reply("[00ff66]menu open — JUMP next, CROUCH prev, LMB confirm, RMB cancel[-]");
+            ctx.Reply("[00ff66]menu open — SCROLL navigate, LMB confirm, RMB cancel[-]");
         });
 
         // Register with the top-level launcher (/m). Plugins that want to be
