@@ -20,5 +20,6 @@
         <window name="styxPermEditor" />
         <window name="styxSrm" />
         <window name="styxZombieHealth" />
+        <window name="styxShop" />
     </append>
 </xui>

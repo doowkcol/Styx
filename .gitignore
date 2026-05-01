@@ -12,6 +12,15 @@ data/StyxBackpack/
 data/StyxTeleport/
 data/PermEditor.last_open.json
 
+# Server-meta progression runtime state (Economy / Rewards / Leveling / Shop)
+data/StyxEconomy.wallet.json
+data/StyxLeveling.wallet.json
+data/StyxLeveling.wallet.wiped-*.json
+data/StyxEconomy.wallet.wiped-*.json
+data/StyxRewards.state.json
+data/WelcomeMessage.seen.json
+data/StyxShop/
+
 # Live permissions file is per-server (contains real player Steam IDs).
 # Ship the sanitised template instead — the framework looks for the .json,
 # so on first run users copy or rename permissions.example.json.

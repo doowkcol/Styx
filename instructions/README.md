@@ -21,6 +21,7 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | [07](./07-donor-perks.md) | DonorPerks | `/donor` `/m → My Buffs` | Group-mapped buffs + per-player toggle UI |
 | [08](./08-welcome-message.md) | WelcomeMessage | `/wm` | Permission-gated welcome messages on spawn |
 | [10](./10-chat-tags.md) | ChatTags | (none) | Group-priority `[Tag]` prefix on chat |
+| [26](./26-shop.md) | StyxShop | `/shop` `/s` `/m → Shop` | Categorised, paginated item shop — pay with Credits |
 
 ## Admin tooling
 
@@ -33,11 +34,19 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | [14](./14-admin-radar.md) | AdminRadar | `/aradar` | Through-walls 5-category entity radar |
 | [15](./15-admin-tools.md) | AdminTools | `/m → Admin Tools` | Sub-menu launcher for vanish + radar toggles |
 
+## Server progression / economy
+
+| # | Plugin | Chat command | What |
+|---|---|---|---|
+| [24](./24-economy.md) | StyxEconomy | `/balance` `/pay` `/eco` | Per-player virtual currency wallet (the bank) |
+| [25](./25-rewards.md) | StyxRewards | `/rewards` | Configurable earn engine — money + xp on kills, loot, harvest, quests, login, online time |
+| [27](./27-leveling.md) | StyxLeveling | `/xp` | Server XP + level system, milestone group promotions (server ranks) |
+
 ## HUD / menu / interactive UI
 
 | # | Plugin | Chat command | What |
 |---|---|---|---|
-| [16](./16-hud.md) | StyxHud | (always on) | Top-left HUD: players, rank, wipe + restart countdown |
+| [16](./16-hud.md) | StyxHud | (always on) | Top-left HUD: players, rank, wipe, restart countdown, currency, level/XP |
 | [17](./17-menu.md) | StyxMenu | `/menu` `/m` | Interactive action menu — heal-full, water, teleport, server info |
 | [18](./18-zombie-radar.md) | StyxZombieRadar | `/radar` | Live per-player zombie-count HUD section, perm-tiered radius |
 | [23](./23-zombie-health.md) | StyxZombieHealth | `/zhealth` | Crosshair entity-health HUD — name + HP of what you're aimed at |

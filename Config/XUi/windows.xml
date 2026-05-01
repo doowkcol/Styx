@@ -114,6 +114,34 @@
                    pos="180,-128" width="70" height="18" color="255,220,120,255"
                    visible="{#cvar('styx.radar.radius') &gt; 0}" />
 
+            <!-- Economy section. Visibility gated on styx.eco.loaded so the
+                 row hides when StyxEconomy isn't installed (cvar absent => 0).
+                 Currency name is plugin-config-driven, baked at boot via
+                 Styx.Ui.Labels.Register("styx_eco_currency", ...). -->
+            <label depth="2" name="ecoLbl"
+                   text="{#localization('styx_eco_currency')}:" font_size="14"
+                   pos="12,-150" width="160" height="18" color="255,220,140,255"
+                   visible="{#cvar('styx.eco.loaded') == 1}" />
+            <label depth="2" name="ecoVal"
+                   text="{cvar(styx.eco.balance:0)}" font_size="14" justify="right"
+                   pos="180,-150" width="70" height="18" color="255,240,180,255"
+                   visible="{#cvar('styx.eco.loaded') == 1}" />
+
+            <!-- Level + XP section (StyxLeveling). Hidden if plugin not loaded. -->
+            <label depth="2" name="lvlLbl"
+                   text="Level:" font_size="14"
+                   pos="12,-168" width="60" height="18" color="200,220,255,255"
+                   visible="{#cvar('styx.xp.loaded') == 1}" />
+            <label depth="2" name="lvlVal"
+                   text="{cvar(styx.xp.level:0)}" font_size="14"
+                   pos="76,-168" width="40" height="18" color="255,240,180,255"
+                   visible="{#cvar('styx.xp.loaded') == 1}" />
+            <label depth="2" name="xpVal"
+                   text="{cvar(styx.xp.balance:0)} / {cvar(styx.xp.next:0)}"
+                   font_size="12" justify="right"
+                   pos="120,-168" width="130" height="18" color="180,200,220,255"
+                   visible="{#cvar('styx.xp.loaded') == 1}" />
+
             <!-- Hint footer -->
             <label depth="2" name="hint"
                    text="/m for menu" font_size="11" justify="center"
@@ -1909,6 +1937,440 @@
                        pos="160,-32" width="300" height="18" pivot="top" />
             </rect>
         </window>
+        <!--
+            styxShop — in-game item shop. 800x600 centered panel.
+
+            Layout:
+              top bar  : title + balance + page counter
+              left col : 8 row labels (paginated catalog list)
+              right col: selected-item detail (icon + name + desc + price + afford)
+              footer   : controls help
+
+            All content gated by visible="{#cvar('styx.shop.open') == 1}" so the
+            window is always mounted but hidden until the plugin opens it.
+            Per-row labels read from runtime localization (shop_name_*, shop_desc_*,
+            shop_icon_*) which the plugin bakes at boot. See StyxShop.cs.
+        -->
+        <window name="styxShop"
+                anchor="LeftTop"
+                pos="560,-100"
+                width="800" height="600"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="-30"
+                visible="{#cvar('styx.shop.open') == 1}">
+
+            <!-- Backdrop + border -->
+            <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,210"     type="sliced" width="800" height="600" />
+            <sprite depth="1" name="border" sprite="menu_empty3px" color="255,220,0,220" type="sliced" width="800" height="600" fillcenter="false" />
+
+            <!-- Title -->
+            <label depth="2" name="title"
+                   text="REKT SHOP"
+                   font_size="26" justify="center" style="outline"
+                   color="255,220,0,255"
+                   pos="400,-12" width="800" height="32" pivot="top" />
+
+            <!-- Balance + page counter (top-right of title bar) -->
+            <label depth="2" name="bal"
+                   text="Balance: {cvar(styx.eco.balance:0)}"
+                   font_size="16" justify="right"
+                   pos="780,-18" width="220" height="20" pivot="topright"
+                   color="255,240,180,255" />
+            <label depth="2" name="pageNum"
+                   text="Page {cvar(styx.shop.page_disp:1)} / {cvar(styx.shop.pages:1)}"
+                   font_size="14" justify="left"
+                   pos="20,-18" width="200" height="20"
+                   color="200,200,200,255" />
+
+            <!-- Divider under title -->
+            <sprite depth="2" name="divTop" sprite="menu_empty" color="255,220,0,80"
+                    type="sliced" width="780" height="1" pos="10,-50" />
+
+            <!-- ====================================================================
+                 STAGE 0: Section picker. Visible while styx.shop.stage == 0.
+                 Centered single-column list of categories with item counts.
+                 ==================================================================== -->
+
+            <label depth="2" name="stage0Hdr"
+                   text="CATEGORIES"
+                   font_size="16" justify="center" style="outline"
+                   pos="400,-62" width="800" height="18" pivot="top"
+                   color="255,220,140,255"
+                   visible="{#cvar('styx.shop.stage') == 0}" />
+
+            <!-- 8 section rows. Each: cursor + section name + (N items) badge. Centered. -->
+            <label depth="3" name="sec0Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-100" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 0}" />
+            <label depth="3" name="sec0Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row0_id')))}"
+                   font_size="20"
+                   pos="270,-100" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 0}" />
+            <label depth="3" name="sec0Count"
+                   text="({cvar(styx.shop.row0_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-102" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 0}" />
+
+            <label depth="3" name="sec1Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-140" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 1}" />
+            <label depth="3" name="sec1Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row1_id')))}"
+                   font_size="20"
+                   pos="270,-140" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 1}" />
+            <label depth="3" name="sec1Count"
+                   text="({cvar(styx.shop.row1_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-142" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 1}" />
+
+            <label depth="3" name="sec2Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-180" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 2}" />
+            <label depth="3" name="sec2Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row2_id')))}"
+                   font_size="20"
+                   pos="270,-180" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 2}" />
+            <label depth="3" name="sec2Count"
+                   text="({cvar(styx.shop.row2_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-182" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 2}" />
+
+            <label depth="3" name="sec3Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-220" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 3}" />
+            <label depth="3" name="sec3Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row3_id')))}"
+                   font_size="20"
+                   pos="270,-220" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 3}" />
+            <label depth="3" name="sec3Count"
+                   text="({cvar(styx.shop.row3_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-222" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 3}" />
+
+            <label depth="3" name="sec4Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-260" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 4}" />
+            <label depth="3" name="sec4Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row4_id')))}"
+                   font_size="20"
+                   pos="270,-260" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 4}" />
+            <label depth="3" name="sec4Count"
+                   text="({cvar(styx.shop.row4_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-262" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 4}" />
+
+            <label depth="3" name="sec5Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-300" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 5}" />
+            <label depth="3" name="sec5Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row5_id')))}"
+                   font_size="20"
+                   pos="270,-300" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 5}" />
+            <label depth="3" name="sec5Count"
+                   text="({cvar(styx.shop.row5_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-302" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 5}" />
+
+            <label depth="3" name="sec6Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-340" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 6}" />
+            <label depth="3" name="sec6Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row6_id')))}"
+                   font_size="20"
+                   pos="270,-340" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 6}" />
+            <label depth="3" name="sec6Count"
+                   text="({cvar(styx.shop.row6_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-342" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 6}" />
+
+            <label depth="3" name="sec7Cur" text="&gt;" font_size="22" color="255,220,0,255"
+                   pos="240,-380" width="14" height="26"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.sel') == 7}" />
+            <label depth="3" name="sec7Name"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.row7_id')))}"
+                   font_size="20"
+                   pos="270,-380" width="220" height="26"
+                   color="240,240,240,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 7}" />
+            <label depth="3" name="sec7Count"
+                   text="({cvar(styx.shop.row7_seccount:0)})"
+                   font_size="16" justify="right"
+                   pos="500,-382" width="60" height="22"
+                   color="180,200,220,255"
+                   visible="{#cvar('styx.shop.stage') == 0 and cvar('styx.shop.count') &gt; 7}" />
+
+            <!-- ====================================================================
+                 STAGE 1: Item list + detail card. Visible while styx.shop.stage == 1.
+                 ==================================================================== -->
+
+            <!-- Section header -->
+            <label depth="2" name="listHdr"
+                   text="{#localization('shop_section_' + int(cvar('styx.shop.section_id')))}"
+                   font_size="14" justify="left" style="outline"
+                   pos="20,-60" width="320" height="18"
+                   color="255,220,140,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <!-- ROW 0 -->
+            <label  depth="3" name="row0Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-84" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 0}" />
+            <sprite depth="3" name="row0Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row0_id')))}"
+                    pos="40,-86" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 0}" />
+            <label  depth="3" name="row0Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row0_id')))}"
+                    font_size="15" pos="68,-84" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 0}" />
+            <label  depth="3" name="row0Price"
+                    text="{cvar(styx.shop.row0_price:0)}"
+                    font_size="15" justify="right" pos="270,-84" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 0}" />
+
+            <!-- ROW 1 -->
+            <label  depth="3" name="row1Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-120" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 1}" />
+            <sprite depth="3" name="row1Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row1_id')))}"
+                    pos="40,-122" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 1}" />
+            <label  depth="3" name="row1Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row1_id')))}"
+                    font_size="15" pos="68,-120" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 1}" />
+            <label  depth="3" name="row1Price"
+                    text="{cvar(styx.shop.row1_price:0)}"
+                    font_size="15" justify="right" pos="270,-120" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 1}" />
+
+            <!-- ROW 2 -->
+            <label  depth="3" name="row2Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-156" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 2}" />
+            <sprite depth="3" name="row2Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row2_id')))}"
+                    pos="40,-158" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 2}" />
+            <label  depth="3" name="row2Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row2_id')))}"
+                    font_size="15" pos="68,-156" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 2}" />
+            <label  depth="3" name="row2Price"
+                    text="{cvar(styx.shop.row2_price:0)}"
+                    font_size="15" justify="right" pos="270,-156" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 2}" />
+
+            <!-- ROW 3 -->
+            <label  depth="3" name="row3Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-192" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 3}" />
+            <sprite depth="3" name="row3Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row3_id')))}"
+                    pos="40,-194" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 3}" />
+            <label  depth="3" name="row3Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row3_id')))}"
+                    font_size="15" pos="68,-192" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 3}" />
+            <label  depth="3" name="row3Price"
+                    text="{cvar(styx.shop.row3_price:0)}"
+                    font_size="15" justify="right" pos="270,-192" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 3}" />
+
+            <!-- ROW 4 -->
+            <label  depth="3" name="row4Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-228" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 4}" />
+            <sprite depth="3" name="row4Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row4_id')))}"
+                    pos="40,-230" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 4}" />
+            <label  depth="3" name="row4Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row4_id')))}"
+                    font_size="15" pos="68,-228" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 4}" />
+            <label  depth="3" name="row4Price"
+                    text="{cvar(styx.shop.row4_price:0)}"
+                    font_size="15" justify="right" pos="270,-228" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 4}" />
+
+            <!-- ROW 5 -->
+            <label  depth="3" name="row5Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-264" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 5}" />
+            <sprite depth="3" name="row5Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row5_id')))}"
+                    pos="40,-266" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 5}" />
+            <label  depth="3" name="row5Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row5_id')))}"
+                    font_size="15" pos="68,-264" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 5}" />
+            <label  depth="3" name="row5Price"
+                    text="{cvar(styx.shop.row5_price:0)}"
+                    font_size="15" justify="right" pos="270,-264" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 5}" />
+
+            <!-- ROW 6 -->
+            <label  depth="3" name="row6Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-300" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 6}" />
+            <sprite depth="3" name="row6Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row6_id')))}"
+                    pos="40,-302" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 6}" />
+            <label  depth="3" name="row6Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row6_id')))}"
+                    font_size="15" pos="68,-300" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 6}" />
+            <label  depth="3" name="row6Price"
+                    text="{cvar(styx.shop.row6_price:0)}"
+                    font_size="15" justify="right" pos="270,-300" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 6}" />
+
+            <!-- ROW 7 -->
+            <label  depth="3" name="row7Cur" text="&gt;" font_size="20" color="255,220,0,255"
+                    pos="22,-336" width="14" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.sel') == 7}" />
+            <sprite depth="3" name="row7Icon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.row7_id')))}"
+                    pos="40,-338" width="22" height="22"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 7}" />
+            <label  depth="3" name="row7Name"
+                    text="{#localization('shop_name_' + int(cvar('styx.shop.row7_id')))}"
+                    font_size="15" pos="68,-336" width="200" height="22"
+                    color="240,240,240,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 7}" />
+            <label  depth="3" name="row7Price"
+                    text="{cvar(styx.shop.row7_price:0)}"
+                    font_size="15" justify="right" pos="270,-336" width="60" height="22"
+                    color="255,220,140,255"
+                    visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.count') &gt; 7}" />
+
+            <!-- Vertical divider between columns (stage 1 only) -->
+            <sprite depth="2" name="divCol" sprite="menu_empty" color="255,220,0,80"
+                    type="sliced" width="1" height="500" pos="350,-60"
+                    visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <!-- Right column: selected-item detail -->
+
+            <sprite depth="2" name="detailIcon" atlas="ItemIconAtlas"
+                    sprite="{#localization('shop_icon_' + int(cvar('styx.shop.detail_id')))}"
+                    pos="430,-90" width="100" height="100"
+                    visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <label depth="2" name="detailName"
+                   text="{#localization('shop_name_' + int(cvar('styx.shop.detail_id')))}"
+                   font_size="22" style="outline"
+                   pos="550,-100" width="240" height="30"
+                   color="255,255,255,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <label depth="2" name="detailCount"
+                   text="x {cvar(styx.shop.detail_count:0)}"
+                   font_size="16"
+                   pos="550,-130" width="120" height="20"
+                   color="200,220,255,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <label depth="2" name="detailDesc"
+                   text="{#localization('shop_desc_' + int(cvar('styx.shop.detail_id')))}"
+                   font_size="13"
+                   pos="430,-210" width="350" height="200"
+                   color="200,200,200,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <label depth="2" name="detailPriceLbl"
+                   text="Price"
+                   font_size="14"
+                   pos="430,-450" width="80" height="20"
+                   color="200,200,200,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+            <label depth="2" name="detailPriceVal"
+                   text="{cvar(styx.shop.detail_price:0)}"
+                   font_size="22" style="outline"
+                   pos="430,-475" width="180" height="28"
+                   color="255,220,140,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+
+            <label depth="2" name="afford1"
+                   text="CAN AFFORD"
+                   font_size="16" style="outline"
+                   pos="630,-475" width="160" height="22"
+                   color="100,220,120,255"
+                   visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.afford') == 1}" />
+            <label depth="2" name="afford0"
+                   text="INSUFFICIENT FUNDS"
+                   font_size="16" style="outline"
+                   pos="630,-475" width="160" height="22"
+                   color="220,100,100,255"
+                   visible="{#cvar('styx.shop.stage') == 1 and cvar('styx.shop.afford') == 0}" />
+
+            <!-- Footer divider -->
+            <sprite depth="2" name="divFooter" sprite="menu_empty" color="255,220,0,80"
+                    type="sliced" width="780" height="1" pos="10,-560" />
+
+            <!-- Controls hint - text differs per stage -->
+            <label depth="2" name="hintStage0"
+                   text="[SCROLL] navigate   [LMB] open category   [RMB] close"
+                   font_size="13" justify="center"
+                   pos="400,-572" width="800" height="18" pivot="top"
+                   color="180,180,180,255"
+                   visible="{#cvar('styx.shop.stage') == 0}" />
+            <label depth="2" name="hintStage1"
+                   text="[SCROLL] navigate   [LMB] buy   [RMB] back to categories"
+                   font_size="13" justify="center"
+                   pos="400,-572" width="800" height="18" pivot="top"
+                   color="180,180,180,255"
+                   visible="{#cvar('styx.shop.stage') == 1}" />
+
+        </window>
+
     </append>
 
     <!--
