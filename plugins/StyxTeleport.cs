@@ -30,9 +30,10 @@ using System.Linq;
 using Styx;
 using Styx.Data;
 using Styx.Plugins;
+using Styx.Scheduling;
 using UnityEngine;
 
-[Info("StyxTeleport", "Doowkcol", "0.1.0")]
+[Info("StyxTeleport", "Doowkcol", "0.1.2")]
 public class StyxTeleport : StyxPlugin
 {
     public override string Description => "Home / trader / last-death teleport picker (v0.6.3 framework demo)";
@@ -109,6 +110,13 @@ public class StyxTeleport : StyxPlugin
     {
         public Dictionary<string, PlayerState> Players =
             new Dictionary<string, PlayerState>(StringComparer.OrdinalIgnoreCase);
+
+        // Resolved trader names keyed by area position ("x_y_z"). Once we
+        // see a real name via owningTrader.EntityName, we persist it here so
+        // later boots (when the trader chunk may not be loaded at scan time)
+        // can still display the real name. See ResolveTraderName().
+        public Dictionary<string, string> TraderNames =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
     }
 
     // ---- Trader cache ----
@@ -199,8 +207,102 @@ public class StyxTeleport : StyxPlugin
         StyxCore.Commands.Register("listhomes", "Dump your saved homes to chat",
             (ctx, args) => CmdListHomes(ctx, args));
 
-        Log.Out("[StyxTeleport] Loaded v0.1.0 — MaxHomes={0}, traders scanned={1}",
-            _cfg.MaxHomes, _traders.Count);
+        // Admin: force a trader re-scan + label re-register. Useful after
+        // visiting all traders (chunks loaded) to pick up real names that
+        // weren't resolvable at boot. Names appear in the UI after the next
+        // server restart due to the label-bake cycle.
+        StyxCore.Commands.Register("trescan", "Re-scan trader names + re-register labels (admin)", (ctx, args) =>
+        {
+            var pid = ctx.Client?.PlatformId?.CombinedString;
+            if (!string.IsNullOrEmpty(pid) && !StyxCore.Perms.HasPermission(pid, "styx.admin"))
+            {
+                ctx.Reply("[ff6666]styx.admin perm required.[-]");
+                return;
+            }
+            int afterFallbacks = RescanAndRelabel();
+            ctx.Reply(string.Format(
+                "[ccddff]StyxTeleport rescan:[-] {0} trader(s), {1} resolved, {2} still fallback. " +
+                "Names show in UI after next server restart (label bake cycle).",
+                _traders.Count, _traders.Count - afterFallbacks, afterFallbacks));
+            for (int i = 0; i < _traders.Count; i++)
+            {
+                var t = _traders[i];
+                string posKey = PositionKey(new Vector3i((int)t.AreaMin.x, (int)t.AreaMin.y, (int)t.AreaMin.z));
+                ctx.Reply(string.Format("  [{0}] {1}  ({2})", i + 1, t.Name, posKey));
+            }
+        });
+
+        // Admin: manual override for trader names. When automatic resolution
+        // fails (e.g. trader chunk never loads at scan time and no player
+        // ever visits the area), this lets the admin set a name directly.
+        // Persists to disk and re-registers the label. Names appear after
+        // the next server restart due to the label bake cycle.
+        StyxCore.Commands.Register("tname", "Manually name a trader — /tname <slot> <name> (admin)", (ctx, args) =>
+        {
+            var pid = ctx.Client?.PlatformId?.CombinedString;
+            if (!string.IsNullOrEmpty(pid) && !StyxCore.Perms.HasPermission(pid, "styx.admin"))
+            {
+                ctx.Reply("[ff6666]styx.admin perm required.[-]");
+                return;
+            }
+            if (args.Length < 2 || !int.TryParse(args[0], out int slot1) || slot1 < 1 || slot1 > _traders.Count)
+            {
+                ctx.Reply("Usage: /tname <slot 1.." + _traders.Count + "> <name>");
+                ctx.Reply("Current traders:");
+                for (int i = 0; i < _traders.Count; i++)
+                    ctx.Reply(string.Format("  [{0}] {1}", i + 1, _traders[i].Name));
+                return;
+            }
+            int slot = slot1 - 1;
+            string newName = string.Join(" ", args, 1, args.Length - 1).Trim();
+            if (string.IsNullOrEmpty(newName)) { ctx.Reply("[ff6666]Name can't be empty.[-]"); return; }
+
+            var t = _traders[slot];
+            string posKey = PositionKey(new Vector3i((int)t.AreaMin.x, (int)t.AreaMin.y, (int)t.AreaMin.z));
+            _stateStore.Value.TraderNames[posKey] = newName;
+            _stateStore.Save();
+            t.Name = newName;
+            Styx.Ui.Labels.Register(this, "tp_trader_" + slot, newName);
+            ctx.Reply(string.Format(
+                "[00ff66]Trader [{0}] renamed to '{1}'.[-] Persisted. Visible in UI after next server restart.",
+                slot1, newName));
+        });
+
+        // Periodic auto-resolve: every 30s, walk traders still on fallback
+        // and try owningTrader.EntityName. If a player has been near a
+        // trader since the last tick, the entity is now in memory and we
+        // capture + persist the real name. Cheap (just a reflection probe
+        // per fallback trader).
+        Scheduler.Every(30.0, () =>
+        {
+            try
+            {
+                bool anyResolved = false;
+                var world = GameManager.Instance?.World;
+                if (world?.TraderAreas == null) return;
+                for (int i = 0; i < _traders.Count; i++)
+                {
+                    if (!IsFallbackName(_traders[i].Name)) continue;
+                    if (i >= world.TraderAreas.Count) continue;
+                    var area = world.TraderAreas[i];
+                    string newName = ResolveTraderName(area, area.Position, i, out bool isFallback);
+                    if (!isFallback && newName != _traders[i].Name)
+                    {
+                        _traders[i].Name = newName;
+                        Styx.Ui.Labels.Register(this, "tp_trader_" + i, newName);
+                        Log.Out("[StyxTeleport] Auto-resolved trader [{0}] -> '{1}' (will appear after next restart)",
+                            i + 1, newName);
+                        anyResolved = true;
+                    }
+                }
+                if (anyResolved && _stateStore != null) _stateStore.Save();
+            }
+            catch (Exception e) { Log.Warning("[StyxTeleport] auto-resolve failed: " + e.Message); }
+        }, name: "StyxTeleport.trader-resolve");
+
+        int persistedCount = _stateStore?.Value?.TraderNames?.Count ?? 0;
+        Log.Out("[StyxTeleport] Loaded v0.1.2 — MaxHomes={0}, traders scanned={1}, persisted names={2}",
+            _cfg.MaxHomes, _traders.Count, persistedCount);
     }
 
     public override void OnUnload()
@@ -220,10 +322,14 @@ public class StyxTeleport : StyxPlugin
         Styx.Ui.Labels.UnregisterAll(this);
     }
 
-    // Framework calls this hook. Retry trader scan once world is fully loaded.
+    // Framework calls this hook. Always re-scan + re-register trader labels —
+    // first scan at OnLoad usually runs before trader chunks are loaded, so
+    // names fall back to "Trader N". By OnServerInitialized the world is
+    // settled enough that the prefab-name path can resolve real names. Labels
+    // are static-baked, so any newly-resolved names show up at NEXT restart.
     void OnServerInitialized()
     {
-        if (_traders.Count == 0) ScanTraders();
+        RescanAndRelabel();
     }
 
     // Capture player death position for the "last death" destination.
@@ -258,22 +364,16 @@ public class StyxTeleport : StyxPlugin
         // We cache only the area bounds + slot id; the live trader entity (and
         // therefore the real shop-floor Y) is re-resolved at teleport time
         // because traders aren't always loaded at world-init.
+        int fallbackCount = 0;
         for (int i = 0; i < world.TraderAreas.Count; i++)
         {
             var area = world.TraderAreas[i];
-            string name = "Trader " + (i + 1);
             Vector3 areaMin = new Vector3(area.Position.x, area.Position.y, area.Position.z);
             Vector3 areaSize = new Vector3(area.PrefabSize.x, area.PrefabSize.y, area.PrefabSize.z);
             Vector3 scanPos = areaMin + areaSize * 0.5f;
 
-            try
-            {
-                var ownerField = HarmonyLib.Traverse.Create(area).Field("owningTrader");
-                var owner = ownerField.GetValue<EntityTrader>();
-                if (owner != null && !string.IsNullOrEmpty(owner.EntityName))
-                    name = owner.EntityName;
-            }
-            catch { /* private field reflection failed; numeric fallback is fine */ }
+            string name = ResolveTraderName(area, area.Position, i, out bool isFallback);
+            if (isFallback) fallbackCount++;
 
             _traders.Add(new CachedTrader
             {
@@ -285,7 +385,90 @@ public class StyxTeleport : StyxPlugin
                 ScanPosition = scanPos,
             });
         }
-        Log.Out("[StyxTeleport] Trader scan found {0}", _traders.Count);
+        Log.Out("[StyxTeleport] Trader scan found {0} ({1} with fallback names)",
+            _traders.Count, fallbackCount);
+    }
+
+    /// <summary>Position key for the persisted trader-name dictionary.
+    /// XZ uniquely identifies a trader POI; Y is included for paranoia
+    /// against stacked traders (theoretically possible with modlets).</summary>
+    private static string PositionKey(Vector3i p) => p.x + "_" + p.y + "_" + p.z;
+
+    /// <summary>Resolve a friendly name for a trader area. Tries:
+    ///   1. Live <c>owningTrader.EntityName</c> — only works if the trader's
+    ///      chunk is loaded (a player has been near it recently). When this
+    ///      fires, we also persist the result so later boots (chunk unloaded)
+    ///      still get the real name.
+    ///   2. Persisted name from previous resolution (per-position, on disk).
+    ///   3. <c>"Trader N+1"</c> numeric fallback.
+    /// <paramref name="isFallback"/> is true iff path 3 was used.</summary>
+    private string ResolveTraderName(object area, Vector3i pos, int idx, out bool isFallback)
+    {
+        isFallback = false;
+        string posKey = PositionKey(pos);
+
+        // Path 1: live entity → also persist on success so we keep the name
+        // forever, even when the chunk later unloads.
+        try
+        {
+            var owner = HarmonyLib.Traverse.Create(area).Field("owningTrader").GetValue<EntityTrader>();
+            if (owner != null && !string.IsNullOrEmpty(owner.EntityName))
+            {
+                var live = owner.EntityName;
+                if (_stateStore?.Value != null)
+                {
+                    if (!_stateStore.Value.TraderNames.TryGetValue(posKey, out var existing) ||
+                        !string.Equals(existing, live, StringComparison.Ordinal))
+                    {
+                        _stateStore.Value.TraderNames[posKey] = live;
+                        _stateStore.Save();
+                    }
+                }
+                return live;
+            }
+        }
+        catch { /* swallow — try next path */ }
+
+        // Path 2: persisted from a previous session
+        if (_stateStore?.Value != null &&
+            _stateStore.Value.TraderNames.TryGetValue(posKey, out var persisted) &&
+            !string.IsNullOrEmpty(persisted))
+        {
+            return persisted;
+        }
+
+        // Path 3: numeric fallback
+        isFallback = true;
+        return "Trader " + (idx + 1);
+    }
+
+    /// <summary>Rescan + re-register the trader labels. Call after OnLoad to
+    /// pick up names that weren't available at first scan (e.g. trader chunk
+    /// wasn't loaded yet). Labels are static-baked, so the UI won't reflect
+    /// any newly-resolved names until the NEXT server restart (the framework
+    /// stages labels at shutdown and loads them at next-boot init).
+    /// Returns the count of traders still on numeric fallback.</summary>
+    private int RescanAndRelabel()
+    {
+        ScanTraders();
+        int fallbacks = 0;
+        for (int i = 0; i < _traders.Count; i++)
+        {
+            Styx.Ui.Labels.Register(this, "tp_trader_" + i, _traders[i].Name);
+            if (IsFallbackName(_traders[i].Name)) fallbacks++;
+        }
+        return fallbacks;
+    }
+
+    /// <summary>Heuristic: numeric fallback names look like "Trader 5".
+    /// Real ones look like "Trader Joel", "Bob", or whatever the entity
+    /// reports — never just "Trader N".</summary>
+    private static bool IsFallbackName(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return true;
+        if (!name.StartsWith("Trader ", StringComparison.Ordinal)) return false;
+        var rest = name.Substring(7).Trim();
+        return int.TryParse(rest, out _);
     }
 
     /// <summary>
