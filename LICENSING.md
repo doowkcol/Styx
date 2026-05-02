@@ -64,11 +64,11 @@ The polished plugins that make a Styx server feel finished:
 | Plugin | What |
 |---|---|
 | `StyxCrafting` | Perm-tiered forge speed + output bonus + idle-fuel auto-shutdown |
-| `DonorPerks` | Group-mapped buffs + per-player toggle UI |
+| `StyxBuffs` | Perm-gated buffs + per-player toggle UI |
 | `StyxZombieRadar` | Live per-player zombie-count HUD section |
 | `StyxZombieHealth` | Crosshair entity-health HUD — name + HP of what you're aimed at |
 | `StyxHud` | Top-left HUD: players, rank, wipe + restart countdown |
-| `StyxMenu` | Interactive action menu — heal-full, water, teleport, server info |
+| `StyxMenu` | Interactive action menu — heal-full, server info |
 | `ServerRestartManager` | Scheduled daily restarts with countdown |
 | `Godmode` | Styx-internal damage immunity flag |
 | `Vanish` | Invisible + AI-ignore admin tool |

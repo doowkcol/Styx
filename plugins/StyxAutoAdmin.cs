@@ -15,7 +15,7 @@
 // DEFAULT DISABLED. Flip Enabled=true in configs/StyxAutoAdmin.json
 // when deploying to a test server. The "admin" group already ships
 // with sensible perms via the framework's EnsureDefaultGroups bootstrap
-// (styx.admin.*, styx.perm.admin, styx.donor.admin, styx.restart.admin,
+// (styx.admin.*, styx.perm.admin, styx.buffs.admin, styx.restart.admin,
 // styx.radar.master, styx.kit.wheels, plus inherits vip + default).
 
 using Styx;

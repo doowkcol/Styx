@@ -2,7 +2,7 @@
 
 Adds every joining player to a configured perm group (defaults to `admin`). **Test / sandbox / demo server use only** — never enable on a production server.
 
-The whole point is "let visitors experience the full Styx framework without the operator manually granting perms each time." The framework's default `admin` group already ships with the right perms (`styx.admin.*`, `styx.perm.admin`, `styx.donor.admin`, etc.) plus inherits from `vip` and `default`, so a one-line group add gets visitors everything they need.
+The whole point is "let visitors experience the full Styx framework without the operator manually granting perms each time." The framework's default `admin` group already ships with the right perms (`styx.admin.*`, `styx.perm.admin`, `styx.buffs.admin`, etc.) plus inherits from `vip` and `default`, so a one-line group add gets visitors everything they need.
 
 ## Default state
 

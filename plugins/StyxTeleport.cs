@@ -181,7 +181,7 @@ public class StyxTeleport : StyxPlugin
         Styx.Ui.Labels.Register(this, "tp_trader_fallback", "(no traders found)");
 
         // Launcher entry — gated on basic use perm so no-perm players don't see it.
-        Styx.Ui.Menu.Register(this, "Teleport", OpenFor, permission: "styx.tp.use");
+        Styx.Ui.Menu.Register(this, "Teleport  /sethome", OpenFor, permission: "styx.tp.use");
         StyxCore.Perms.RegisterKnown("styx.tp.use",
             "Open the Teleport launcher entry (homes / trader / last-death)", Name);
 

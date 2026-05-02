@@ -47,7 +47,7 @@ public class PermEditor : StyxPlugin
     private const string PermAdmin = "styx.perm.admin";  // Same gate as PermManager
 
     private const int MaxGroupRows  = 8;
-    private const int MaxPluginRows = 12;
+    private const int MaxPluginRows = 20;
     private const int MaxPermRows   = 16;
     private const int ConfigRowCount = 3;  // Stage 2 has 3 leading config rows: priority / tag / color
 

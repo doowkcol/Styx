@@ -13,7 +13,7 @@
         <window name="styxLauncher" />
         <window name="styxKits" />
         <!-- <window name="styxRadar" /> --> <!-- Disabled 2026-04-23: zombie count now in StyxHud. Window definition kept in windows.xml; uncomment to re-enable the standalone big-number panel. -->
-        <window name="styxDonorBuffs" />
+        <window name="styxBuffs" />
         <window name="styxTeleport" />
         <window name="styxAdminRadar" />
         <window name="styxAdminTools" />

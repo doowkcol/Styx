@@ -40,7 +40,7 @@ public class StyxMenu : StyxPlugin
 
     private const string CvOpen   = "styx.menu.open";
     private const string CvSel    = "styx.menu.sel";
-    private const int OptionCount = 5;
+    private const int OptionCount = 3;
 
     // Plugins that want input should track which players they hold a claim on
     // so OnUnload can release cleanly.
@@ -64,7 +64,7 @@ public class StyxMenu : StyxPlugin
         // Register with the top-level launcher (/m). Plugins that want to be
         // discoverable via /m self-register here. Auto-unregistered on unload.
         Styx.Ui.Menu.Register(this,
-            label: "Action menu (heal / water / tp / info)",
+            label: "Action menu  /menu",
             onSelect: p => Open(p));
 
         // Menu open-state is UI-ephemeral — clear on each spawn so the panel
@@ -155,25 +155,11 @@ public class StyxMenu : StyxPlugin
                     Styx.Server.Whisper(p, "[00ff66][Menu] Restored — HP, food, water, stamina + cleared injuries & disease.[-]");
                     break;
                 case 1:
-                    bool ok = StyxCore.Player.GiveBackpack(p, new[] { ("drinkJarBoiledWater", 3, 1) });
-                    Styx.Server.Whisper(p, ok
-                        ? "[00ff66][Menu] 3 waters dropped at your feet. Look down.[-]"
-                        : "[ff6666][Menu] GiveBackpack failed — check server log.[-]");
-                    break;
-                case 2:
-                    var pos = StyxCore.Player.PositionOf(p);
-                    var dest = new UnityEngine.Vector3(pos.x + 20f, pos.y, pos.z);
-                    bool teleOk = StyxCore.Player.Teleport(p, dest);
-                    Styx.Server.Whisper(p, teleOk
-                        ? string.Format("[00ff66][Menu] Teleported 20m east.[-]")
-                        : "[ff6666][Menu] Teleport failed — check server log.[-]");
-                    break;
-                case 3:
                     Styx.Server.Whisper(p, string.Format(
                         "[88ddff][Menu] day {0}, {1} online, blood moon: {2}[-]",
                         StyxCore.World.CurrentDay, Styx.Server.PlayerCount, StyxCore.World.IsBloodMoon));
                     break;
-                case 4:
+                case 2:
                     Styx.Server.Whisper(p, "[ffaa00][Menu] Closed.[-]");
                     break;
             }

@@ -59,7 +59,7 @@ public class StyxPerms : StyxPlugin
         // Show up in /m for admins only. Permission gate is evaluated when
         // the launcher opens, so non-admins won't see this entry.
         Styx.Ui.Menu.Register(this,
-            label: "Perm Manager",
+            label: "Perm Manager  /perms",
             onSelect: p => Open(p),
             permission: PermAdmin);
 

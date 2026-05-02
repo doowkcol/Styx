@@ -200,7 +200,7 @@ public class StyxShop : StyxPlugin
                 "styx.shop.row" + k + "_id", "styx.shop.row" + k + "_price",
                 "styx.shop.row" + k + "_seccount");
 
-        Styx.Ui.Menu.Register(this, "Shop", OpenFor, permission: _cfg.UsePerm);
+        Styx.Ui.Menu.Register(this, "Shop  /shop", OpenFor, permission: _cfg.UsePerm);
 
         StyxCore.Commands.Register("shop",
             "Open the shop -- /shop [reload]", CmdShop);

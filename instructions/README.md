@@ -18,7 +18,7 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | [04](./04-backpack.md) | StyxBackpack | `/b` | Persistent personal storage + perm-tiered death-bag |
 | [05](./05-crafting.md) | StyxCrafting | `/crafting` | Perm-tiered forge speed + output bonus + idle-fuel autoshutdown |
 | [06](./06-zombie-loot.md) | ZombieLoot | `/zloot` | Perm-tiered loot bag drops on zombie kill |
-| [07](./07-donor-perks.md) | DonorPerks | `/donor` `/m → My Buffs` | Group-mapped buffs + per-player toggle UI |
+| [07](./07-styx-buffs.md) | StyxBuffs | `/buffs` `/m → My Buffs` | Perm-gated buffs + per-player toggle UI |
 | [08](./08-welcome-message.md) | WelcomeMessage | `/wm` | Permission-gated welcome messages on spawn |
 | [10](./10-chat-tags.md) | ChatTags | (none) | Group-priority `[Tag]` prefix on chat |
 | [26](./26-shop.md) | StyxShop | `/shop` `/s` `/m → Shop` | Categorised, paginated item shop — pay with Credits |

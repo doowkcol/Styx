@@ -188,7 +188,7 @@ public class ServerRestartManager : StyxPlugin
             "styx.srm.last_wipe_d", "styx.srm.confirm_pending");
 
         // Launcher entry — admin only. Same perm as the chat command.
-        Styx.Ui.Menu.Register(this, "Server Restart Manager", OpenFor, permission: Perm);
+        Styx.Ui.Menu.Register(this, "Server Restart Manager  /srm", OpenFor, permission: Perm);
     }
 
     public override void OnUnload()

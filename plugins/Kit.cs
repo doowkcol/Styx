@@ -95,6 +95,13 @@ public class Kit : StyxPlugin
             ["styx.kit.basic"]  = "Standard kits available to everyone",
             ["styx.kit.vip"]    = "VIP-tier kit access (donor / supporter)",
             ["styx.kit.master"] = "Admin-tier kit access (everything)",
+            // Level-milestone tiers -- grant via the perm editor onto the
+            // matching milestone group (lvl25/lvl50/lvl75/lvl100 from
+            // StyxLeveling). Players unlock as they hit the level.
+            ["styx.kit.lvl25"]  = "Level 25 milestone kits",
+            ["styx.kit.lvl50"]  = "Level 50 milestone kits",
+            ["styx.kit.lvl75"]  = "Level 75 milestone kits",
+            ["styx.kit.lvl100"] = "Level 100 milestone kits",
         };
 
         public Dictionary<string, KitDef> Kits = new Dictionary<string, KitDef>(StringComparer.OrdinalIgnoreCase)
@@ -168,6 +175,181 @@ public class Kit : StyxPlugin
                     new KitItem { Item = "drugPainkillers",          Count = 3 },
                 }
             },
+
+            // ============================================================
+            // Per-wipe basic loadout (no level required) -- everyone with
+            // styx.kit.basic gets this once per wipe. CooldownSeconds = 7d
+            // approximates "per wipe" for a weekly wipe schedule; raise/lower
+            // to match the operator's wipe cadence.
+            // ============================================================
+            ["basic_loadout"] = new KitDef
+            {
+                Description = "Q6 stone tools + primitive weapons + Athletic armour — 1× per wipe",
+                CooldownSeconds = 604800,  // 7 days
+                Perm = "styx.kit.basic",
+                Icon = "meleeToolRepairT0StoneAxe",
+                Items = new List<KitItem>
+                {
+                    // Tools (Q6 stone)
+                    new KitItem { Item = "meleeToolRepairT0StoneAxe",       Count = 1, Quality = 6 },
+                    new KitItem { Item = "meleeToolTorch",                  Count = 4 },
+                    // Primitive weapons (Q6)
+                    new KitItem { Item = "meleeWpnSpearT0StoneSpear",       Count = 1, Quality = 6 },
+                    new KitItem { Item = "meleeWpnClubT0WoodenClub",        Count = 1, Quality = 6 },
+                    new KitItem { Item = "gunBowT0PrimitiveBow",            Count = 1, Quality = 6 },
+                    new KitItem { Item = "ammoArrowStone",                  Count = 30 },
+                    // Athletic (T0) armour set Q6
+                    new KitItem { Item = "armorAthleticHelmet",             Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorAthleticOutfit",             Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorAthleticGloves",             Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorAthleticBoots",              Count = 1, Quality = 6 },
+                    // Survival
+                    new KitItem { Item = "drinkJarBoiledWater",             Count = 6 },
+                    new KitItem { Item = "foodCanChili",                    Count = 6 },
+                    new KitItem { Item = "medicalBandage",                  Count = 5 },
+                }
+            },
+
+            // ============================================================
+            // Level-milestone tiers. Each tier has a per-wipe LOADOUT (gear)
+            // and a DAILY drop (currency / resources / ammo).
+            //   - Loadout cooldown 604800s (7d) = "1 per wipe" on weekly
+            //   - Daily cooldown 86400s (24h)
+            // ============================================================
+
+            // ---- L25 ---- early game
+            ["lvl25_loadout"] = new KitDef
+            {
+                Description = "L25 loadout: T1 pistol + iron spear + Preacher armour — 1× per wipe",
+                CooldownSeconds = 604800,
+                Perm = "styx.kit.lvl25",
+                Icon = "gunHandgunT1Pistol",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "gunHandgunT1Pistol",          Count = 1, Quality = 4 },
+                    new KitItem { Item = "ammo9mmBulletBall",           Count = 200 },
+                    new KitItem { Item = "meleeWpnSpearT1IronSpear",    Count = 1, Quality = 4 },
+                    new KitItem { Item = "armorPreacherHelmet",         Count = 1, Quality = 4 },
+                    new KitItem { Item = "armorPreacherOutfit",         Count = 1, Quality = 4 },
+                    new KitItem { Item = "armorPreacherGloves",         Count = 1, Quality = 4 },
+                    new KitItem { Item = "armorPreacherBoots",          Count = 1, Quality = 4 },
+                    new KitItem { Item = "medicalFirstAidBandage",      Count = 3 },
+                }
+            },
+            ["lvl25_daily"] = new KitDef
+            {
+                Description = "L25 daily: 200 dukes + 50 scrap iron + 50 9mm — every 24h",
+                CooldownSeconds = 86400,
+                Perm = "styx.kit.lvl25",
+                Icon = "casinoCoin",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "casinoCoin",          Count = 200 },
+                    new KitItem { Item = "resourceScrapIron",   Count = 50 },
+                    new KitItem { Item = "ammo9mmBulletBall",   Count = 50 },
+                }
+            },
+
+            // ---- L50 ---- mid game
+            ["lvl50_loadout"] = new KitDef
+            {
+                Description = "L50 loadout: T2 magnum + iron sledge + Ranger armour — 1× per wipe",
+                CooldownSeconds = 604800,
+                Perm = "styx.kit.lvl50",
+                Icon = "gunHandgunT2Magnum44",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "gunHandgunT2Magnum44",            Count = 1, Quality = 5 },
+                    new KitItem { Item = "ammo44MagnumBulletBall",          Count = 100 },
+                    new KitItem { Item = "meleeWpnSledgeT1IronSledgehammer", Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorRangerHelmet",               Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorRangerOutfit",               Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorRangerGloves",               Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorRangerBoots",                Count = 1, Quality = 5 },
+                    new KitItem { Item = "medicalFirstAidKit",              Count = 2 },
+                }
+            },
+            ["lvl50_daily"] = new KitDef
+            {
+                Description = "L50 daily: 500 dukes + 30 forged iron + 50 .44 mag — every 24h",
+                CooldownSeconds = 86400,
+                Perm = "styx.kit.lvl50",
+                Icon = "casinoCoin",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "casinoCoin",                  Count = 500 },
+                    new KitItem { Item = "resourceForgedIron",          Count = 30 },
+                    new KitItem { Item = "ammo44MagnumBulletBall",      Count = 50 },
+                }
+            },
+
+            // ---- L75 ---- late game
+            ["lvl75_loadout"] = new KitDef
+            {
+                Description = "L75 loadout: T2 lever rifle + steel club + Enforcer armour — 1× per wipe",
+                CooldownSeconds = 604800,
+                Perm = "styx.kit.lvl75",
+                Icon = "gunRifleT2LeverActionRifle",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "gunRifleT2LeverActionRifle",  Count = 1, Quality = 5 },
+                    new KitItem { Item = "ammo762mmBulletBall",         Count = 150 },
+                    new KitItem { Item = "meleeWpnClubT3SteelClub",     Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorEnforcerHelmet",         Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorEnforcerOutfit",         Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorEnforcerGloves",         Count = 1, Quality = 5 },
+                    new KitItem { Item = "armorEnforcerBoots",          Count = 1, Quality = 5 },
+                    new KitItem { Item = "medicalFirstAidKit",          Count = 3 },
+                }
+            },
+            ["lvl75_daily"] = new KitDef
+            {
+                Description = "L75 daily: 1000 dukes + 20 forged steel + 30 7.62 AP — every 24h",
+                CooldownSeconds = 86400,
+                Perm = "styx.kit.lvl75",
+                Icon = "casinoCoin",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "casinoCoin",                  Count = 1000 },
+                    new KitItem { Item = "resourceForgedSteel",         Count = 20 },
+                    new KitItem { Item = "ammo762mmBulletAP",           Count = 30 },
+                }
+            },
+
+            // ---- L100 ---- endgame (utility/melee complement to VIP loadout)
+            ["lvl100_loadout"] = new KitDef
+            {
+                Description = "L100 loadout: T3 sniper + steel sledge + nailgun + Q6 Ranger — 1× per wipe",
+                CooldownSeconds = 604800,
+                Perm = "styx.kit.lvl100",
+                Icon = "gunRifleT3SniperRifle",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "gunRifleT3SniperRifle",               Count = 1, Quality = 6 },
+                    new KitItem { Item = "ammo762mmBulletAP",                   Count = 200 },
+                    new KitItem { Item = "meleeWpnSledgeT3SteelSledgehammer",   Count = 1, Quality = 6 },
+                    new KitItem { Item = "meleeToolRepairT3Nailgun",            Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorRangerHelmet",                   Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorRangerOutfit",                   Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorRangerGloves",                   Count = 1, Quality = 6 },
+                    new KitItem { Item = "armorRangerBoots",                    Count = 1, Quality = 6 },
+                    new KitItem { Item = "medicalFirstAidKit",                  Count = 5 },
+                }
+            },
+            ["lvl100_daily"] = new KitDef
+            {
+                Description = "L100 daily: 2000 dukes + 50 forged steel + 100 concrete + 60 7.62 AP",
+                CooldownSeconds = 86400,
+                Perm = "styx.kit.lvl100",
+                Icon = "casinoCoin",
+                Items = new List<KitItem>
+                {
+                    new KitItem { Item = "casinoCoin",                  Count = 2000 },
+                    new KitItem { Item = "resourceForgedSteel",         Count = 50 },
+                    new KitItem { Item = "resourceConcreteMix",         Count = 100 },
+                    new KitItem { Item = "ammo762mmBulletAP",           Count = 60 },
+                }
+            },
         };
 
         public string ColourReady = "[00ff66]";
@@ -188,22 +370,49 @@ public class Kit : StyxPlugin
     // UI state — stable sorted kit list + per-player "menu-open" set.
     private List<string> _sortedKits = new List<string>();
     private readonly HashSet<int> _openFor = new HashSet<int>();
-    private const int MaxUiRows = 8;
+    private const int MaxUiRows = 16;
 
     public override void OnLoad()
     {
         _cfg = StyxCore.Configs.Load<Config>(this);
         _state = this.Data.Store<State>("cooldowns");
 
-        StyxCore.Commands.Register("kit", "List or claim kits — /kit [name] | /kit info <name>", (ctx, args) =>
+        StyxCore.Commands.Register("kit", "Open the Kits UI — /kit [list|close|info <name>|<name>]", (ctx, args) =>
         {
-            if (args.Length == 0) { ShowList(ctx); return; }
-            if (args.Length >= 2 && args[0].Equals("info", StringComparison.OrdinalIgnoreCase))
+            // No args -- open the UI panel (same as /m → Kits).
+            if (args.Length == 0)
             {
-                ShowContents(ctx, args[1]);
+                if (ctx.Client == null) { ctx.Reply("Run from in-game chat."); return; }
+                var p = StyxCore.Player.FindByEntityId(ctx.Client.entityId);
+                if (p == null) { ctx.Reply("Player not found."); return; }
+                var pid = ctx.Client.PlatformId?.CombinedString;
+                if (!string.IsNullOrEmpty(pid) && !StyxCore.Perms.HasPermission(pid, "styx.kit.use"))
+                { ctx.Reply(_cfg.ColourError + "You lack permission 'styx.kit.use'.[-]"); return; }
+                OpenFor(p);
                 return;
             }
-            Claim(ctx, args[0]);
+
+            string sub = args[0].ToLowerInvariant();
+            switch (sub)
+            {
+                case "list":
+                    ShowList(ctx);
+                    return;
+                case "close":
+                    if (ctx.Client == null) { ctx.Reply("Run from in-game chat."); return; }
+                    var pc = StyxCore.Player.FindByEntityId(ctx.Client.entityId);
+                    if (pc != null) CloseFor(pc);
+                    ctx.Reply(_cfg.ColourCooldown + "Kits panel closed.[-]");
+                    return;
+                case "info":
+                    if (args.Length < 2) { ctx.Reply("Usage: /kit info <name>"); return; }
+                    ShowContents(ctx, args[1]);
+                    return;
+                default:
+                    // /kit <name> -- claim by name (chat path)
+                    Claim(ctx, args[0]);
+                    return;
+            }
         });
 
         // Stable sort for deterministic slot IDs across restarts.
@@ -233,7 +442,7 @@ public class Kit : StyxPlugin
 
         // Show up in /m — gated on the basic "use" perm so no-perm players
         // don't see kits at all (per-kit perms still gate each claim).
-        Styx.Ui.Menu.Register(this, "Kits", OpenFor, permission: "styx.kit.use");
+        Styx.Ui.Menu.Register(this, "Kits  /kit", OpenFor, permission: "styx.kit.use");
 
         // UI open-state clears on every spawn — otherwise a server restart
         // while a player had /m → Kits open would reopen the panel for them.

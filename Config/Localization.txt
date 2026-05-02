@@ -26,7 +26,5 @@ styxPerms_4,styx,Ui,Close
 # the file — this is the documented "written at boot, used until restart"
 # behaviour.
 styxMenu_0,styx,Ui,Heal me to full
-styxMenu_1,styx,Ui,Give drinking water x3
-styxMenu_2,styx,Ui,Teleport 20m east
-styxMenu_3,styx,Ui,Show server info
-styxMenu_4,styx,Ui,Close menu
+styxMenu_1,styx,Ui,Show server info
+styxMenu_2,styx,Ui,Close menu

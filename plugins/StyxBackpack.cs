@@ -189,7 +189,7 @@ public class StyxBackpack : StyxPlugin
         string gatePerm = _cfg.SizeByPerm.Count > 0
             ? _cfg.SizeByPerm[_cfg.SizeByPerm.Count - 1].Perm   // lowest tier = broadest gate
             : "styx.backpack.use";
-        Styx.Ui.Menu.Register(this, "Backpack", OpenFor, permission: gatePerm);
+        Styx.Ui.Menu.Register(this, "Backpack  /b", OpenFor, permission: gatePerm);
 
         StyxCore.Commands.Register("b",
             "Open your persistent backpack — /b [status|clear|drop|sweep]",
