@@ -37,24 +37,30 @@
 // — no tight coupling, no plugin-load-order dependency.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Styx;
 using Styx.Plugins;
 using Styx.Scheduling;
 
-[Info("StyxHud", "Doowkcol", "0.1.0")]
+[Info("StyxHud", "Doowkcol", "0.2.0")]
 public class StyxHud : StyxPlugin
 {
     public override string Description => "Always-on player HUD: players, rank, wipe + restart countdowns";
 
     private TimerHandle _tick;
 
-    // Rank id → label index. Owner overrides any group; otherwise we
-    // pick the highest tier the player belongs to. Default = 0.
+    // Rank labels are built dynamically from the perm system's groups.
+    //   Index 0      = "Player" (no-tag fallback for default-only members)
+    //   Index 1..N   = each tagged group's ChatTag, ordered priority-desc
+    //   Index N+1    = "[Owner]" (vanilla auth-0 wins over everything)
+    // Built on first Tick (not OnLoad) so late-loading plugins like
+    // StyxLeveling have already pre-created their milestone groups.
     private const int RankDefault = 0;
-    private const int RankVip     = 1;
-    private const int RankAdmin   = 2;
-    private const int RankOwner   = 3;
+    private int _ownerRankId;
+    private bool _rankLabelsBuilt;
+    private Dictionary<string, int> _groupRankIndex;     // group name -> label index
+    private List<string> _groupsByPriorityDesc;          // resolution order
 
     public override void OnLoad()
     {
@@ -70,11 +76,10 @@ public class StyxHud : StyxPlugin
         Styx.Ui.Labels.Register(this, "styx_hud_header", header);
         Styx.Ui.Labels.Register(this, "styx_hud_subheader", subheader);
 
-        // Rank labels — XUi binds via {#localization('styx_rank_' + int(cvar(...)))}
+        // Rank labels are populated lazily on first Tick (see BuildRankLabels)
+        // to give plugins like StyxLeveling time to pre-create milestone groups.
+        // Pre-register slot 0 here so the XUi binding has *something* until then.
         Styx.Ui.Labels.Register(this, "styx_rank_0", "Player");
-        Styx.Ui.Labels.Register(this, "styx_rank_1", "[VIP]");
-        Styx.Ui.Labels.Register(this, "styx_rank_2", "[Admin]");
-        Styx.Ui.Labels.Register(this, "styx_rank_3", "[Owner]");
 
         Styx.Ui.Ephemeral.Register(
             "styx.world.players", "styx.hud.rank_id",
@@ -100,6 +105,10 @@ public class StyxHud : StyxPlugin
 
     private void Tick()
     {
+        // Lazy build rank labels on first tick so late-loading plugins
+        // (e.g., StyxLeveling pre-creating lvl25/50/75/100) are accounted for.
+        if (!_rankLabelsBuilt) BuildRankLabels();
+
         int playerCount = StyxCore.World?.PlayerCount ?? 0;
         int subVis = string.IsNullOrEmpty(StyxCore.Branding?.HudSubheader) ? 0 : 1;
 
@@ -121,20 +130,60 @@ public class StyxHud : StyxPlugin
         }
     }
 
-    /// <summary>Map a player to a rank tier — owner > admin > vip > default.
-    /// Returns the index into our styx_rank_N labels.</summary>
+    /// <summary>
+    /// Snapshot every group with a non-empty ChatTag, register a rank
+    /// label per group (priority-desc order), and reserve the last index
+    /// for "[Owner]". Re-callable; idempotent re-registration overwrites
+    /// stale label values but doesn't grow the index space.
+    /// </summary>
+    private void BuildRankLabels()
+    {
+        _groupRankIndex = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        _groupsByPriorityDesc = new List<string>();
+
+        var taggedGroups = StyxCore.Perms.GetAllGroups()
+            .Where(g => g != null && !string.IsNullOrEmpty(g.ChatTag))
+            .OrderByDescending(g => g.Priority)
+            .ToList();
+
+        // Slot 0 reserved for the no-tag default ("Player").
+        Styx.Ui.Labels.Register(this, "styx_rank_0", "Player");
+
+        int idx = 1;
+        foreach (var g in taggedGroups)
+        {
+            Styx.Ui.Labels.Register(this, "styx_rank_" + idx, g.ChatTag);
+            _groupRankIndex[g.Name] = idx;
+            _groupsByPriorityDesc.Add(g.Name);
+            idx++;
+        }
+
+        _ownerRankId = idx;
+        Styx.Ui.Labels.Register(this, "styx_rank_" + _ownerRankId, "[Owner]");
+
+        _rankLabelsBuilt = true;
+        Log.Out("[StyxHud] Rank labels built -- {0} tagged group(s) + Owner.", taggedGroups.Count);
+    }
+
+    /// <summary>
+    /// Resolve a player's rank label index for the HUD.
+    /// Owner (vanilla serveradmin.xml auth) wins outright; otherwise we
+    /// walk the player's groups in priority-desc order and return the
+    /// first index in <see cref="_groupRankIndex"/>. Falls back to 0
+    /// ("Player") if no tagged group matches.
+    /// </summary>
     private int ResolveRankId(string pid)
     {
         if (string.IsNullOrEmpty(pid)) return RankDefault;
-        // Owner via vanilla serveradmin.xml auth tier — beats any group.
-        if (StyxCore.Perms.IsOwner(pid)) return RankOwner;
+        if (StyxCore.Perms.IsOwner(pid)) return _ownerRankId;
 
+        if (_groupsByPriorityDesc == null) return RankDefault;
         var groups = StyxCore.Perms.GetPlayerGroups(pid);
-        // Highest tier wins (admin > vip > default).
-        if (groups.Any(g => string.Equals(g, "admin", StringComparison.OrdinalIgnoreCase)))
-            return RankAdmin;
-        if (groups.Any(g => string.Equals(g, "vip", StringComparison.OrdinalIgnoreCase)))
-            return RankVip;
+        foreach (var groupName in _groupsByPriorityDesc)
+        {
+            if (groups.Any(g => string.Equals(g, groupName, StringComparison.OrdinalIgnoreCase)))
+                return _groupRankIndex[groupName];
+        }
         return RankDefault;
     }
 }
