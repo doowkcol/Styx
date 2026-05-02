@@ -93,6 +93,12 @@ public class StyxLeveling : StyxPlugin, ILeveling
 
         // Log every XP grant to the server log.
         public bool LogTransactions = false;
+
+        // Extra perm required for /xp wipe. Empty (default) = only
+        // styx.xp.admin needed. Set to a NON-styx.* perm (e.g. "ops.wipe")
+        // to lock the wipe out from auth-0 visitors on a test server.
+        // Operator manually grants the configured perm to themselves.
+        public string WipeAdditionalPerm = "";
     }
 
     // ============================================================ Data
@@ -368,6 +374,16 @@ public class StyxLeveling : StyxPlugin, ILeveling
 
         if (sub == "wipe")
         {
+            // Optional second-perm gate so test-server visitors with
+            // auth-0 implicit styx.xp.admin can't trigger a wipe.
+            if (!string.IsNullOrEmpty(_cfg.WipeAdditionalPerm) &&
+                !StyxCore.Perms.HasPermission(actorId, _cfg.WipeAdditionalPerm))
+            {
+                ctx.Reply(string.Format(
+                    "[ff6666]Wipe locked on this server (operator-only -- requires '{0}' perm).[-]",
+                    _cfg.WipeAdditionalPerm));
+                return;
+            }
             if (args.Length < 2 || args[1].ToLowerInvariant() != "confirm")
             {
                 ctx.Reply("[ffaa00]This wipes ALL player XP and removes EVERY player from every milestone group. Re-run as: /xp wipe confirm[-]");

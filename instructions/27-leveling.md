@@ -127,6 +127,22 @@ Money and XP wipes are independent — operators can:
 
 Schedule via OS task scheduler / Pterodactyl cron / RCON — no built-in auto-wipe.
 
+### Locking wipe on test / sandbox servers
+
+On a test server where visitors get auto-admin (auth-0), `styx.xp.admin` is implicitly granted to every joiner — including `/xp wipe`. To lock it down, set:
+
+```json
+"WipeAdditionalPerm": "ops.wipe"
+```
+
+`/xp wipe` will then require **both** `styx.xp.admin` AND `ops.wipe`. The `ops.wipe` perm starts with `ops.` (not `styx.`) so it's NOT auto-granted to auth-0 owners. Only the operator who explicitly grants it to themselves has it:
+
+```
+/perm grant <YourSteamId> ops.wipe
+```
+
+Same pattern available on StyxEconomy for `/eco wipe` — re-use the same `ops.wipe` perm for both.
+
 ## Programmatic access
 
 ```csharp

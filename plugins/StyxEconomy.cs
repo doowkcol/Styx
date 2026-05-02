@@ -56,6 +56,13 @@ public class StyxEconomy : StyxPlugin, IEconomy
 
         // Log every Credit/Debit to the server log -- useful while tuning.
         public bool LogTransactions = false;
+
+        // Extra perm required for /eco wipe. Empty (default) = only
+        // styx.eco.admin needed (current behaviour). Set to a NON-styx.*
+        // perm name (e.g. "ops.wipe") to block visitors who got
+        // styx.eco.admin via auth-0 implicit grants on a test server.
+        // Operator manually grants the configured perm to themselves.
+        public string WipeAdditionalPerm = "";
     }
 
     // ============================================================ Data
@@ -328,6 +335,16 @@ public class StyxEconomy : StyxPlugin, IEconomy
         // /eco wipe confirm  -- nukes all wallets, writes a backup first.
         if (sub == "wipe")
         {
+            // Optional second-perm gate so test-server visitors with
+            // auth-0 implicit styx.eco.admin can't trigger a wipe.
+            if (!string.IsNullOrEmpty(_cfg.WipeAdditionalPerm) &&
+                !StyxCore.Perms.HasPermission(actorId, _cfg.WipeAdditionalPerm))
+            {
+                ctx.Reply(string.Format(
+                    "[ff6666]Wipe locked on this server (operator-only -- requires '{0}' perm).[-]",
+                    _cfg.WipeAdditionalPerm));
+                return;
+            }
             if (args.Length < 2 || args[1].ToLowerInvariant() != "confirm")
             {
                 ctx.Reply("[ffaa00]This wipes EVERY player's " + _cfg.CurrencyName + " balance. Re-run as: /eco wipe confirm[-]");
