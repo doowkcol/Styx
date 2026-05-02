@@ -36,22 +36,6 @@ The currency name "Credits" can be renamed — edit `CurrencyName` and restart t
 
 There's no auto-wipe. Operator triggers `/eco wipe confirm` manually, or schedules it via OS task scheduler / Pterodactyl cron. A backup `wallet.wiped-<UTC-timestamp>.json` is written next to the live `wallet.json` before the wipe — recoverable if you regret it.
 
-### Locking wipe on test / sandbox servers
-
-On a test server where visitors get auto-admin (auth-0), `styx.eco.admin` is implicitly granted to every joiner — including `/eco wipe`. To keep visitors from accidentally (or deliberately) nuking everyone's wallets, set:
-
-```json
-"WipeAdditionalPerm": "ops.wipe"
-```
-
-`/eco wipe` will then require **both** `styx.eco.admin` AND `ops.wipe`. The `ops.wipe` perm starts with `ops.` (not `styx.`) so it's NOT auto-granted to auth-0 owners — only the operator who explicitly grants it to themselves has it:
-
-```
-/perm grant <YourSteamId> ops.wipe
-```
-
-Visitors get a clear refusal message when they try `/eco wipe`. Same pattern available on StyxLeveling for `/xp wipe`.
-
 ## Programmatic access (for plugin authors)
 
 ```csharp
