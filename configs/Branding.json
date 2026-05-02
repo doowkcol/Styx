@@ -1,6 +1,6 @@
 {
-  "ServerName": "REKT",
-  "HudHeader": "REKT HUD",
-  "HudSubheader": "Styx framework",
-  "LauncherHeader": "REKT Menu"
+  "ServerName": "Styx",
+  "HudHeader": "STYX",
+  "HudSubheader": "v0.6.3 — Public Test",
+  "LauncherHeader": "Styx Menu"
 }
