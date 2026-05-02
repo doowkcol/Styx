@@ -28,8 +28,10 @@ using System.IO;
 using Newtonsoft.Json;
 using Styx;
 using Styx.Plugins;
+using Styx.Scheduling;
+using UnityEngine;
 
-[Info("StyxShop", "Doowkcol", "0.1.0")]
+[Info("StyxShop", "Doowkcol", "0.2.0")]
 public class StyxShop : StyxPlugin
 {
     public override string Description => "Item shop -- buy items with currency, paginated UI";
@@ -42,6 +44,35 @@ public class StyxShop : StyxPlugin
     {
         // Empty = anyone can use /shop and the launcher entry.
         public string UsePerm = "styx.shop.use";
+
+        // ---- Sell terminal (/sell command) ----
+
+        // Master toggle. False disables /sell entirely.
+        public bool SellEnabled = true;
+
+        // Players need this perm to /sell. Empty = anyone.
+        public string SellPerm = "styx.shop.sell";
+
+        // Sell-bin grid. Six rows × eight cols = 48 slots is plenty for bulk
+        // selling without a stupidly-tall window.
+        public int SellBinRows = 6;
+        public int SellBinCols = 8;
+
+        // Fallback formula when a CatalogEntry has SellPrice = 0 (operator
+        // didn't set it explicitly). 0.5 = sell at half the buy price (classic
+        // shop spread). Set to 0 to disable -- entries without explicit
+        // SellPrice will then fall through to DefaultSellPrice / refusal.
+        public float SellPriceRatio = 0.5f;
+
+        // Per-unit price for items NOT in the catalog at all. Only consulted
+        // when AllowSellUncataloged = true.
+        public long DefaultSellPrice = 1;
+
+        // false = items not in catalog get returned to the player on close
+        //         (via GiveBackpack) -- strict-catalog-only mode.
+        // true  = uncataloged items sell at DefaultSellPrice -- "junk drawer"
+        //         friendly mode.
+        public bool AllowSellUncataloged = true;
     }
 
     public class CatalogEntry
@@ -58,6 +89,10 @@ public class StyxShop : StyxPlugin
         public int Count = 1;
         public int Quality = 1;
         public long Price = 10;
+
+        // Per-unit sell price. 0 = use the configured ratio fallback against
+        // Price (default 50%). Set explicitly to override.
+        public long SellPrice = 0;
 
         // Empty = visible to all (with UsePerm). Set to gate this entry behind
         // a specific perm (e.g. "styx.shop.donor_armour").
@@ -107,6 +142,28 @@ public class StyxShop : StyxPlugin
 
     private const string DefaultSection = "General";
 
+    // ---- Sell terminal state ----
+
+    /// <summary>
+    /// One per player while a sell-bin is open. Mirrors StyxBackpack's
+    /// session pattern -- spawn an EntityBackpack, TELockServer it open,
+    /// poll lockedTileEntities to detect close, process items on close.
+    /// </summary>
+    private class SellSession
+    {
+        public int PlayerEntityId;
+        public string Pid;
+        public int BinEntityId;
+        public TileEntityLootContainer Loot;
+        public Vector3i EntityPos;
+        public bool WasAccessing;
+        public bool EverAccessed;
+        public double CreatedAt;
+    }
+    private readonly Dictionary<int, SellSession> _sellBins = new Dictionary<int, SellSession>();
+    private TimerHandle _sellTick;
+    private const double SellStuckTimeoutSeconds = 10.0;
+
     // ============================================================ Lifecycle
 
     public override void OnLoad()
@@ -150,7 +207,20 @@ public class StyxShop : StyxPlugin
         StyxCore.Commands.Register("s",
             "Open the shop (alias for /shop)", CmdShop);
 
-        Log.Out("[StyxShop] Loaded v0.1.0 -- {0} catalog entries", _catalog.Items.Count);
+        if (_cfg.SellEnabled)
+        {
+            if (!string.IsNullOrEmpty(_cfg.SellPerm))
+                StyxCore.Perms.RegisterKnown(_cfg.SellPerm,
+                    "Use the sell terminal (/sell) to convert items into currency", Name);
+            StyxCore.Commands.Register("sell",
+                "Open the sell terminal -- drop items in, close to sell", CmdSell);
+            // Tick at 0.5s -- close detection should catch the player closing
+            // the bin within one half-second.
+            _sellTick = Scheduler.Every(0.5, SellTick, name: "StyxShop.SellTick");
+        }
+
+        Log.Out("[StyxShop] Loaded v0.2.0 -- {0} catalog entries, sell={1}",
+            _catalog.Items.Count, _cfg.SellEnabled ? "enabled" : "disabled");
     }
 
     public override void OnUnload()
@@ -164,6 +234,13 @@ public class StyxShop : StyxPlugin
             Styx.Ui.Input.Release(p, Name);
         }
         _sessions.Clear();
+
+        // Despawn any open sell-bins on unload so they don't get orphaned.
+        _sellTick?.Destroy();
+        _sellTick = null;
+        foreach (var s in _sellBins.Values)
+            try { DespawnSellBin(s.BinEntityId); } catch { }
+        _sellBins.Clear();
     }
 
     // ============================================================ Catalog IO
@@ -630,5 +707,281 @@ public class StyxShop : StyxPlugin
         { ctx.Reply("[ff6666]No permission to use the shop.[-]"); return; }
 
         OpenFor(p);
+    }
+
+    // ============================================================ Sell terminal
+    //
+    // The sell flow uses the same EntityBackpack-as-container pattern that
+    // StyxBackpack uses for personal storage: spawn a transient container
+    // entity at the player's feet, TELockServer it open, poll the engine's
+    // lockedTileEntities map every half-second to detect close. On close
+    // we iterate items[], compute total sell value, credit the player, and
+    // bounce any unsellable items back via GiveBackpack.
+
+    private void CmdSell(Styx.Commands.CommandContext ctx, string[] args)
+    {
+        if (ctx.Client == null) { ctx.Reply("Run from in-game chat."); return; }
+        if (!_cfg.SellEnabled) { ctx.Reply("[ffaa00][Sell] Selling is disabled on this server.[-]"); return; }
+
+        var p = StyxCore.Player.FindByEntityId(ctx.Client.entityId);
+        if (p == null) { ctx.Reply("Player not found."); return; }
+
+        var pid = StyxCore.Player.PlatformIdOf(p);
+        if (!string.IsNullOrEmpty(_cfg.SellPerm) && !StyxCore.Perms.HasPermission(pid, _cfg.SellPerm))
+        { ctx.Reply("[ff6666]No permission to use /sell.[-]"); return; }
+
+        OpenSellBinFor(p);
+    }
+
+    private void OpenSellBinFor(EntityPlayer p)
+    {
+        if (p == null) return;
+        var pid = StyxCore.Player.PlatformIdOf(p);
+
+        if (_sellBins.ContainsKey(p.entityId))
+        {
+            Styx.Server.Whisper(p, "[ccddff][Sell] Already open (close it first).[-]");
+            return;
+        }
+
+        try
+        {
+            Vector3 pos = p.GetPosition();
+            // Use our custom StyxSellBin entity class (defined in
+            // Config/entityclasses.xml + Localization.txt) -- visually
+            // identical to a vanilla Backpack but the loot window header
+            // shows "Sell Terminal" instead of "Backpack". The C# class
+            // is still EntityBackpack (our XML sets Class="EntityBackpack"),
+            // so all the existing spawn / open / close machinery works
+            // unchanged.
+            var entity = EntityFactory.CreateEntity("StyxSellBin".GetHashCode(), pos) as EntityBackpack;
+            if (entity == null)
+            {
+                // Defensive fallback: if the modlet didn't load (unlikely),
+                // fall back to vanilla Backpack so /sell still works -- the
+                // header will just say "Backpack" instead of "Sell Terminal".
+                Log.Warning("[StyxShop] StyxSellBin entity_class not found -- falling back to Backpack. Did Config/entityclasses.xml load?");
+                entity = EntityFactory.CreateEntity("Backpack".GetHashCode(), pos) as EntityBackpack;
+            }
+            if (entity == null)
+            {
+                Log.Warning("[StyxShop] Couldn't create sell-bin entity for " + pid);
+                Styx.Server.Whisper(p, "[ff6666][Sell] Failed to create container entity (see log).[-]");
+                return;
+            }
+
+            // Mirror StyxBackpack's BuildContainer logic: empty container with
+            // a valid lootListName (avoids client NPE), bTouched=true to block
+            // engine auto-fill, IsUserAccessing=true so the despawn check
+            // doesn't kill the bag in the 0.2s gap before TELockServer runs.
+            var loot = new TileEntityLootContainer((Chunk)null);
+            loot.lootListName = entity.GetLootList();
+            loot.SetUserAccessing(_bUserAccessing: true);
+            loot.SetEmpty();
+            loot.SetContainerSize(new Vector2i(_cfg.SellBinCols, _cfg.SellBinRows), clearItems: true);
+            loot.bPlayerBackpack = true;   // engine despawn picks the safe branch
+            loot.bTouched = true;
+            loot.SetModified();
+
+            entity.RefPlayerId = -1;
+            int preassignedId = entity.entityId;
+            var ecd = new EntityCreationData(entity)
+            {
+                lootContainer = loot,
+            };
+            entity.OnEntityUnload();
+            GameManager.Instance.RequestToSpawnEntityServer(ecd);
+
+            double sysNow = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+            var session = new SellSession
+            {
+                PlayerEntityId = p.entityId,
+                Pid = pid,
+                BinEntityId = preassignedId,
+                Loot = loot,
+                EntityPos = new Vector3i(pos),
+                WasAccessing = false,
+                EverAccessed = false,
+                CreatedAt = sysNow,
+            };
+            _sellBins[p.entityId] = session;
+
+            Scheduler.Once(0.2, () => ForceOpenSellBin(session), name: "StyxShop.openSellBin");
+
+            Styx.Server.Whisper(p, "[ccddff][Sell] Drop items in. Close the bin to sell. Anything we can't price gets returned.[-]");
+            Log.Out("[StyxShop] Sell-bin opened for {0} ({1}) -- {2}×{3} slots, entityId={4}",
+                p.EntityName, pid, _cfg.SellBinRows, _cfg.SellBinCols, entity.entityId);
+        }
+        catch (Exception e)
+        {
+            Log.Warning("[StyxShop] OpenSellBinFor failed: " + e.Message + "\n" + e.StackTrace);
+            Styx.Server.Whisper(p, "[ff6666][Sell] Open failed: " + e.Message + "[-]");
+        }
+    }
+
+    private void ForceOpenSellBin(SellSession s)
+    {
+        try
+        {
+            var gm = GameManager.Instance;
+            if (gm == null) return;
+            var entity = gm.World?.GetEntity(s.BinEntityId);
+            if (entity == null)
+            {
+                Log.Warning("[StyxShop] Sell-bin entity " + s.BinEntityId + " not found post-spawn -- aborting");
+                _sellBins.Remove(s.PlayerEntityId);
+                return;
+            }
+            gm.TELockServer(0, s.EntityPos, s.BinEntityId, s.PlayerEntityId);
+            // Match StyxBackpack: release IsUserAccessing once TELockServer
+            // is in -- otherwise the server discards every drag-drop.
+            s.Loot.SetUserAccessing(_bUserAccessing: false);
+        }
+        catch (Exception e) { Log.Warning("[StyxShop] ForceOpenSellBin failed: " + e.Message); }
+    }
+
+    private void SellTick()
+    {
+        if (_sellBins.Count == 0) return;
+
+        double sysNow = (DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)).TotalSeconds;
+        var gm = GameManager.Instance;
+        var locked = gm?.lockedTileEntities;
+        var world = gm?.World;
+
+        List<SellSession> toClose = null;
+        foreach (var s in _sellBins.Values)
+        {
+            // Re-fetch live container reference -- engine may swap it during
+            // sync. (Same gotcha as StyxBackpack's Tick.)
+            var entity = world?.GetEntity(s.BinEntityId);
+            var liveLoot = entity?.lootContainer;
+            if (liveLoot != null && !ReferenceEquals(liveLoot, s.Loot)) s.Loot = liveLoot;
+
+            bool accessingNow = locked != null && s.Loot != null && locked.ContainsKey(s.Loot);
+            if (accessingNow) s.EverAccessed = true;
+
+            if (s.WasAccessing && !accessingNow)
+            {
+                (toClose ??= new List<SellSession>()).Add(s);
+            }
+            else if (!s.EverAccessed && sysNow - s.CreatedAt > SellStuckTimeoutSeconds)
+            {
+                Log.Warning("[StyxShop] Sell-bin for " + s.Pid + " never opened -- cleaning up stuck session");
+                (toClose ??= new List<SellSession>()).Add(s);
+            }
+
+            s.WasAccessing = accessingNow;
+        }
+
+        if (toClose != null)
+            foreach (var s in toClose)
+                ProcessSellBinClose(s);
+    }
+
+    private void ProcessSellBinClose(SellSession s)
+    {
+        try
+        {
+            var p = StyxCore.Player.FindByEntityId(s.PlayerEntityId);
+            var eco = StyxCore.Services?.Get<IEconomy>();
+            string currency = eco?.CurrencyName ?? "Credits";
+
+            long totalCredit = 0;
+            int soldStacks = 0;
+            int soldUnits = 0;
+            var returnList = new List<(string itemName, int count, int quality)>();
+
+            var items = s.Loot?.items;
+            if (items != null)
+            {
+                for (int i = 0; i < items.Length; i++)
+                {
+                    var stack = items[i];
+                    if (stack == null || stack.IsEmpty()) continue;
+                    string itemName = stack.itemValue?.ItemClass?.Name ?? "";
+                    long unit = ResolveSellPrice(itemName);
+                    if (unit > 0)
+                    {
+                        totalCredit += unit * stack.count;
+                        soldStacks++;
+                        soldUnits += stack.count;
+                    }
+                    else
+                    {
+                        // Refused -- return to player.
+                        returnList.Add((itemName, stack.count, stack.itemValue?.Quality ?? 1));
+                    }
+                    items[i] = ItemStack.Empty.Clone();
+                }
+                s.Loot.SetModified();
+            }
+
+            // Credit + return + log.
+            if (p != null && totalCredit > 0 && eco != null)
+            {
+                eco.Credit(p, totalCredit, "sell terminal");
+                Styx.Server.Whisper(p, string.Format(
+                    "[00ff66][Sell] Sold {0} stack(s) ({1} item(s)) for {2} {3}. Balance: {4}.[-]",
+                    soldStacks, soldUnits, totalCredit, currency, eco.Balance(p)));
+            }
+            else if (p != null && totalCredit == 0 && returnList.Count == 0)
+            {
+                // Bin closed with nothing in it.
+                Styx.Server.Whisper(p, "[ccddff][Sell] (Empty -- nothing sold.)[-]");
+            }
+            if (p != null && returnList.Count > 0)
+            {
+                StyxCore.Player.GiveBackpack(p, returnList.ToArray());
+                Styx.Server.Whisper(p, string.Format(
+                    "[ffaa00][Sell] {0} item(s) couldn't be priced -- returned to your feet.[-]",
+                    returnList.Count));
+            }
+
+            Log.Out("[StyxShop] Sell-bin closed for {0} -- credited {1} {2}, returned {3} unsellable",
+                s.Pid, totalCredit, currency, returnList.Count);
+        }
+        catch (Exception e) { Log.Warning("[StyxShop] ProcessSellBinClose failed: " + e.Message); }
+        finally
+        {
+            try { DespawnSellBin(s.BinEntityId); } catch { }
+            _sellBins.Remove(s.PlayerEntityId);
+        }
+    }
+
+    /// <summary>
+    /// Resolve a per-unit sell price for the given item name. Priority:
+    ///   1. Catalog entry's explicit SellPrice (>0)
+    ///   2. Catalog entry's Price * SellPriceRatio (when SellPrice == 0
+    ///      and ratio > 0)
+    ///   3. DefaultSellPrice (if AllowSellUncataloged AND not in catalog)
+    ///   4. 0 (refuse -- returned to player)
+    /// </summary>
+    private long ResolveSellPrice(string itemName)
+    {
+        if (string.IsNullOrEmpty(itemName)) return 0;
+
+        for (int i = 0; i < _catalog.Items.Count; i++)
+        {
+            var e = _catalog.Items[i];
+            if (e == null) continue;
+            if (!string.Equals(e.Item, itemName, StringComparison.OrdinalIgnoreCase)) continue;
+            // Found in catalog.
+            if (e.SellPrice > 0) return e.SellPrice;
+            if (_cfg.SellPriceRatio > 0f && e.Price > 0)
+                return (long)Math.Floor(e.Price * _cfg.SellPriceRatio);
+            return 0;   // catalog entry exists but no resolvable sell price
+        }
+
+        // Not in catalog.
+        return _cfg.AllowSellUncataloged ? _cfg.DefaultSellPrice : 0;
+    }
+
+    private void DespawnSellBin(int entityId)
+    {
+        var world = GameManager.Instance?.World;
+        if (world == null) return;
+        var ent = world.GetEntity(entityId);
+        if (ent != null) world.RemoveEntity(entityId, EnumRemoveEntityReason.Despawned);
     }
 }

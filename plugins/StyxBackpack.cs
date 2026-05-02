@@ -398,6 +398,20 @@ public class StyxBackpack : StyxPlugin
             if (!bag.lootContainer.bPlayerBackpack) continue;          // zombie-loot bag or similar — skip
             try
             {
+                // Empty the items[] array first -- engine treats non-empty
+                // bPlayerBackpack=true bags as persistent and chunk-save
+                // re-persists them after RemoveEntity. With empty items
+                // the engine's auto-Kill path fires cleanly. Items in
+                // these orphan bags are safe to drop -- they're either
+                // duplicates of what's in the player's JSON save (the
+                // bag is leftover from a previous session that already
+                // saved) or junk from a stale /b session.
+                if (bag.lootContainer.items != null)
+                {
+                    for (int i = 0; i < bag.lootContainer.items.Length; i++)
+                        bag.lootContainer.items[i] = ItemStack.Empty.Clone();
+                    bag.lootContainer.SetModified();
+                }
                 world.RemoveEntity(bag.entityId, EnumRemoveEntityReason.Despawned);
                 removed++;
             }
@@ -478,7 +492,18 @@ public class StyxBackpack : StyxPlugin
             // bag is locked to the player via TELockServer while in use, so
             // other players can't loot it. Accepting the visibility trade.
             Vector3 pos = p.GetPosition();
-            var entity = EntityFactory.CreateEntity("Backpack".GetHashCode(), pos) as EntityBackpack;
+            // Use our custom StyxBackpack entity_class (defined in
+            // Config/entityclasses.xml + Localization.txt). Same C# class
+            // (EntityBackpack), same visuals, but the loot window header
+            // reads "Styx Backpack" so players can distinguish their
+            // persistent stash from vanilla death bags + Styx sell bins.
+            // Falls back to vanilla "Backpack" if the modlet didn't load.
+            var entity = EntityFactory.CreateEntity("StyxBackpack".GetHashCode(), pos) as EntityBackpack;
+            if (entity == null)
+            {
+                Log.Warning("[StyxBackpack] StyxBackpack entity_class not found -- falling back to vanilla Backpack. Did Config/entityclasses.xml load?");
+                entity = EntityFactory.CreateEntity("Backpack".GetHashCode(), pos) as EntityBackpack;
+            }
             if (entity == null)
             {
                 Log.Warning("[StyxBackpack] Couldn't create Backpack entity for " + pid);
@@ -717,11 +742,40 @@ public class StyxBackpack : StyxPlugin
             foreach (var s in toClose)
             {
                 try { SaveSession(s); } catch (Exception e) { Log.Warning("[StyxBackpack] Close-save failed for " + s.Pid + ": " + e.Message); }
+                // Empty the in-world loot container BEFORE despawn. Engine
+                // treats EntityBackpack with bPlayerBackpack=true and
+                // !IsEmpty() as a persistent player backpack -- chunk save
+                // re-persists it even after RemoveEntity, leading to orphan
+                // bags on next connect. Items are already in the JSON save
+                // (SaveSession ran above), so clearing items[] here is
+                // lossless. With an empty container the engine's own
+                // auto-Kill path fires cleanly and the entity is removed
+                // from chunk save.
+                try { ClearLootContainerItems(s); } catch (Exception e) { Log.Warning("[StyxBackpack] Close-clear failed for " + s.Pid + ": " + e.Message); }
                 try { DespawnBackpackEntity(s.BackpackEntityId); } catch { }
                 _sessions.Remove(s.PlayerEntityId);
                 Log.Out("[StyxBackpack] Closed for {0} (entityId={1})", s.Pid, s.BackpackEntityId);
             }
         }
+    }
+
+    /// <summary>
+    /// Empty the session's in-world loot container so the engine's
+    /// despawn path treats it as a removable empty backpack rather than a
+    /// persistent player stash. Caller is responsible for SaveSession
+    /// having already written items to JSON before this runs -- otherwise
+    /// items are lost.
+    /// </summary>
+    private void ClearLootContainerItems(Session s)
+    {
+        // Re-fetch the live container -- engine may have swapped it.
+        var world = GameManager.Instance?.World;
+        var entity = world?.GetEntity(s.BackpackEntityId);
+        var loot = entity?.lootContainer ?? s.Loot;
+        if (loot?.items == null) return;
+        for (int i = 0; i < loot.items.Length; i++)
+            loot.items[i] = ItemStack.Empty.Clone();
+        loot.SetModified();
     }
 
     private void DespawnBackpackEntity(int entityId)
@@ -885,6 +939,7 @@ public class StyxBackpack : StyxPlugin
         if (_sessions.TryGetValue(ep.entityId, out var s))
         {
             try { SaveSession(s); } catch { }
+            try { ClearLootContainerItems(s); } catch { }
             try { DespawnBackpackEntity(s.BackpackEntityId); } catch { }
             _sessions.Remove(ep.entityId);
         }
@@ -1019,9 +1074,81 @@ public class StyxBackpack : StyxPlugin
         }
 
         try { SaveSession(s); } catch (Exception e) { Log.Warning("[StyxBackpack] Disconnect-save failed: " + e.Message); }
+        // Empty the bag before despawn so chunk save doesn't re-persist
+        // a non-empty player backpack -- same fix as Tick() close handler.
+        try { ClearLootContainerItems(s); } catch (Exception e) { Log.Warning("[StyxBackpack] Disconnect-clear failed: " + e.Message); }
         try { DespawnBackpackEntity(s.BackpackEntityId); } catch { }
         _sessions.Remove(ci.entityId);
         Log.Out("[StyxBackpack] Disconnect cleanup for {0} (entityId={1})", s.Pid, s.BackpackEntityId);
     }
+
+    /// <summary>
+    /// Player connected — schedule an orphan-stash sweep at multiple
+    /// short intervals as chunks stream in. The bag near the player
+    /// becomes visible roughly when its chunk loads (~0.3-1s after
+    /// spawn); subsequent ticks catch bags in chunks that load later.
+    /// Earlier first-tick = less visible flicker for the player.
+    ///
+    /// Catches stash bags left behind by previous sessions where
+    /// DespawnBackpackEntity raced the engine's chunk-save and the
+    /// entity got persisted to disk instead of cleanly removed.
+    /// New-session orphans should be rare since v0.3.1's
+    /// ClearLootContainerItems-before-despawn fix, but the sweep
+    /// remains as a safety net for old saves + unclean shutdowns.
+    /// </summary>
+    void OnPlayerSpawned(ClientInfo client, RespawnType reason, Vector3i pos)
+    {
+        if (client == null) return;
+        // Only sweep on actual connects, not every respawn-on-death.
+        if (reason != RespawnType.EnterMultiplayer && reason != RespawnType.JoinMultiplayer) return;
+
+        // Schedule at 0.3s, 1s, 2s, 4s. The first catches the typical
+        // "bag at the player's logoff position" case the moment its
+        // chunk loads (usually well under a second). Later ticks catch
+        // any bags whose chunks lag in. After 4s we stop -- if bags
+        // are still in unloaded chunks, they're not visible to the
+        // player anyway and the next /b sweep / server restart will
+        // get them.
+        ScheduleSweepAt(0.3,  "fast");
+        ScheduleSweepAt(1.0,  "1s");
+        ScheduleSweepAt(2.0,  "2s");
+        ScheduleSweepAt(4.0,  "4s");
+    }
+
+    private void ScheduleSweepAt(double seconds, string tag)
+    {
+        Scheduler.Once(seconds, () =>
+        {
+            try
+            {
+                int n = SweepOrphanStashBags();
+                if (n > 0)
+                    Log.Out("[StyxBackpack] Post-connect sweep ({0}) removed {1} orphan stash bag(s)", tag, n);
+            }
+            catch (Exception e) { Log.Warning("[StyxBackpack] Post-connect sweep ({0}) failed: {1}", tag, e.Message); }
+        }, name: "StyxBackpack.PostConnectSweep_" + tag);
+    }
+
+    // NOTE: an earlier attempt patched EntityBackpack.Start() Postfix to
+    // override lootContainer.entityId to -1 in the hope that
+    // XUiC_BackpackWindow.TryGetMoveDestinationInventory would accept the
+    // backpack as a "block-based loot" destination (flag2 in that method)
+    // and enable the inventory→container dump-buttons. The patch is
+    // ineffective AND breaks close detection:
+    //   1. ineffective -- TryGetMoveDestinationInventory is CLIENT-SIDE
+    //      code. The server's lootContainer.entityId override doesn't
+    //      reach the client, which runs its own EntityBackpack.Start()
+    //      and re-stamps entityId from the entity itself. Server Harmony
+    //      can't patch the client.
+    //   2. breaks close detection -- TELockServer maps by
+    //      tileEntityLootContainer.entityId. Mid-flight changes to that
+    //      field disrupt IsUserAccessing / unlock lookups, so close
+    //      events don't fire and the on-close autosave never runs. The
+    //      next restart loads the pre-take state, "resurrecting" items.
+    // The dump-button limitation is a fundamental constraint of being
+    // server-only -- without a client companion DLL there's no way to
+    // make the client-side TryGetMoveDestinationInventory accept an
+    // entity-backed container. Players use shift-click on individual
+    // stacks (which works for any open container) or drag-drop.
 
 }

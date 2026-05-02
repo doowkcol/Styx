@@ -2375,21 +2375,19 @@
 
     <!--
         Player-inventory dump-into-container buttons (btnMoveFillAndSmart +
-        btnMoveAll) — vanilla gates them on `lootingorvehiclestorage`, which
-        only fires for block-based loot (`EntityId == -1`), vehicle storage,
-        or drone storage. Entity-backed containers like our StyxBackpack are
-        excluded by the same check that excludes vanilla death bags.
-        Switching visibility to always-true means the buttons render whenever
-        the inventory panel is open. They're inert when no container is open
-        (no target to dump to), which is a tiny cosmetic wart but the only
-        way to get the dump-buttons working for our stash without distributing
-        a client-side mod (the binding is evaluated client-side — a server
-        Harmony patch can't reach it).
+        btnMoveAll) — left at vanilla visibility ({lootingorvehiclestorage}).
+        Vanilla shows them only for block-based loot, vehicle storage, and
+        drone storage; hides them for entity-backed containers like
+        StyxBackpack, StyxSellBin, and vanilla death bags.
 
-        Side-effect: the buttons are also visible for vanilla EntityBackpack
-        death bags now (vanilla excluded them on UX grounds — "you don't
-        usually dump-into your own death bag"). Harmless: the buttons work
-        correctly there too, just rarely useful.
+        We previously force-visible'd them via a setattribute hoping the
+        click handler would work for our entity-backed bags, but
+        XUiC_BackpackWindow.TryGetMoveDestinationInventory rejects all
+        entity-backed containers that aren't EntityDrone — and that's
+        client-side code we can't reach with a server-only Harmony patch.
+        Result was buttons visible but inert, confusing players. Restoring
+        vanilla behaviour means they hide cleanly when the container can't
+        accept dumps. Players use shift-click on individual stacks instead
+        (works for any open container).
     -->
-    <setattribute xpath="/windows/window[@name='windowBackpack']/panel[@name='header']/rect[@controller='ContainerStandardControls']/rect[@visible='{lootingorvehiclestorage}']" name="visible">true</setattribute>
 </configs>

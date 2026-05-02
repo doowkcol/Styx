@@ -6,8 +6,9 @@ In-game item shop with categories, paginated browsing, and live affordability ch
 
 | Command | What | Perm |
 |---|---|---|
-| `/shop` or `/s` | Open the shop | `styx.shop.use` |
+| `/shop` or `/s` | Open the shop (buy) | `styx.shop.use` |
 | `/m → Shop` | Open via launcher | `styx.shop.use` |
+| `/sell` | Open the sell terminal — drop items in, close to sell | `styx.shop.sell` |
 | `/shop reload` | Reload catalog from disk after editing | `styx.eco.admin` |
 
 ## UI flow
@@ -99,6 +100,64 @@ Players without `styx.shop.donor` simply don't see this row. Section item counts
 - **Insufficient balance** — purchase blocked at the chat-affordance check; nothing debited.
 - **Economy plugin not loaded** — shop reports "Economy not loaded" and refuses to debit.
 - **Section with zero visible items for a player** — section hidden in their picker. If all sections are zero, shop whispers "No items available to you."
+
+## Sell terminal (`/sell`)
+
+**Workflow:**
+1. Player runs `/sell` → a transient sell-bin (8×6 = 48 slots) spawns at their feet
+2. Player drags items into it (any items, any amount, any combination)
+3. Player closes the bin (Esc / walk away / close window)
+4. Server iterates the bin contents, computes total sell value, credits the wallet, returns any unsellable items to the player's feet via `GiveBackpack`
+
+The bin is locked to the player while open (`TELockServer`) so other players can't loot it.
+
+### Pricing — three layers
+
+For each item dropped in, the server resolves a per-unit sell price in this order:
+
+1. **Catalog entry's `SellPrice`** (if > 0) — explicit override
+2. **`Price × SellPriceRatio`** — fallback when `SellPrice == 0`. Default ratio is 0.5 (sell at 50% of buy)
+3. **`DefaultSellPrice`** — flat per-unit rate for items NOT in the catalog at all
+4. If none of the above produce a positive number, the item is **refused** and returned to the player
+
+So a catalog entry can leave `SellPrice` unset and the system auto-derives a 50%-spread sell price. Operators who want strict pricing per item set `SellPrice` explicitly.
+
+### Config knobs (`configs/StyxShop.json`)
+
+| Field | Default | Purpose |
+|---|---|---|
+| `SellEnabled` | true | Master toggle. False disables `/sell` entirely. |
+| `SellPerm` | `styx.shop.sell` | Empty = anyone. Set to gate sell behind a perm. |
+| `SellBinRows` × `SellBinCols` | 6 × 8 | Bin grid size (= 48 slots). |
+| `SellPriceRatio` | 0.5 | Fallback sell-as-fraction-of-buy when `SellPrice` not set per entry. 0 disables this fallback. |
+| `DefaultSellPrice` | 1 | Flat per-unit price for items NOT in the catalog. Only used when `AllowSellUncataloged` is true. |
+| `AllowSellUncataloged` | true | False = strict catalog-only mode; uncataloged items get returned to the player. |
+
+### Per-entry catalog field
+
+```json
+{
+  "Item": "resourceForgedIron",
+  "Price": 100,
+  "SellPrice": 30,         // explicit -- 30 credits per unit
+  "Section": "Resources"
+}
+```
+
+If `SellPrice` is omitted (or 0) and the global ratio is 0.5, players sell at 50 credits per forged iron (half of buy price 100).
+
+### Operator strategies
+
+- **"Junk drawer" mode (default)**: leave `AllowSellUncataloged` true, `DefaultSellPrice` low. Players can dump anything for at least a token credit. Catalog items get the ratio price.
+- **"Curated economy" mode**: set `AllowSellUncataloged` false, hand-tune `SellPrice` on every catalog entry. Players can only sell what you've explicitly priced.
+- **"No-spread sell" mode**: set every catalog entry's `SellPrice == Price`. Players resell at exactly buy price (zero spread). Inflationary — only do this if you also have aggressive sinks.
+
+### Edge cases
+
+- **Player drops item, then takes it back out before closing**: not sold. Bin processes only what's still inside on close.
+- **Player disconnects without closing**: engine releases the lock, plugin processes on next tick. Credit hits the wallet (visible next login). Returned items spawn at the disconnected player's last position.
+- **Server restart with bin open mid-session**: bin entity persists in the save as a regular EntityBackpack with the player's items inside. Plugin's in-memory session is gone — orphaned bin in the world. Player can still loot the bag manually. (Future v0.3: scan-and-cleanup on plugin load.)
+- **Plugin unloaded while bin open**: `OnUnload` despawns all open sell-bins (items lost). Don't unload while players are mid-sell.
 
 ## FX (currency exchange) idiom
 

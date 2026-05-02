@@ -1,4 +1,6 @@
 Key,File,Type,english
+StyxSellBin,entityclasses,Entity Info,Sell Terminal
+StyxBackpack,entityclasses,Entity Info,Styx Backpack
 buffStyxVipUndeadName,buffs,Buff,VIP: Undead Slayer
 buffStyxVipUndeadDesc,buffs,Buff,"Donor perk — deal +100% damage to zombies."
 buffStyxVipHarvestName,buffs,Buff,VIP: Harvest Master

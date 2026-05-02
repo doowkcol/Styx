@@ -54,12 +54,28 @@ First-match-wins on the `SizeByPerm` list: highest tier the player holds wins. N
 
 The container is **not** a permanent world block. Each `/b` call:
 
-1. Spawns a short-lived `EntityBackpack` at your feet
+1. Spawns a short-lived `EntityBackpack` at your feet (custom `StyxBackpack` entity class — header reads "Styx Backpack" in the loot window, distinct from vanilla death bags and Styx sell bins)
 2. Hydrates it from your saved file (`data/StyxBackpack/<PlatformId>.json`)
 3. Triggers the engine's "open loot UI" — the loot window opens, AND the vanilla flow auto-opens your character backpack panel beside it for drag-drop
-4. Polls `IsUserAccessing` every `PollSeconds`; on close, serialises everything back to the JSON file and despawns the entity
+4. Polls `IsUserAccessing` every `PollSeconds`; on close, serialises everything back to the JSON file, **empties the in-world container, and despawns the entity**
 
 Auto-saves every `AutosaveSeconds` while open — crash-safe within that window.
+
+### Why the container gets emptied on close
+
+The engine treats `EntityBackpack` with `bPlayerBackpack=true` as a persistent player stash and won't auto-Kill it while it has items. If we just call `RemoveEntity`, the chunk save can race the removal and re-persist the bag — leading to orphan bags appearing on the next reconnect. Items are already in the JSON save by the time we clear the in-world container, so this is lossless and lets the engine's normal cleanup path run cleanly.
+
+### Orphan-bag sweep
+
+If you do see a bag appear briefly at login (orphan from before the v0.3.1 fix, or from an unclean shutdown), the plugin runs an orphan sweep at 0.3 / 1 / 2 / 4 seconds after spawn that picks them up. Server log:
+
+```
+[StyxBackpack] Post-connect sweep (fast) removed N orphan stash bag(s)
+```
+
+After that one cycle the chunk save persists the removal and the orphans are gone permanently. Steady-state should report nothing — if it keeps reporting non-zero counts every login, something's still leaking; capture the log and investigate.
+
+You can also trigger the sweep manually via `/b sweep` (admin).
 
 ## Death behaviour
 

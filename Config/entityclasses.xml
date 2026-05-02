@@ -1,0 +1,57 @@
+<configs>
+
+    <!--
+        Custom entity classes shipped by Styx. The XML auto-syncs to
+        clients on connect via the engine's vanilla XML distribution
+        path (WorldStaticData.cs has _sendToClients: true for
+        entityclasses), so a player joining a Styx server gets these
+        registered without installing anything client-side.
+    -->
+
+    <append xpath="/entity_classes">
+
+        <!--
+            StyxSellBin — visually identical to a vanilla Backpack but a
+            distinct entity class so its loot window header shows
+            "Sell Terminal" instead of "Backpack". Localization key
+            matches the class name (see Localization.txt).
+            Used by the StyxShop /sell command.
+        -->
+        <entity_class name="StyxSellBin">
+            <property name="Class" value="EntityBackpack"/>
+            <property name="UserSpawnType" value="None"/>
+            <property name="Mesh" value="@:Entities/LootContainers/backpack_droppedPrefab.prefab"/>
+            <property name="ModelType" value="Custom"/>
+            <property name="Prefab" value="Backpack"/>
+            <property name="Parent" value="Backpack"/>
+            <property name="TimeStayAfterDeath" value="3600"/>
+            <property name="IsEnemyEntity" value="false"/>
+            <property name="LootListOnDeath" value="playerBackpack"/>
+            <property name="Faction" value="none"/>
+            <property name="NavObject" value="backpack"/>
+        </entity_class>
+
+        <!--
+            StyxBackpack — used by the StyxBackpack plugin's /b command.
+            Same visuals as a vanilla Backpack; loot window header reads
+            "Styx Backpack" so players can tell at a glance whether they're
+            looking at their persistent stash, a vanilla death bag, or a
+            sell terminal.
+        -->
+        <entity_class name="StyxBackpack">
+            <property name="Class" value="EntityBackpack"/>
+            <property name="UserSpawnType" value="None"/>
+            <property name="Mesh" value="@:Entities/LootContainers/backpack_droppedPrefab.prefab"/>
+            <property name="ModelType" value="Custom"/>
+            <property name="Prefab" value="Backpack"/>
+            <property name="Parent" value="Backpack"/>
+            <property name="TimeStayAfterDeath" value="3600"/>
+            <property name="IsEnemyEntity" value="false"/>
+            <property name="LootListOnDeath" value="playerBackpack"/>
+            <property name="Faction" value="none"/>
+            <property name="NavObject" value="backpack"/>
+        </entity_class>
+
+    </append>
+
+</configs>
