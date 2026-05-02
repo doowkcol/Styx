@@ -28,7 +28,7 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | # | Plugin | Chat command | What |
 |---|---|---|---|
 | [09](./09-server-restart.md) | ServerRestartManager | `/srm` | Scheduled daily restarts with countdown |
-| [11](./11-godmode.md) | Godmode | `/god` | Styx-internal damage immunity flag |
+| [11](./11-godmode.md) | Godmode | `/god` | **Disabled** (`.cs.disabled`) — client-authoritative death prediction blocks server-only godmode on V2.6 |
 | [12](./12-vanish.md) | Vanish | `/vanish` | Invisible + AI-ignore (admin tool) |
 | [13](./13-reflect.md) | Reflect | `/reflect` | Damage-reflect modes (off/shield/back/double) |
 | [14](./14-admin-radar.md) | AdminRadar | `/aradar` | Through-walls 5-category entity radar |

@@ -1,17 +1,33 @@
 # 11 — Godmode
 
-> **⚠️ EXPERIMENTAL — NOT WORKING YET.**
+> **🚫 DISABLED — shipped as `Godmode.cs.disabled`. Will not load.**
 >
-> The framework patches and the plugin command surface are in place, but
-> server-side godmode does not currently produce the desired effect on a
-> live dedicated server. The player still appears to die from the client's
-> point of view (death animation plays, respawn screen shown). See
-> `STYX_V26_ENGINE_SURFACE.md §1.2` for why dedicated-server damage
-> cancellation is fundamentally hard, and `§1.7` / `§1.8` for the
-> patches that have been tried so far.
+> Server-side godmode is fundamentally blocked by the client-authoritative
+> death-prediction path on V2.6 dedicated servers. The framework patches
+> in `Styx.Core/Hooks/FirstPartyPatches.cs` correctly cancel server-side
+> damage paths (verified — `Kill()` / `OnEntityDeath()` never fire), but
+> the client locally predicts the death and shows the respawn screen
+> regardless. We've tried six patch points covering the entire damage
+> pipeline; closing the last gap appears to require either a client
+> companion mod (which Styx avoids by design) or an engine hook that
+> hasn't been identified yet.
 >
-> Treat this plugin as a work-in-progress. The doc below describes the
-> intended surface; do not rely on it in production.
+> File renamed to `.disabled` to make the no-op state explicit — the
+> plugin watcher only picks up `.cs` files, so it won't load. The
+> framework's IsGodmode/SetGodmode API on `StyxCore` remains in place
+> for any future plugin that wants to consult it, but no plugin
+> currently does.
+>
+> **Future work:** if a server-only client-death-suppression hook is
+> ever discovered, or the project decides to relax the no-client-mod
+> constraint for admin tooling, the plugin can be re-enabled by simply
+> renaming back to `.cs`. Background context for the resumption:
+> `STYX_V26_ENGINE_SURFACE.md §1.2 / §1.7 / §1.8`.
+>
+> ---
+>
+> The doc below describes the intended surface for reference. Don't
+> rely on it in production today.
 
 ---
 
