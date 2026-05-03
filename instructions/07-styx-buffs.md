@@ -1,6 +1,6 @@
 # 07 — StyxBuffs
 
-Defines a flat list of buffs (and optional CVar writes), each gated by a permission. The picker UI shows **every configured buff to every player** -- even ones they don't have a gate-perm for, marked `[No Perm]`, so they can see what's possible. Two flavours:
+Defines a flat list of buffs (and optional CVar writes), each gated by a permission. The picker UI shows **every configured buff to every player** -- even ones they don't have a gate-perm for, marked `(No Perm)`, so they can see what's possible. Two flavours:
 
 - **Toggle buffs** (`CooldownSeconds = 0`) -- always-on while perm + ON. Auto-apply on join/spawn + reapply tick. Player toggles via LMB.
 - **Cooldown buffs** (`CooldownSeconds > 0`) -- on-demand. LMB on a Ready row applies the buff for `DurationSeconds`, then enters cooldown for `CooldownSeconds`, then becomes Ready again. Never auto-applied.
@@ -90,7 +90,7 @@ Two entries with the same `Buff` but different `Perm` is fine -- the player gets
 
 | Status | Meaning | LMB action |
 |---|---|---|
-| `[No Perm]` | Player doesn't hold the gate-perm | whisper "no perm" |
+| `(No Perm)` | Player doesn't hold the gate-perm | whisper "no perm" |
 | `OFF` | Toggle buff, perm OK, user disabled | toggle ON |
 | `ON` | Toggle buff, perm OK, active | toggle OFF |
 | `Ready` | Cooldown buff, perm OK, available | activate (apply for DurationSeconds) |

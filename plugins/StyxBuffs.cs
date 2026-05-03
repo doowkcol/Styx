@@ -788,7 +788,7 @@ public class StyxBuffs : StyxPlugin
         string statusText;
         switch (status)
         {
-            case StatusNoPerm:   statusText = "[888888][No Perm][-]"; break;
+            case StatusNoPerm:   statusText = "[888888](No Perm)[-]"; break;
             case StatusOff:      statusText = "[ffaa00]OFF[-]"; break;
             case StatusOn:       statusText = "[00ff66]ON[-]"; break;
             case StatusReady:    statusText = "[66ddff]Ready[-]"; break;
@@ -841,7 +841,7 @@ public class StyxBuffs : StyxPlugin
             string statusText;
             switch (status)
             {
-                case StatusNoPerm:   statusText = "[888888][No Perm][-]"; break;
+                case StatusNoPerm:   statusText = "[888888](No Perm)[-]"; break;
                 case StatusOff:      statusText = "[ffaa00]OFF[-]"; break;
                 case StatusOn:       statusText = "[00ff66]ON[-]"; break;
                 case StatusReady:    statusText = "[66ddff]Ready[-]"; break;

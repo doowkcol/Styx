@@ -629,7 +629,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row0_id')))}"
                         font_size="18" pos="76,-52" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 0}" />
-                <label depth="3" name="snp0" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp0" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-54" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 0}" />
                 <label depth="3" name="soff0" text="OFF" font_size="14" color="220,120,100,255"
@@ -658,7 +658,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row1_id')))}"
                         font_size="18" pos="76,-76" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 1}" />
-                <label depth="3" name="snp1" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp1" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-78" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 0}" />
                 <label depth="3" name="soff1" text="OFF" font_size="14" color="220,120,100,255"
@@ -687,7 +687,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row2_id')))}"
                         font_size="18" pos="76,-100" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 2}" />
-                <label depth="3" name="snp2" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp2" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-102" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 0}" />
                 <label depth="3" name="soff2" text="OFF" font_size="14" color="220,120,100,255"
@@ -716,7 +716,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row3_id')))}"
                         font_size="18" pos="76,-124" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 3}" />
-                <label depth="3" name="snp3" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp3" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-126" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 0}" />
                 <label depth="3" name="soff3" text="OFF" font_size="14" color="220,120,100,255"
@@ -745,7 +745,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row4_id')))}"
                         font_size="18" pos="76,-148" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 4}" />
-                <label depth="3" name="snp4" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp4" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-150" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 0}" />
                 <label depth="3" name="soff4" text="OFF" font_size="14" color="220,120,100,255"
@@ -774,7 +774,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row5_id')))}"
                         font_size="18" pos="76,-172" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 5}" />
-                <label depth="3" name="snp5" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp5" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-174" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 0}" />
                 <label depth="3" name="soff5" text="OFF" font_size="14" color="220,120,100,255"
@@ -803,7 +803,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row6_id')))}"
                         font_size="18" pos="76,-196" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 6}" />
-                <label depth="3" name="snp6" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp6" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-198" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 0}" />
                 <label depth="3" name="soff6" text="OFF" font_size="14" color="220,120,100,255"
@@ -832,7 +832,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row7_id')))}"
                         font_size="18" pos="76,-220" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 7}" />
-                <label depth="3" name="snp7" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp7" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-222" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 0}" />
                 <label depth="3" name="soff7" text="OFF" font_size="14" color="220,120,100,255"
@@ -861,7 +861,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row8_id')))}"
                         font_size="18" pos="76,-244" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 8}" />
-                <label depth="3" name="snp8" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp8" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-246" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 0}" />
                 <label depth="3" name="soff8" text="OFF" font_size="14" color="220,120,100,255"
@@ -890,7 +890,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row9_id')))}"
                         font_size="18" pos="76,-268" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 9}" />
-                <label depth="3" name="snp9" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp9" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-270" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 0}" />
                 <label depth="3" name="soff9" text="OFF" font_size="14" color="220,120,100,255"
@@ -919,7 +919,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row10_id')))}"
                         font_size="18" pos="76,-292" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 10}" />
-                <label depth="3" name="snp10" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp10" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-294" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 0}" />
                 <label depth="3" name="soff10" text="OFF" font_size="14" color="220,120,100,255"
@@ -948,7 +948,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row11_id')))}"
                         font_size="18" pos="76,-316" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 11}" />
-                <label depth="3" name="snp11" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp11" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-318" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 0}" />
                 <label depth="3" name="soff11" text="OFF" font_size="14" color="220,120,100,255"
@@ -977,7 +977,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row12_id')))}"
                         font_size="18" pos="76,-340" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 12}" />
-                <label depth="3" name="snp12" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp12" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-342" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 0}" />
                 <label depth="3" name="soff12" text="OFF" font_size="14" color="220,120,100,255"
@@ -1006,7 +1006,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row13_id')))}"
                         font_size="18" pos="76,-364" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 13}" />
-                <label depth="3" name="snp13" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp13" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-366" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 0}" />
                 <label depth="3" name="soff13" text="OFF" font_size="14" color="220,120,100,255"
@@ -1035,7 +1035,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row14_id')))}"
                         font_size="18" pos="76,-388" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 14}" />
-                <label depth="3" name="snp14" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp14" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-390" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 0}" />
                 <label depth="3" name="soff14" text="OFF" font_size="14" color="220,120,100,255"
@@ -1064,7 +1064,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row15_id')))}"
                         font_size="18" pos="76,-412" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 15}" />
-                <label depth="3" name="snp15" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp15" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-414" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 0}" />
                 <label depth="3" name="soff15" text="OFF" font_size="14" color="220,120,100,255"
@@ -1093,7 +1093,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row16_id')))}"
                         font_size="18" pos="76,-436" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 16}" />
-                <label depth="3" name="snp16" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp16" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-438" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 0}" />
                 <label depth="3" name="soff16" text="OFF" font_size="14" color="220,120,100,255"
@@ -1122,7 +1122,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row17_id')))}"
                         font_size="18" pos="76,-460" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 17}" />
-                <label depth="3" name="snp17" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp17" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-462" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 0}" />
                 <label depth="3" name="soff17" text="OFF" font_size="14" color="220,120,100,255"
@@ -1151,7 +1151,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row18_id')))}"
                         font_size="18" pos="76,-484" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 18}" />
-                <label depth="3" name="snp18" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp18" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-486" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 0}" />
                 <label depth="3" name="soff18" text="OFF" font_size="14" color="220,120,100,255"
@@ -1180,7 +1180,7 @@
                         text="{#localization('buffs_name_' + int(cvar('styx.buffs.row19_id')))}"
                         font_size="18" pos="76,-508" width="300" height="22" color="240,240,240,255"
                         visible="{#cvar('styx.buffs.count') &gt; 19}" />
-                <label depth="3" name="snp19" text="[No Perm]" font_size="14" color="130,130,130,255"
+                <label depth="3" name="snp19" text="(No Perm)" font_size="14" color="130,130,130,255"
                        pos="384,-510" width="110" height="20"
                        visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 0}" />
                 <label depth="3" name="soff19" text="OFF" font_size="14" color="220,120,100,255"
@@ -1208,7 +1208,7 @@
                        color="220,220,200,255" />
 
                 <label depth="3" name="hint"
-                       text="[No Perm] = need a perm. ON/OFF = toggle. Ready/Active/Cooldown = on-demand buffs."
+                       text="(No Perm) = need a perm. ON/OFF = toggle. Ready/Active/Cooldown = on-demand buffs."
                        font_size="12" justify="center"
                        pos="250,-600" width="500" height="16" pivot="top"
                        color="200,200,160,255" />
