@@ -39,7 +39,7 @@ using Styx;
 using Styx.Permissions;
 using Styx.Plugins;
 
-[Info("PermEditor", "Doowkcol", "0.2.0")]
+[Info("PermEditor", "Doowkcol", "0.2.1")]
 public class PermEditor : StyxPlugin
 {
     public override string Description => "UI for granting/revoking plugin perms per group (group → plugin → perms)";
@@ -64,6 +64,12 @@ public class PermEditor : StyxPlugin
     // tag" sentinel — selecting it sets ChatTag = null. Storing presets
     // statically lets us register them as static labels for indexed lookup
     // (Recipe B), avoiding the dynamic-string painting limitation of XUi.
+    //
+    // The array MUST cover every tag a group might actually carry, otherwise
+    // IndexOfTagPreset falls back to 0 and the editor shows "[None]" for
+    // groups whose stored ChatTag isn't in the cycle (the disconnect bug).
+    // Append new tags rather than reordering — preset indices are exposed via
+    // perm_tag_<i> localization keys consumed by windows.xml.
     private static readonly string[] TagPresets =
     {
         "[None]",     // index 0 → null tag
@@ -74,23 +80,35 @@ public class PermEditor : StyxPlugin
         "[Mod]",
         "[Admin]",
         "[Owner]",
+        "[Survivor]",  // default group
+        "[LVL25]",
+        "[LVL50]",
+        "[LVL75]",
+        "[LVL100]",
     };
 
     // ChatTagColor preset cycle — array of (BBCode hex, friendly name).
+    // Same constraint as TagPresets: extend rather than reorder.
     private static readonly string[] ColorPresets =
     {
         "ffffff",  // white
         "888888",  // gray
         "00ff66",  // green
         "55aaff",  // blue
-        "ffaa00",  // gold
+        "ffaa00",  // gold (VIP)
         "ff6666",  // red
         "ff66ff",  // magenta
         "00ffff",  // cyan
+        "cccccc",  // lt gray (default group)
+        "88ff66",  // lime  (lvl25)
+        "66bbff",  // sky   (lvl50)
+        "cc88ff",  // lavender (lvl75)
+        "ffd700",  // yellow (lvl100)
     };
     private static readonly string[] ColorNames =
     {
         "white", "gray", "green", "blue", "gold", "red", "magenta", "cyan",
+        "lt gray", "lime", "sky", "lavender", "yellow",
     };
 
     // Priority cycle: 0..200 in steps of 10.
@@ -143,14 +161,26 @@ public class PermEditor : StyxPlugin
         StyxCore.Perms.RegisterKnown(PermAdmin,
             "Open the /m → Perm Editor sub-menu", Name);
 
-        Log.Out("[PermEditor] Loaded v0.2.0 — perm: {0} (labels built at OnServerInitialized)", PermAdmin);
+        // First boot: BuildLabels() runs again at OnServerInitialized once
+        // every plugin has registered its perms (otherwise late-registering
+        // plugins would render as raw placeholder keys).
+        // Hot-reload: OnServerInitialized doesn't fire again, so call here
+        // too -- by then every other plugin's perms are already in the
+        // registry, and this run also re-persists tag/color labels into
+        // Mods/StyxRuntime/Config/Localization.txt for next boot. The
+        // first-boot call is a harmless duplicate of OnServerInitialized.
+        BuildLabels();
+
+        Log.Out("[PermEditor] Loaded v0.2.1 — perm: {0} (labels built in OnLoad + OnServerInitialized)", PermAdmin);
     }
 
     /// <summary>
-    /// Defer label baking until ALL plugins have loaded — otherwise plugins
-    /// that register perms after PermEditor (whichever way the load order
-    /// resolves them) won't have static labels and would render as the raw
-    /// placeholder key (e.g. "perm_def_3").
+    /// First-boot label rebake. OnLoad already calls BuildLabels, but plugins
+    /// that register perms AFTER PermEditor (load order dependent) wouldn't be
+    /// in the registry yet at that point and would render as raw placeholder
+    /// keys (e.g. "perm_def_3"). OnServerInitialized fires once all plugins
+    /// have loaded -- run BuildLabels again so the registry is complete.
+    /// On hot-reload this hook does NOT fire, so OnLoad's call carries.
     /// </summary>
     void OnServerInitialized()
     {
