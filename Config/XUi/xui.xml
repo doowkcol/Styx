@@ -10,6 +10,7 @@
         <window name="styxHud" />
         <window name="styxMenu" />
         <window name="styxBuilder" />
+        <window name="styxShield" />
         <window name="styxPerms" />
         <window name="styxLauncher" />
         <window name="styxKits" />

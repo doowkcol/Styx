@@ -8,8 +8,12 @@ data/_compile_cache/
 data/*.sessions.json
 data/*.state.json
 data/*.cooldowns.json
+data/*.zones.json
+data/*.tracker.json
 data/StyxBackpack/
 data/StyxTeleport/
+data/StyxShield/
+data/StyxBuilder/
 data/PermEditor.last_open.json
 
 # Server-meta progression runtime state (Economy / Rewards / Leveling / Shop)

@@ -15,6 +15,8 @@ styxRank_4,styx,Ui,Transcendent [loc]
 buffStyxInputProbeName,buffs,Buff,Styx Input Probe
 buffStyxInputProbeDesc,buffs,Buff,"Routes key presses to the server (experiment)."
 buffStyxHealFullName,buffs,Buff,Healing
+buffStyxShieldActiveName,buffs,Buff,Sanctuary
+buffStyxShieldActiveDesc,buffs,Buff,"Shield active — zombies don't notice you and won't path into your land claim. Bloodmoon suspends protection."
 styxPerms_0,styx,Ui,View my groups and effective perms
 styxPerms_1,styx,Ui,List online players with their groups
 styxPerms_2,styx,Ui,List all groups with member and perm counts

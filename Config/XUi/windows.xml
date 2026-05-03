@@ -482,6 +482,114 @@
         </window>
 
         <!--
+            styxShield — Sanctuary toggle UI (StyxShield.cs).
+
+            Single-page panel. State driven by:
+              styx.shield.open         panel visible
+              styx.shield.active       1 if player owns &gt;= 1 active shield
+              styx.shield.slots_used   current slot count
+              styx.shield.slots_max    config cap
+              styx.shield.bloodmoon    1 if protection currently suspended
+              styx.shield.here         1 if player standing in their own LCB
+              styx.shield.here_active  1 if THIS LCB is the shielded one
+
+            Inputs: LMB toggle current LCB, RMB back to launcher.
+        -->
+        <window name="styxShield"
+                anchor="CenterCenter" pos="-260,170"
+                width="520" height="340"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="52">
+
+            <rect name="wrap" pos="0,0" width="520" height="340"
+                  visible="{#cvar('styx.shield.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,210"        type="sliced" width="520" height="340" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="120,200,255,220"  type="sliced" width="520" height="340" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="STYX SHIELD"
+                       font_size="26" justify="center" style="outline"
+                       color="120,200,255,255"
+                       pos="260,-10" width="520" height="30" pivot="top" />
+
+                <!-- ===== Status row: ACTIVE / INACTIVE ===== -->
+                <label depth="3" name="stActive" text="ACTIVE"
+                       font_size="20" justify="center" style="outline"
+                       pos="260,-50" width="520" height="26" pivot="top"
+                       color="100,255,140,255"
+                       visible="{#cvar('styx.shield.active') == 1}" />
+                <label depth="3" name="stInactive" text="INACTIVE"
+                       font_size="20" justify="center" style="outline"
+                       pos="260,-50" width="520" height="26" pivot="top"
+                       color="180,180,180,255"
+                       visible="{#cvar('styx.shield.active') == 0}" />
+
+                <!-- ===== Bloodmoon suspension banner ===== -->
+                <label depth="3" name="bmBanner"
+                       text="SUSPENDED — Blood Moon"
+                       font_size="14" justify="center" style="outline"
+                       pos="260,-78" width="520" height="20" pivot="top"
+                       color="255,120,120,255"
+                       visible="{#cvar('styx.shield.bloodmoon') == 1}" />
+
+                <!-- ===== Slot usage ===== -->
+                <label depth="3" name="slots"
+                       text="Slots used: {cvar(styx.shield.slots_used:0)} / {cvar(styx.shield.slots_max:0)}"
+                       font_size="14" justify="center"
+                       pos="260,-104" width="520" height="20" pivot="top"
+                       color="200,220,255,255" />
+
+                <!-- ===== Description ===== -->
+                <label depth="3" name="d1"
+                       text="Zombies don't notice you while inside your land claim."
+                       font_size="13" justify="center"
+                       pos="260,-140" width="500" height="18" pivot="top"
+                       color="220,220,220,255" />
+                <label depth="3" name="d2"
+                       text="Walls of stealth: aggro, noise, and idle wander all filtered."
+                       font_size="13" justify="center"
+                       pos="260,-160" width="500" height="18" pivot="top"
+                       color="220,220,220,255" />
+                <label depth="3" name="d3"
+                       text="Stand inside YOUR land claim to toggle. Suspends during blood moon."
+                       font_size="13" justify="center"
+                       pos="260,-180" width="500" height="18" pivot="top"
+                       color="180,200,220,255" />
+
+                <!-- ===== Toggle prompt: depends on (here, here_active) ===== -->
+                <!-- (a) Not standing in own LCB -->
+                <label depth="3" name="needLcb"
+                       text="STAND IN YOUR LCB TO TOGGLE"
+                       font_size="16" justify="center" style="outline"
+                       pos="260,-222" width="520" height="22" pivot="top"
+                       color="255,180,120,255"
+                       visible="{#cvar('styx.shield.here') == 0}" />
+                <!-- (b) In own LCB, this one is shielded -->
+                <label depth="3" name="canDeact"
+                       text="[LMB] DEACTIVATE THIS CLAIM"
+                       font_size="16" justify="center" style="outline"
+                       pos="260,-222" width="520" height="22" pivot="top"
+                       color="255,200,120,255"
+                       visible="{#(cvar('styx.shield.here') == 1) and (cvar('styx.shield.here_active') == 1)}" />
+                <!-- (c) In own LCB, this one not shielded -->
+                <label depth="3" name="canAct"
+                       text="[LMB] ACTIVATE THIS CLAIM"
+                       font_size="16" justify="center" style="outline"
+                       pos="260,-222" width="520" height="22" pivot="top"
+                       color="120,255,180,255"
+                       visible="{#(cvar('styx.shield.here') == 1) and (cvar('styx.shield.here_active') == 0)}" />
+
+                <!-- Legend -->
+                <label depth="3" name="legend"
+                       text="[LMB] toggle   [RMB] back"
+                       font_size="14" justify="center"
+                       pos="260,-314" width="520" height="20" pivot="top"
+                       color="180,180,180,255" />
+            </rect>
+        </window>
+
+        <!--
             styxBuffs — StyxBuffs toggle UI.
             Per-row name + ON/OFF status (visibility-gated labels) + a
             description line that tracks the cursor. Same wiring as styxKits:

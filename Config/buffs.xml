@@ -141,5 +141,23 @@
             </effect_group>
         </buff>
 
+        <!--
+            Visual marker for an active StyxShield. No mechanical effect —
+            the actual stealth/repulsion is delivered by the framework's
+            Harmony patches (Styx.Hooks.FirstParty.ShieldGuard) reading from
+            Styx.Shield.IsPlayerShielded. The buff just gives the player an
+            icon they can see in their HUD so they know the shield is on.
+
+            Long duration; the plugin re-applies on join/spawn and on
+            activate. Removed by plugin on /shield off or LCB destruction.
+        -->
+        <buff name="buffStyxShieldActive"
+              name_key="buffStyxShieldActiveName"
+              description_key="buffStyxShieldActiveDesc"
+              icon="ui_game_symbol_shield">
+            <stack_type value="replace"/>
+            <duration value="999999"/>
+        </buff>
+
     </append>
 </configs>
