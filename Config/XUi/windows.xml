@@ -217,6 +217,271 @@
         </window>
 
         <!--
+            styxBuilder — Builder picker (StyxBuilder.cs).
+
+            Three-stage UI (v0.5.0):
+              Stage 0 (styx.builder.stage == 0): block-type picker
+                Up to 10 rows of {block name} (count: N) populated per-player
+                from their tracked-in-claim blocks. styx.builder.row<N>_id
+                holds the block.blockID at row N (-1 if unused — row hidden);
+                {#localization('builder_block_' + id)} resolves to a friendly
+                name (labels registered at OnLoad from Block.list).
+              Stage 1 (styx.builder.stage == 1): action picker
+                Repair / Upgrade / Downgrade applied to the type chosen at
+                stage 0. Sub-header shows which type the filter is on.
+              Stage 2 (styx.builder.stage == 2): post-scan confirm prompt
+                Header reflects the chosen op. Body shows {cvar(...count)}
+                blocks targeted, with a "FREE" badge if styx.builder.free == 1.
+                LMB confirms; RMB returns to stage 1 without executing.
+
+            Cost detail (per-resource breakdown) is whispered into chat from
+            the plugin — per-player dynamic strings can't be painted in XUi.
+        -->
+        <window name="styxBuilder"
+                anchor="CenterCenter" pos="-260,240"
+                width="520" height="480"
+                pivot="TopLeft"
+                controller="ToolbeltWindow"
+                depth="51">
+
+            <rect name="wrap" pos="0,0" width="520" height="480"
+                  visible="{#cvar('styx.builder.open') == 1}">
+
+                <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,210"        type="sliced" width="520" height="480" />
+                <sprite depth="1" name="border" sprite="menu_empty3px" color="255,200,120,220"  type="sliced" width="520" height="480" fillcenter="false" />
+
+                <label depth="2" name="hdr" text="STYX BUILDER"
+                       font_size="26" justify="center" style="outline"
+                       color="255,200,120,255"
+                       pos="260,-10" width="520" height="30" pivot="top" />
+
+                <!-- ===== Stage 0: tier picker (up to 6 rows) =====
+                     row<N>_id holds a BlockTier ordinal (0=Basic, 1=Wood,
+                     2=Cobblestone, 3=Concrete, 4=Steel, 5=Other) or -1 if
+                     the player has no tracked blocks of that tier. The
+                     plugin populates rows in tier-ordinal order so the
+                     picker reads top-down: Basic -> ... -> Other. -->
+                <rect name="stage0" pos="0,-46" width="520" height="400"
+                      visible="{#cvar('styx.builder.stage') == 0}">
+
+                    <label depth="3" name="sub" text="Pick a block grade to operate on"
+                           font_size="14" justify="center"
+                           pos="260,0" width="520" height="18" pivot="top"
+                           color="200,200,200,255" />
+
+                    <!-- Empty-state hint when no tiers tracked in claim -->
+                    <label depth="3" name="empty"
+                           text="No tracked blocks in your current claim."
+                           font_size="14" justify="center"
+                           pos="260,-30" width="520" height="20" pivot="top"
+                           color="255,180,120,255"
+                           visible="{#cvar('styx.builder.type_count') == 0}" />
+
+                    <label depth="3" name="t0c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="22,-30" width="20" height="22"
+                           visible="{#(cvar('styx.builder.row0_id') &gt;= 0) and (cvar('styx.builder.sel') == 0)}" />
+                    <label depth="3" name="t0n"
+                           text="{#localization('builder_tier_' + int(cvar('styx.builder.row0_id')))}"
+                           font_size="16"
+                           pos="50,-30" width="370" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.builder.row0_id') &gt;= 0}" />
+                    <label depth="3" name="t0k" text="x{cvar(styx.builder.row0_count:0)}"
+                           font_size="14" justify="right"
+                           pos="430,-30" width="70" height="22" color="180,220,255,255"
+                           visible="{#cvar('styx.builder.row0_id') &gt;= 0}" />
+
+                    <label depth="3" name="t1c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="22,-58" width="20" height="22"
+                           visible="{#(cvar('styx.builder.row1_id') &gt;= 0) and (cvar('styx.builder.sel') == 1)}" />
+                    <label depth="3" name="t1n"
+                           text="{#localization('builder_tier_' + int(cvar('styx.builder.row1_id')))}"
+                           font_size="16"
+                           pos="50,-58" width="370" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.builder.row1_id') &gt;= 0}" />
+                    <label depth="3" name="t1k" text="x{cvar(styx.builder.row1_count:0)}"
+                           font_size="14" justify="right"
+                           pos="430,-58" width="70" height="22" color="180,220,255,255"
+                           visible="{#cvar('styx.builder.row1_id') &gt;= 0}" />
+
+                    <label depth="3" name="t2c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="22,-86" width="20" height="22"
+                           visible="{#(cvar('styx.builder.row2_id') &gt;= 0) and (cvar('styx.builder.sel') == 2)}" />
+                    <label depth="3" name="t2n"
+                           text="{#localization('builder_tier_' + int(cvar('styx.builder.row2_id')))}"
+                           font_size="16"
+                           pos="50,-86" width="370" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.builder.row2_id') &gt;= 0}" />
+                    <label depth="3" name="t2k" text="x{cvar(styx.builder.row2_count:0)}"
+                           font_size="14" justify="right"
+                           pos="430,-86" width="70" height="22" color="180,220,255,255"
+                           visible="{#cvar('styx.builder.row2_id') &gt;= 0}" />
+
+                    <label depth="3" name="t3c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="22,-114" width="20" height="22"
+                           visible="{#(cvar('styx.builder.row3_id') &gt;= 0) and (cvar('styx.builder.sel') == 3)}" />
+                    <label depth="3" name="t3n"
+                           text="{#localization('builder_tier_' + int(cvar('styx.builder.row3_id')))}"
+                           font_size="16"
+                           pos="50,-114" width="370" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.builder.row3_id') &gt;= 0}" />
+                    <label depth="3" name="t3k" text="x{cvar(styx.builder.row3_count:0)}"
+                           font_size="14" justify="right"
+                           pos="430,-114" width="70" height="22" color="180,220,255,255"
+                           visible="{#cvar('styx.builder.row3_id') &gt;= 0}" />
+
+                    <label depth="3" name="t4c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="22,-142" width="20" height="22"
+                           visible="{#(cvar('styx.builder.row4_id') &gt;= 0) and (cvar('styx.builder.sel') == 4)}" />
+                    <label depth="3" name="t4n"
+                           text="{#localization('builder_tier_' + int(cvar('styx.builder.row4_id')))}"
+                           font_size="16"
+                           pos="50,-142" width="370" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.builder.row4_id') &gt;= 0}" />
+                    <label depth="3" name="t4k" text="x{cvar(styx.builder.row4_count:0)}"
+                           font_size="14" justify="right"
+                           pos="430,-142" width="70" height="22" color="180,220,255,255"
+                           visible="{#cvar('styx.builder.row4_id') &gt;= 0}" />
+
+                    <label depth="3" name="t5c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="22,-170" width="20" height="22"
+                           visible="{#(cvar('styx.builder.row5_id') &gt;= 0) and (cvar('styx.builder.sel') == 5)}" />
+                    <label depth="3" name="t5n"
+                           text="{#localization('builder_tier_' + int(cvar('styx.builder.row5_id')))}"
+                           font_size="16"
+                           pos="50,-170" width="370" height="22" color="240,240,240,255"
+                           visible="{#cvar('styx.builder.row5_id') &gt;= 0}" />
+                    <label depth="3" name="t5k" text="x{cvar(styx.builder.row5_count:0)}"
+                           font_size="14" justify="right"
+                           pos="430,-170" width="70" height="22" color="180,220,255,255"
+                           visible="{#cvar('styx.builder.row5_id') &gt;= 0}" />
+
+                    <label depth="3" name="hint0"
+                           text="Stand inside YOUR land claim. Costs drawn from owned crates."
+                           font_size="12" justify="center"
+                           pos="260,-292" width="520" height="16" pivot="top"
+                           color="180,180,180,255" />
+                </rect>
+
+                <!-- ===== Stage 1: action picker ===== -->
+                <rect name="stage1" pos="0,-46" width="520" height="400"
+                      visible="{#cvar('styx.builder.stage') == 1}">
+
+                    <label depth="3" name="sub1"
+                           text="Grade: {#localization('builder_tier_' + int(cvar('styx.builder.type_id')))}"
+                           font_size="14" justify="center"
+                           pos="260,0" width="520" height="18" pivot="top"
+                           color="180,220,255,255" />
+
+                    <!-- Row 0: Repair -->
+                    <label depth="3" name="a0c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="32,-32" width="20" height="24"
+                           visible="{#cvar('styx.builder.sel') == 0}" />
+                    <label depth="3" name="a0" text="Repair  -- fix damaged blocks of this grade"
+                           font_size="20"
+                           pos="64,-32" width="430" height="24" color="240,240,240,255" />
+
+                    <!-- Row 1: Upgrade -->
+                    <label depth="3" name="a1c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="32,-62" width="20" height="24"
+                           visible="{#cvar('styx.builder.sel') == 1}" />
+                    <label depth="3" name="a1" text="Upgrade  -- promote to next tier"
+                           font_size="20"
+                           pos="64,-62" width="430" height="24" color="240,240,240,255" />
+
+                    <!-- Row 2: Downgrade -->
+                    <label depth="3" name="a2c" text="&gt;" font_size="22" color="255,200,120,255"
+                           pos="32,-92" width="20" height="24"
+                           visible="{#cvar('styx.builder.sel') == 2}" />
+                    <label depth="3" name="a2" text="Downgrade  -- revert to previous tier"
+                           font_size="20"
+                           pos="64,-92" width="430" height="24" color="240,240,240,255" />
+
+                    <label depth="3" name="hint1"
+                           text="Only blocks of the selected type will be touched."
+                           font_size="12" justify="center"
+                           pos="260,-148" width="520" height="16" pivot="top"
+                           color="180,180,180,255" />
+                </rect>
+
+                <!-- ===== Stage 2: confirm prompt ===== -->
+                <rect name="stage2" pos="0,-46" width="520" height="400"
+                      visible="{#cvar('styx.builder.stage') == 2}">
+
+                    <!-- Per-op verb header (visibility-gated on styx.builder.op) -->
+                    <label depth="3" name="hRepair" text="Repair?"
+                           font_size="24" justify="center" style="outline"
+                           pos="260,0" width="520" height="28" pivot="top"
+                           color="100,255,180,255"
+                           visible="{#cvar('styx.builder.op') == 0}" />
+                    <label depth="3" name="hUpgrade" text="Upgrade?"
+                           font_size="24" justify="center" style="outline"
+                           pos="260,0" width="520" height="28" pivot="top"
+                           color="100,200,255,255"
+                           visible="{#cvar('styx.builder.op') == 1}" />
+                    <label depth="3" name="hDowngrade" text="Downgrade?"
+                           font_size="24" justify="center" style="outline"
+                           pos="260,0" width="520" height="28" pivot="top"
+                           color="255,180,180,255"
+                           visible="{#cvar('styx.builder.op') == 2}" />
+
+                    <!-- Show the tier being affected -->
+                    <label depth="3" name="cTyp"
+                           text="Grade: {#localization('builder_tier_' + int(cvar('styx.builder.type_id')))}"
+                           font_size="14" justify="center"
+                           pos="260,-32" width="520" height="18" pivot="top"
+                           color="180,220,255,255" />
+
+                    <!-- Block count -->
+                    <label depth="3" name="cnt"
+                           text="Targeting {cvar(styx.builder.count:0)} block(s)"
+                           font_size="18" justify="center"
+                           pos="260,-58" width="520" height="22" pivot="top"
+                           color="240,240,240,255" />
+
+                    <!-- FREE badge -->
+                    <label depth="3" name="free" text="FREE -- no materials required"
+                           font_size="14" justify="center" style="outline"
+                           pos="260,-86" width="520" height="18" pivot="top"
+                           color="100,255,140,255"
+                           visible="{#cvar('styx.builder.free') == 1}" />
+
+                    <!-- Cost-detail pointer (when not free) -->
+                    <label depth="3" name="costRef" text="Cost breakdown shown in chat"
+                           font_size="13" justify="center"
+                           pos="260,-86" width="520" height="18" pivot="top"
+                           color="255,210,140,255"
+                           visible="{#cvar('styx.builder.free') == 0}" />
+
+                    <label depth="3" name="hint2"
+                           text="Materials drawn from YOUR locked crates inside this claim."
+                           font_size="12" justify="center"
+                           pos="260,-114" width="520" height="16" pivot="top"
+                           color="180,180,180,255" />
+                </rect>
+
+                <!-- Stage-specific legend (anchored to bottom of window) -->
+                <label depth="3" name="legend0"
+                       text="[SCROLL] choose   [LMB] select type   [RMB] back"
+                       font_size="14" justify="center"
+                       pos="260,-454" width="520" height="20" pivot="top"
+                       color="180,180,180,255"
+                       visible="{#cvar('styx.builder.stage') == 0}" />
+                <label depth="3" name="legend1"
+                       text="[SCROLL] choose   [LMB] scan   [RMB] back"
+                       font_size="14" justify="center"
+                       pos="260,-454" width="520" height="20" pivot="top"
+                       color="180,180,180,255"
+                       visible="{#cvar('styx.builder.stage') == 1}" />
+                <label depth="3" name="legend2"
+                       text="[LMB] CONFIRM   [RMB] back"
+                       font_size="14" justify="center"
+                       pos="260,-454" width="520" height="20" pivot="top"
+                       color="180,180,180,255"
+                       visible="{#cvar('styx.builder.stage') == 2}" />
+            </rect>
+        </window>
+
+        <!--
             styxBuffs — StyxBuffs toggle UI.
             Per-row name + ON/OFF status (visibility-gated labels) + a
             description line that tracks the cursor. Same wiring as styxKits:

@@ -9,6 +9,7 @@
     <append xpath="/xui/ruleset[@name='default']/window_group[@name='toolbelt']">
         <window name="styxHud" />
         <window name="styxMenu" />
+        <window name="styxBuilder" />
         <window name="styxPerms" />
         <window name="styxLauncher" />
         <window name="styxKits" />
