@@ -1368,6 +1368,15 @@
                            color="160,255,180,255"
                            pos="280,-38" width="560" height="18" pivot="top" />
 
+                    <!-- Sliding-window position badge (top-right). Hidden when
+                         the picker is empty so it never shows "0/0". -->
+                    <label depth="3" name="hdr1pos"
+                           text="{cvar(styx.pe.plugin_pos:1)}/{cvar(styx.pe.plugin_total:1)}"
+                           font_size="13" justify="right"
+                           color="180,180,180,255"
+                           pos="510,-38" width="50" height="18" pivot="top"
+                           visible="{#cvar('styx.pe.plugin_total') &gt; 0}" />
+
                     <!-- 20 plugin rows. Y: -68, -94, -120, -146, -172, -198, -224, -250, -276, -302, -328, -354, -380, -406, -432, -458, -484, -510, -536, -562 (26px steps) -->
                     <label depth="3" name="ppc0" text="&gt;" font_size="22" color="255,200,140,255"
                            pos="22,-68" width="20" height="22" visible="{#cvar('styx.pe.sel') == 0}" />
@@ -1490,7 +1499,7 @@
                            visible="{#cvar('styx.pe.plugin_count') &gt; 19}" />
 
                     <label depth="3" name="hint1p"
-                           text="'(All plugins)' shows every registered perm. Perm count per plugin whispered as you navigate."
+                           text="(All plugins) = unfiltered. List scrolls past 20 — top-right badge shows your position. Perm count per plugin whispered as you navigate."
                            font_size="12" justify="center"
                            pos="280,-602" width="560" height="16" pivot="top"
                            color="200,200,160,255" />
@@ -1510,6 +1519,15 @@
                            font_size="22" justify="center" style="outline"
                            color="160,255,180,255"
                            pos="280,-8" width="560" height="24" pivot="top" />
+
+                    <!-- Sliding-window position badge (top-right). Only shown
+                         when the cursor is on a perm row (perm_pos > 0). -->
+                    <label depth="3" name="hdr2pos"
+                           text="{cvar(styx.pe.perm_pos:1)}/{cvar(styx.pe.perm_total:1)}"
+                           font_size="13" justify="right"
+                           color="180,180,180,255"
+                           pos="510,-12" width="50" height="18" pivot="top"
+                           visible="{#cvar('styx.pe.perm_pos') &gt; 0}" />
 
                     <!-- ===== Group config rows (sel 0..2) ===== -->
 
@@ -1744,7 +1762,7 @@
                            visible="{#cvar('styx.pe.perm_count') &gt; 15  and cvar('styx.pe.perm15_status') == 0}" />
 
                     <label depth="3" name="hint1"
-                           text="Top 3 rows edit group identity. Below = perm grants. Description whispered as you navigate."
+                           text="Top 3 rows edit group identity. Below = perm grants. Long lists scroll past 16 — top-right badge shows position. Description whispered as you navigate."
                            font_size="12" justify="center"
                            pos="280,-490" width="560" height="16" pivot="top"
                            color="200,200,160,255" />
