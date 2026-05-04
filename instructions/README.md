@@ -22,6 +22,8 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | [08](./08-welcome-message.md) | WelcomeMessage | `/wm` | Permission-gated welcome messages on spawn |
 | [10](./10-chat-tags.md) | ChatTags | (none) | Group-priority `[Tag]` prefix on chat |
 | [26](./26-shop.md) | StyxShop | `/shop` `/s` `/m → Shop` | Categorised, paginated item shop — pay with Credits |
+| [29](./29-builder.md) | StyxBuilder | `/build` `/repair` `/upgrade` `/downgrade` | Whole-base upgrade / downgrade / repair on tracked claim blocks (perm-tiered free / discount / full-cost) |
+| [30](./30-shield.md) | StyxShield | `/shield` `/m → Shield` | Sanctuary stealth zone bound to your land claim — zombies don't notice you while inside |
 
 ## Admin tooling
 
@@ -34,6 +36,7 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | [13](./13-reflect.md) | Reflect | `/reflect` | Damage-reflect modes (off/shield/back/double) |
 | [14](./14-admin-radar.md) | AdminRadar | `/aradar` | Through-walls 5-category entity radar |
 | [15](./15-admin-tools.md) | AdminTools | `/m → Admin Tools` | Sub-menu launcher for vanish + radar toggles |
+| [31](./31-profiler.md) | StyxProfiler | `/prof` | Chat-rendered profiler dashboard — hooks / commands / timers / patches / GC |
 
 ## Server progression / economy
 

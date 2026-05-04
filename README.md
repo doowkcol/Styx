@@ -24,29 +24,39 @@ Full per-plugin operator reference: [`instructions/README.md`](./instructions/RE
 
 ## What ships in the box
 
-**Player-facing**
+**Player-facing — survival quality of life**
 - `/m` action launcher · `/menu` action menu (heal, water, teleport, info)
+- `/build` whole-base auto-upgrade / downgrade / repair on tracked claim blocks (perm-tiered free / discounted / full-cost)
+- `/shield` sanctuary stealth zone bound to your land claim — zombies don't notice you while inside (auto-suspends during blood moon)
 - `/sethome` × 3 · nearest trader · last death teleport
 - `/b` persistent personal backpack + perm-tiered death bag
 - `/kit` claimable starter / VIP / themed item kits
 - `/zloot` perm-tiered loot bag drops on zombie kill (Romero-tuned, 18+ zombie classes themed)
-- `/donor` group-mapped buffs with per-player toggle UI
+- `/buffs` perm-gated buff perks (toggle and on-demand-cooldown flavours, per-player UI)
 - `/crafting` perm-tiered forge speed + idle-fuel auto-shutdown
 - `/zhealth` crosshair entity-health HUD readout
 - `/radar` per-player live zombie-count HUD section
 - `/wm` perm-gated welcome messages on spawn
 - `[Tag]` chat-prefix system with group priority
 
+**Player-facing — economy / progression**
+- `/balance` `/pay` `/eco` per-player virtual currency wallet
+- `/rewards` configurable earn engine (kills, loot, harvest, quests, login, online time)
+- `/xp` server XP + level system with milestone group promotions
+- `/shop` `/s` categorised paginated item shop — pay with Credits
+- `/sell` sell loot to the server bank from anywhere
+
 **Admin tools**
+- `/perm` `/m → Perm Editor` group → plugin → toggle perm UI (sliding window over long lists)
 - `/aradar` through-walls 5-category entity radar
 - `/vanish` invisible + AI-ignore
-- `/god` damage immunity
 - `/reflect` damage-reflect modes
 - `/srm` scheduled daily restarts with countdown
+- `/prof` chat-rendered profiler (hooks / commands / timers / patches / GC) — zero-overhead when off
 
 **HUD / UI**
-- Top-left HUD showing players, rank, wipe + restart countdown
-- Per-plugin XUi panels (zombie radar, zombie health, action menu)
+- Top-left HUD showing players, rank, wipe + restart countdown, level / XP / currency
+- Per-plugin XUi panels (zombie radar, zombie health, builder, shield, action menu, perm editor)
 
 **Dev / reference**
 - `/hello` minimal "hello world" plugin
@@ -73,7 +83,9 @@ Commercial / hosting-partnership enquiries: **jacklockwood@outlook.com**.
 
 ## Status
 
-Styx is **production-grade for single-server use**. It runs the [REKT 7DTD Romero PvP server](https://discord.gg/rekt) day-to-day. It has not yet been stress-tested across many concurrent server admins or large-scale community deployments — partner-server testing welcome (open an issue).
+Styx is **production-grade for single-server use**. It runs the public **Styx Framework Test Server** (PvE, EU, Navezgane — search the in-game browser, or direct connect `162.19.126.139:26900`) day-to-day. Operator Discord: https://discord.gg/sV3kTB5n2e.
+
+It has not yet been stress-tested across many concurrent server admins or large-scale community deployments — partner-server testing welcome (open an issue).
 
 The framework targets **7 Days to Die V2.6**. V2.7 / V3 compatibility will be tracked as those versions ship; expect packet shapes and engine internals to drift between point releases.
 
@@ -89,6 +101,8 @@ Patterns to start from:
 - **Perm-tiered behaviour**: `plugins/ZombieLoot.cs` or `plugins/StyxCrafting.cs`
 - **Player-facing UI panel**: `plugins/StyxHud.cs` or `plugins/StyxZombieHealth.cs`
 - **Interactive menu (input capture)**: `plugins/StyxMenu.cs`
+- **Multi-stage UI with sliding window**: `plugins/PermEditor.cs` (group → plugin → perm flow)
+- **Harmony patches via the framework**: `plugins/StyxShield.cs` + `Styx.Hooks.FirstParty.ShieldGuard` (filters AI calls in-engine)
 - **GameData mutation**: `plugins/GameDataDemo.cs`
 
 ---

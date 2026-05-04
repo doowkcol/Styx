@@ -47,8 +47,10 @@ Action launcher — jump/crouch to navigate, LMB to confirm, RMB to close. Each 
 Open via `/m → Perm Editor`. Three-stage picker:
 
 1. **Pick a group** (default / vip / admin / any custom you created)
-2. **Pick a plugin** (or `(All)` to see every perm)
+2. **Pick a plugin** (or `(All plugins)` to see every perm)
 3. **Edit perms for that group × plugin slice** — toggle perms ON/OFF, plus edit group's `Priority`, `ChatTag`, and `ChatTagColor` (used by ChatTags plugin)
+
+Stages 1 (plugins) and 2 (perms) use a **sliding window** over the full list, so the picker never silently truncates — scroll past the visible 20 / 16 rows and the window slides. Top-right `X/Y` badge shows your absolute position when scrolling matters.
 
 Group priority controls which group's tag wins in chat (higher = wins). Default priorities: `default=0`, `vip=50`, `admin=100`.
 
