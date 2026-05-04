@@ -1,13 +1,15 @@
 # Styx
 
-A **Carbon-style server-side modding framework for 7 Days to Die V2.6**.
+A **server-side plugin framework for 7 Days to Die V2.6 dedicated servers.**
 
 - **Server-side only.** No client install required. Players join with vanilla / console-style clients.
 - **EAC-compatible.** Anti-cheat stays enabled. The framework adds nothing to the client.
-- **Hot-reload `.cs` plugins.** Save the file, the plugin reloads. No restart for plugin code.
-- **Permission system, perm-tier UI, hooks, scheduler, XUi panel mounting, indexed-localization HUD pattern, configs, persistent data stores** — all wired up.
+- **Hot-reload `.cs` plugins.** Drop a plugin file in `Mods/Styx/plugins/`, save changes — the framework compiles and reloads it live. No restart for plugin code, no build step.
+- **Batteries included** — permissions with group inheritance, lifecycle hooks with per-plugin attribution, chat commands with parsing + cooldowns, scheduler, persistent data stores, auto-defaulting configs, an XUi panel-mounting layer (server-driven cvars drive HUDs and interactive windows), and a built-in profiler.
 
-Inspired by [Carbon](https://github.com/CarbonCommunity/Carbon.Core) (Rust) and [uMod / Oxide](https://umod.org). Built because nothing else in the 7DTD ecosystem does this combination — especially the EAC-on + no-client-install constraint that lets console-style players join a modded server.
+Built on the native `IModApi` + Harmony. Plugin source is compiled by Roslyn at boot and on save. Ships with 30+ reference plugins covering economy, progression, base management, perm-tiered perks, admin tooling and HUDs — the whole thing is the framework you'd build for yourself the third time you wrote a server-side mod.
+
+Why it exists: nothing else in the 7DTD ecosystem ships this combination — especially the EAC-on + no-client-install constraint that lets console-style players join a modded server, and the live hot-reload of plugin source.
 
 ---
 

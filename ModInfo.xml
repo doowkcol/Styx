@@ -3,7 +3,7 @@
   <Name value="Styx" />
   <DisplayName value="Styx Framework" />
   <Version value="0.1.0" />
-  <Description value="Carbon-inspired plugin framework for 7 Days to Die" />
+  <Description value="Server-side plugin framework for 7 Days to Die V2.6 — hot-reload C# plugins, no client install, EAC-compatible" />
   <Author value="Doowkcol / Rekt Game Servers" />
   <Website value="" />
 </xml>
