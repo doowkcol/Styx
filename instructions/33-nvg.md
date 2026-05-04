@@ -73,3 +73,4 @@ The buff-driven `AddPartFPV` approach pins the light to the *camera*, so it foll
 - `/nvg show <player>` reports two things — the persisted *preference* and whether the buff is currently *active* on the entity. They should match almost always; if "preference: ON, buff active: no" lasts more than 60 s you've found a buff-clearing edge case worth reporting.
 - After editing `Config/buffs.xml` (e.g. to swap the icon), **server restart required** — buffs.xml loads once at boot.
 - Hot-reloading `StyxNvg.cs` works fine — players' on/off preference is in the data store, untouched by code reload.
+- The buff's name + description are runtime-registered by the plugin (`Ui.Labels.Register` from `OnLoad`), so you don't need to edit `Config/Localization.txt`. Already-connected players see the new labels on next reconnect.

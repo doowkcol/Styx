@@ -83,6 +83,16 @@ public class StyxNvg : StyxPlugin
         _cfg   = StyxCore.Configs.Load<Config>(this);
         _state = this.Data.Store<State>("state");
 
+        // Register buff name + description as runtime localization so the
+        // operator doesn't have to hand-edit Mods/Styx/Config/Localization.txt
+        // for this plugin's labels. EngineBridge injects into the server's
+        // Localization dictionary and the next debounced WriteCsv pushes the
+        // entries to clients on connect. Drop-in deploy path: copy the .cs
+        // file, restart for the buffs.xml entry, done.
+        Styx.Ui.Labels.Register(this, "buffStyxNvgName", "Night Vision");
+        Styx.Ui.Labels.Register(this, "buffStyxNvgDesc",
+            "Personal light follows your view. See in the dark without burning torches. Toggle with /nvg.");
+
         StyxCore.Perms.RegisterKnown(PermUse,
             "Toggle personal night vision (/nvg)", Name);
         StyxCore.Perms.RegisterKnown(PermAdmin,
