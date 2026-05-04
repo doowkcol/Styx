@@ -24,7 +24,6 @@ For plugin-author / framework docs, see the `STYX_*.md` files in the project roo
 | [26](./26-shop.md) | StyxShop | `/shop` `/s` `/m → Shop` | Categorised, paginated item shop — pay with Credits |
 | [29](./29-builder.md) | StyxBuilder | `/build` `/repair` `/upgrade` `/downgrade` | Whole-base upgrade / downgrade / repair on tracked claim blocks (perm-tiered free / discount / full-cost) |
 | [30](./30-shield.md) | StyxShield | `/shield` `/m → Shield` | Sanctuary stealth zone bound to your land claim — zombies don't notice you while inside |
-| [32](./32-pockets.md) | StyxPockets | `/pockets` | Perm-tiered passive `BagSize` + `CarryCapacity` bumps — bigger inventory and higher encumbrance threshold per tier |
 
 ## Admin tooling
 

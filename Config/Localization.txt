@@ -17,12 +17,6 @@ buffStyxInputProbeDesc,buffs,Buff,"Routes key presses to the server (experiment)
 buffStyxHealFullName,buffs,Buff,Healing
 buffStyxShieldActiveName,buffs,Buff,Sanctuary
 buffStyxShieldActiveDesc,buffs,Buff,"Shield active — zombies don't notice you and won't path into your land claim. Bloodmoon suspends protection."
-buffStyxPockets6Name,buffs,Buff,Pockets +6
-buffStyxPockets6Desc,buffs,Buff,"+6 inventory slots and +6 carry capacity."
-buffStyxPockets12Name,buffs,Buff,Pockets +12
-buffStyxPockets12Desc,buffs,Buff,"+12 inventory slots and +12 carry capacity."
-buffStyxPockets24Name,buffs,Buff,Pockets +24
-buffStyxPockets24Desc,buffs,Buff,"+24 inventory slots and +24 carry capacity."
 styxPerms_0,styx,Ui,View my groups and effective perms
 styxPerms_1,styx,Ui,List online players with their groups
 styxPerms_2,styx,Ui,List all groups with member and perm counts
