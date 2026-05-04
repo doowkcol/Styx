@@ -46,7 +46,7 @@ using Styx.Scheduling;
 
 /* @styx-buffs
 <!--
-    StyxNvg -- server-side "night vision" via a camera-attached light
+    StyxNvg — server-side "night vision" via a camera-attached light
     source. Same Unity prefab the vanilla Mining Helmet Light mod uses,
     just driven by buff lifecycle instead of armour-equip events.
 
@@ -54,7 +54,7 @@ using Styx.Scheduling;
     player, no helmet required). SetPartActive switches the light on.
     RemovePart cleans up when the buff ends.
 
-    AddPartTPV deliberately skipped -- vanilla parents the third-person
+    AddPartTPV deliberately skipped — vanilla parents the third-person
     light to the helmet's "Spotlight" bone, which only exists when the
     helmet is equipped. The wearer-facing effect (FPV) is what matters
     for night vision; other players seeing a beam is bonus we trade
