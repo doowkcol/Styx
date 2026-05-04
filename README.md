@@ -30,6 +30,7 @@ Full per-plugin operator reference: [`instructions/README.md`](./instructions/RE
 - `/m` action launcher · `/menu` action menu (heal, water, teleport, info)
 - `/build` whole-base auto-upgrade / downgrade / repair on tracked claim blocks (perm-tiered free / discounted / full-cost)
 - `/shield` sanctuary stealth zone bound to your land claim — zombies don't notice you while inside (auto-suspends during blood moon)
+- `/pockets` perm-tiered extra inventory slots + carry capacity (passive — auto-applies on join)
 - `/sethome` × 3 · nearest trader · last death teleport
 - `/b` persistent personal backpack + perm-tiered death bag
 - `/kit` claimable starter / VIP / themed item kits

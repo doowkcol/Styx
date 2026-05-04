@@ -159,5 +159,56 @@
             <duration value="999999"/>
         </buff>
 
+        <!--
+            StyxPockets — perm-tiered passive bumps to BagSize + CarryCapacity.
+
+            BagSize     drives the inventory grid the client paints. Vanilla
+                        engine resizes the bag UI dynamically based on this
+                        stat (storage-pocket armour mods rely on the same
+                        mechanism), so we don't need to touch any client XUi.
+            CarryCapacity sets the threshold before encumbrance kicks in.
+                        Bumping BagSize without bumping CarryCapacity gives
+                        you slots that immediately put you in encumbrance.
+
+            stack_type=replace + long duration; StyxPockets reapplies on
+            spawn and on a periodic tick, so the buff is effectively
+            permanent while perms hold.
+        -->
+        <buff name="buffStyxPockets6"
+              name_key="buffStyxPockets6Name"
+              description_key="buffStyxPockets6Desc"
+              icon="ui_game_symbol_backpack">
+            <stack_type value="replace"/>
+            <duration value="999999"/>
+            <effect_group>
+                <passive_effect name="BagSize"       operation="base_add" value="6"/>
+                <passive_effect name="CarryCapacity" operation="base_add" value="6"/>
+            </effect_group>
+        </buff>
+
+        <buff name="buffStyxPockets12"
+              name_key="buffStyxPockets12Name"
+              description_key="buffStyxPockets12Desc"
+              icon="ui_game_symbol_backpack">
+            <stack_type value="replace"/>
+            <duration value="999999"/>
+            <effect_group>
+                <passive_effect name="BagSize"       operation="base_add" value="12"/>
+                <passive_effect name="CarryCapacity" operation="base_add" value="12"/>
+            </effect_group>
+        </buff>
+
+        <buff name="buffStyxPockets24"
+              name_key="buffStyxPockets24Name"
+              description_key="buffStyxPockets24Desc"
+              icon="ui_game_symbol_backpack">
+            <stack_type value="replace"/>
+            <duration value="999999"/>
+            <effect_group>
+                <passive_effect name="BagSize"       operation="base_add" value="24"/>
+                <passive_effect name="CarryCapacity" operation="base_add" value="24"/>
+            </effect_group>
+        </buff>
+
     </append>
 </configs>
