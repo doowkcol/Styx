@@ -5,6 +5,7 @@ A **server-side plugin framework for 7 Days to Die V2.6 dedicated servers.**
 - **Server-side only.** No client install required. Players join with vanilla / console-style clients.
 - **EAC-compatible.** Anti-cheat stays enabled. The framework adds nothing to the client.
 - **Hot-reload `.cs` plugins.** Drop a plugin file in `Mods/Styx/plugins/`, save changes — the framework compiles and reloads it live. No restart for plugin code, no build step.
+- **Single-file plugins.** Plugin authors embed buff defs, XUi panels, window-group registrations and localization rows directly in the `.cs` source as `/* @styx-* */` block comments. The framework extracts them at boot and writes the canonical `Config/buffs.xml`, `Config/XUi/windows.xml`, `Config/XUi/xui.xml`. Operators drop one file, restart, done — no XML editing, no manual merging. See [`docs/plugin-authoring.md`](./docs/plugin-authoring.md).
 - **Batteries included** — permissions with group inheritance, lifecycle hooks with per-plugin attribution, chat commands with parsing + cooldowns, scheduler, persistent data stores, auto-defaulting configs, an XUi panel-mounting layer (server-driven cvars drive HUDs and interactive windows), and a built-in profiler.
 
 Built on the native `IModApi` + Harmony. Plugin source is compiled by Roslyn at boot and on save. Ships with 30+ reference plugins covering economy, progression, base management, perm-tiered perks, admin tooling and HUDs — the whole thing is the framework you'd build for yourself the third time you wrote a server-side mod.
@@ -96,17 +97,20 @@ The framework targets **7 Days to Die V2.6**. V2.7 / V3 compatibility will be tr
 
 ## For plugin authors
 
-The `instructions/` folder is operator-focused. Plugin authoring docs (framework internals, hook catalogue, capabilities, engine-surface notes) live in the original development repository and will be split into a `docs/` folder here once the public repo settles.
+Start with **[`docs/plugin-authoring.md`](./docs/plugin-authoring.md)** — covers the embedded manifest system, every supported `/* @styx-* */` section (buffs, XUi windows, window-group registration, localization), the synthesis lifecycle, the dev-mode toggle, and the common gotchas.
 
-Patterns to start from:
+Reference patterns to copy from:
 - **Minimal plugin**: `plugins/HelloSource.cs`
 - **Permission-gated command**: `plugins/Kit.cs`
 - **Perm-tiered behaviour**: `plugins/ZombieLoot.cs` or `plugins/StyxCrafting.cs`
-- **Player-facing UI panel**: `plugins/StyxHud.cs` or `plugins/StyxZombieHealth.cs`
+- **Single-file plugin with embedded buff**: `plugins/StyxNvg.cs` — toggle command + `@styx-buffs` block
+- **Single-file plugin with embedded UI panel + buff**: `plugins/StyxShield.cs` — `@styx-xui-windows` + `@styx-xui-window-group toolbelt` + `@styx-buffs` in one file
 - **Interactive menu (input capture)**: `plugins/StyxMenu.cs`
 - **Multi-stage UI with sliding window**: `plugins/PermEditor.cs` (group → plugin → perm flow)
 - **Harmony patches via the framework**: `plugins/StyxShield.cs` + `Styx.Hooks.FirstParty.ShieldGuard` (filters AI calls in-engine)
 - **GameData mutation**: `plugins/GameDataDemo.cs`
+
+The `instructions/` folder is the **operator** reference (per-plugin commands, perms, configs). Plugin-author docs live in `docs/`.
 
 ---
 

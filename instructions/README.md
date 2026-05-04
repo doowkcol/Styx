@@ -2,7 +2,7 @@
 
 Per-plugin command reference, perms, and config notes. Pitched at server operators, not framework authors.
 
-For plugin-author / framework docs, see the `STYX_*.md` files in the project root.
+Plugin-author docs live in **[`../docs/plugin-authoring.md`](../docs/plugin-authoring.md)** — covers the embedded manifest system (`/* @styx-buffs */`, `/* @styx-xui-windows */`, etc.) and how single-file plugins ship their own buff defs, UI panels, and localization without operator XML editing.
 
 ## Read first
 
