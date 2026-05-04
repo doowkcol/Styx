@@ -163,14 +163,20 @@ using Styx.Scheduling;
 
 /* @styx-buffs
 <!--
-    Visual marker for an active StyxShield. No mechanical effect —
-    the actual stealth/repulsion is delivered by the framework's
-    Harmony patches (Styx.Hooks.FirstParty.ShieldGuard) reading from
-    Styx.Shield.IsPlayerShielded. The buff just gives the player an
-    icon they can see in their HUD so they know the shield is on.
+    Visual marker shown ONLY while the player is currently standing
+    inside one of their own shielded land claims (matches what the
+    actual stealth/repulsion does — the Harmony patches in
+    Styx.Hooks.FirstParty.ShieldGuard already only filter when
+    Shield.IsPlayerShielded(p) is true).
 
-    Long duration; the plugin re-applies on join/spawn and on
-    activate. Removed by plugin on /shield off or LCB destruction.
+    The plugin runs a periodic presence-check tick that toggles this
+    buff on/off based on the player's position vs their shielded
+    zones. So the buff icon disappears as the player steps outside
+    their LCB and reappears when they walk back in. Bloodmoon
+    suspension also auto-removes (IsPlayerShielded returns false).
+
+    Long duration is just a "don't expire on its own" sentinel; the
+    plugin owns the lifecycle.
 -->
 <buff name="buffStyxShieldActive"
       name_key="buffStyxShieldActiveName"
@@ -247,6 +253,7 @@ public class StyxShield : StyxPlugin
     private Config _cfg;
     private DataStore<State> _state;
     private TimerHandle _flushTick;
+    private TimerHandle _presenceTick;
     private bool _dirty;
 
     public override void OnLoad()
@@ -303,6 +310,13 @@ public class StyxShield : StyxPlugin
         int flushSecs = Math.Max(5, _cfg.FlushIntervalSeconds);
         _flushTick = Scheduler.Every(flushSecs, FlushIfDirty, name: "StyxShield.flush");
 
+        // Presence tick: toggle the visible Sanctuary buff on/off based on
+        // whether each online player is currently inside their own shielded
+        // LCB. Cheap (Shield.IsPlayerShielded is a single locked AABB scan
+        // over the registry per player) and 2s is fast enough for crisp
+        // visual feedback without burning CPU.
+        _presenceTick = Scheduler.Every(2.0, RefreshAllPresenceBuffs, name: "StyxShield.presence");
+
         Log.Out("[StyxShield] Loaded v0.3.0 -- {0} shield(s) restored, max-per-player={1}, bloodmoon-suspends={2}, animals={3}, bandits={4}",
             restored, _cfg.MaxActivePerPlayer, _cfg.BlockOnBloodmoon,
             _cfg.BlockRegularAnimals, _cfg.BlockBandits);
@@ -312,6 +326,8 @@ public class StyxShield : StyxPlugin
     {
         _flushTick?.Destroy();
         _flushTick = null;
+        _presenceTick?.Destroy();
+        _presenceTick = null;
         FlushIfDirty();
         Shield.Clear();
         // Reset bloodmoon gate so a future plugin reload gets the framework default.
@@ -359,12 +375,12 @@ public class StyxShield : StyxPlugin
 
         Shield.SetOwnerEntityId(pid, client.entityId);
 
-        // Re-apply visible buff if this player owns active zones.
-        if (_state.Value.Active.TryGetValue(pid, out var list) && list.Count > 0)
-        {
-            var p = StyxCore.Player.FindByEntityId(client.entityId);
-            if (p != null) ApplyBuff(p);
-        }
+        // Sync the visible buff against actual presence. The presence tick
+        // would catch this within 2s anyway, but doing it once at spawn
+        // means newly-joined players who land inside their LCB see the
+        // icon immediately rather than waiting for the next tick.
+        var p = StyxCore.Player.FindByEntityId(client.entityId);
+        if (p != null) RefreshPresenceBuff(p);
     }
 
     // ============================================================ Commands
@@ -421,8 +437,11 @@ public class StyxShield : StyxPlugin
             OwnerEntityId = client.entityId,
         });
 
+        // Toggle just succeeded -- the player is by definition standing
+        // inside this LCB, so the presence check applies the buff now
+        // rather than waiting up to 2s for the next presence tick.
         var p = StyxCore.Player.FindByEntityId(client.entityId);
-        if (p != null) ApplyBuff(p);
+        if (p != null) RefreshPresenceBuff(p);
 
         if (_cfg.Verbose)
             Log.Out("[StyxShield] {0} activated shield @ ({1}) [{2}/{3}]",
@@ -449,8 +468,9 @@ public class StyxShield : StyxPlugin
 
         var p = StyxCore.Player.FindByEntityId(client.entityId);
 
-        // Strip visible buff only if no other shield remains for the player.
-        if (owned.Count == 0 && p != null) RemoveBuff(p);
+        // Re-evaluate presence: deactivating the LCB the player is standing
+        // in flips IsPlayerShielded to false, so the buff drops off cleanly.
+        if (p != null) RefreshPresenceBuff(p);
 
         if (_cfg.Verbose)
             Log.Out("[StyxShield] {0} deactivated shield @ ({1}) [{2}/{3}]",
@@ -658,5 +678,33 @@ public class StyxShield : StyxPlugin
     {
         try { p.Buffs?.RemoveBuff(ShieldBuffName); }
         catch (Exception e) { Log.Warning("[StyxShield] RemoveBuff threw: " + e.Message); }
+    }
+
+    /// <summary>
+    /// Reconcile the visible Sanctuary buff against Shield.IsPlayerShielded
+    /// for one player: apply when they're inside their own shielded LCB,
+    /// remove when they're not. Cheap and idempotent -- safe to call from
+    /// hot paths or every-2s ticks. Bloodmoon suspension flows through
+    /// IsPlayerShielded so the buff drops automatically during the event.
+    /// </summary>
+    private void RefreshPresenceBuff(EntityPlayer p)
+    {
+        if (p == null) return;
+        bool shouldHave = false;
+        bool hasIt     = false;
+        try { shouldHave = Styx.Shield.IsPlayerShielded(p); }
+        catch (Exception e) { Log.Warning("[StyxShield] IsPlayerShielded threw: " + e.Message); return; }
+        try { hasIt = p.Buffs?.HasBuff(ShieldBuffName) == true; }
+        catch { /* tolerate -- treat as not present and let ApplyBuff resolve */ }
+
+        if (shouldHave && !hasIt) ApplyBuff(p);
+        else if (!shouldHave && hasIt) RemoveBuff(p);
+    }
+
+    private void RefreshAllPresenceBuffs()
+    {
+        var all = StyxCore.Player.All();
+        if (all == null) return;
+        foreach (var p in all) RefreshPresenceBuff(p);
     }
 }
