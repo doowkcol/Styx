@@ -33,6 +33,56 @@ using System.Collections.Generic;
 using Styx;
 using Styx.Plugins;
 
+/* @styx-buffs
+<!--
+    Full restorative buff — heal HP + refill food/water/stamina + cure
+    every injury and disease. Applied by StyxMenu's "Heal Full" action.
+
+    Mechanics:
+      1. RemoveAllNegativeBuffs — vanilla action that strips every
+         buff marked is_negative (broken legs, sprains, bleeds,
+         abrasions, stuns, infections, dysentery, food poisoning,
+         hypothermia, etc.). Future-proof — also clears any modlet
+         negative buffs without us having to enumerate them.
+      2. RemoveBuff for the lingering TREATMENT buffs (splints,
+         casts, abrasion-treated). These aren't is_negative so they
+         survive step 1, but a "full heal" should remove them too.
+      3. ModifyStats set 25000 — overshoots any reasonable max so the
+         stats system clamps each to its own actual max (vanilla
+         Health 100, Food/Water/Stamina 100, +mods). Same idiom the
+         vanilla admin debug heal uses.
+
+    All actions go through the buff system — client-authoritative
+    safe (the heal can't be clobbered by the next PlayerData sync
+    because the AUTHORITATIVE write path is the buff trigger, same
+    as a bandage / first-aid-kit / Grandpa's Awesome Sauce).
+
+    Applied by plugins with a 1s duration via Player.ApplyBuff;
+    onSelfBuffStart fires once, all effects propagate, buff
+    self-removes when duration ends.
+-->
+<buff name="buffStyxHealFull"
+      name_key="buffStyxHealFullName"
+      hidden="true">
+    <stack_type value="replace"/>
+    <duration value="1"/>
+    <effect_group>
+        <!-- Wipe all negative buffs (injuries, infections, diseases) -->
+        <triggered_effect trigger="onSelfBuffStart" action="RemoveAllNegativeBuffs"/>
+
+        <!-- Wipe lingering treatment buffs (not is_negative so survives RemoveAllNegativeBuffs) -->
+        <triggered_effect trigger="onSelfBuffStart" action="RemoveBuff"
+                          buff="buffInjuryAbrasionTreated,buffLegSplinted,buffLegCast,buffArmSplinted,buffArmCast"/>
+
+        <!-- Refill core stats to max (25000 = sentinel that the stats system clamps to actual max) -->
+        <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Health"  operation="set" value="25000"/>
+        <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Food"    operation="set" value="25000"/>
+        <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Water"   operation="set" value="25000"/>
+        <triggered_effect trigger="onSelfBuffStart" action="ModifyStats" stat="Stamina" operation="set" value="25000"/>
+    </effect_group>
+</buff>
+*/
+
 [Info("StyxMenu", "Doowkcol", "0.3.0")]
 public class StyxMenu : StyxPlugin
 {

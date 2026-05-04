@@ -14,7 +14,7 @@
 // See LICENSE-PLUGINS at the repo root for full terms.
 //
 
-// StyxShield v0.2.0 -- "force-field" / sanctuary buff bound to land claims.
+// StyxShield v0.3.0 -- "force-field" / sanctuary buff bound to land claims.
 //
 // While shield is active on YOUR LCB and you stand inside it:
 //   - Zombies don't notice you (sight or sound aggro is filtered)
@@ -46,7 +46,27 @@ using Styx.Data;
 using Styx.Plugins;
 using Styx.Scheduling;
 
-[Info("StyxShield", "Doowkcol", "0.2.0")]
+/* @styx-buffs
+<!--
+    Visual marker for an active StyxShield. No mechanical effect —
+    the actual stealth/repulsion is delivered by the framework's
+    Harmony patches (Styx.Hooks.FirstParty.ShieldGuard) reading from
+    Styx.Shield.IsPlayerShielded. The buff just gives the player an
+    icon they can see in their HUD so they know the shield is on.
+
+    Long duration; the plugin re-applies on join/spawn and on
+    activate. Removed by plugin on /shield off or LCB destruction.
+-->
+<buff name="buffStyxShieldActive"
+      name_key="buffStyxShieldActiveName"
+      description_key="buffStyxShieldActiveDesc"
+      icon="ui_game_symbol_defense">
+    <stack_type value="replace"/>
+    <duration value="999999"/>
+</buff>
+*/
+
+[Info("StyxShield", "Doowkcol", "0.3.0")]
 public class StyxShield : StyxPlugin
 {
     public override string Description => "Stealth + soft-repulsion zombie shield bound to land claims";
@@ -79,6 +99,17 @@ public class StyxShield : StyxPlugin
         // server wants the shield to also block during blood moon (rarely
         // sensible since the whole point of bloodmoon is to face the horde).
         public bool BlockOnBloodmoon = true;
+
+        // When true, normal animals (bears, wolves, mountain lions etc.)
+        // are also filtered. Default false -- only undead are blocked, so
+        // wildlife threat remains inside shielded zones. Zombie dogs and
+        // other undead-tagged animals are ALWAYS blocked regardless of
+        // this flag.
+        public bool BlockRegularAnimals = false;
+
+        // When true, hostile bandit NPCs are also filtered. Default false
+        // -- bandits are a distinct threat class.
+        public bool BlockBandits = false;
 
         // Dirty-batch flush interval for the zones file.
         public int FlushIntervalSeconds = 30;
@@ -115,6 +146,10 @@ public class StyxShield : StyxPlugin
         // through bloodmoon, override the gate to a constant-false.
         if (!_cfg.BlockOnBloodmoon)
             Shield.IsBloodmoonGate = () => false;
+
+        // Wire opt-in threat-class flags. Default false: undead only.
+        Shield.BlockRegularAnimals = _cfg.BlockRegularAnimals;
+        Shield.BlockBandits        = _cfg.BlockBandits;
 
         // Single-purpose chat command: bare /shield toggles. The UI carries
         // the discoverability and status display.
@@ -153,8 +188,9 @@ public class StyxShield : StyxPlugin
         int flushSecs = Math.Max(5, _cfg.FlushIntervalSeconds);
         _flushTick = Scheduler.Every(flushSecs, FlushIfDirty, name: "StyxShield.flush");
 
-        Log.Out("[StyxShield] Loaded v0.2.0 -- {0} shield(s) restored, max-per-player={1}, bloodmoon-suspends={2}",
-            restored, _cfg.MaxActivePerPlayer, _cfg.BlockOnBloodmoon);
+        Log.Out("[StyxShield] Loaded v0.3.0 -- {0} shield(s) restored, max-per-player={1}, bloodmoon-suspends={2}, animals={3}, bandits={4}",
+            restored, _cfg.MaxActivePerPlayer, _cfg.BlockOnBloodmoon,
+            _cfg.BlockRegularAnimals, _cfg.BlockBandits);
     }
 
     public override void OnUnload()
@@ -165,6 +201,10 @@ public class StyxShield : StyxPlugin
         Shield.Clear();
         // Reset bloodmoon gate so a future plugin reload gets the framework default.
         Shield.IsBloodmoonGate = null;
+        // Reset opt-in threat flags so they don't carry stale values into
+        // a hot-reload that uses a different config.
+        Shield.BlockRegularAnimals = false;
+        Shield.BlockBandits        = false;
         StyxCore.Perms.UnregisterKnownByOwner(Name);
         Styx.Ui.Menu.UnregisterAll(this);
 

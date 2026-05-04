@@ -22,6 +22,48 @@ using System.Collections.Generic;
 using Styx;
 using Styx.Plugins;
 
+/* @styx-buffs
+<!--
+    Styx Input Probe — routes client-side player-input events to the server
+    via cvar writes. Relies on PlayerEntityStats.NetSync (every ~10 ticks,
+    ~0.5s) pushing EntityBuffs state (including cvars) from client to server
+    via NetPackageEntityStatsBuff.
+
+    Buff is applied permanently + hidden. Each input event writes a distinct
+    value to 'styx.input'; server plugin polls and reacts.
+
+    Values:  1=Jump, 2=Crouch, 3=ReloadStart, 4=PrimaryStart, 5=SecondaryStart
+-->
+<buff name="buffStyxInputProbe"
+      name_key="buffStyxInputProbeName"
+      description_key="buffStyxInputProbeDesc"
+      hidden="true">
+    <stack_type value="replace"/>
+    <!-- Long duration (not 0 — that triggers the CVar-driven-duration NRE
+         trap at client load). Plugin reapplies on each spawn anyway. -->
+    <duration value="999999"/>
+
+    <effect_group>
+        <!--
+            Instant-sync via CallGameEvent + allow_client_call.
+            MinEventActionCallGameEvent.Execute on client calls
+            GameEventManager.HandleAction which — on client — immediately
+            sends NetPackageGameEventRequest to server. Server's
+            Harmony Prefix (StyxInputRouter.cs) intercepts and writes
+            styx.input.kind / styx.input.seq on the player entity.
+
+            Latency: one network round-trip (~tens of ms) instead of
+            the ~0.5-1s stats-buff sync tick that ModifyCVar relied on.
+        -->
+        <triggered_effect trigger="onSelfJump"                 action="CallGameEvent" event="styx_input_jump"      allow_client_call="true"/>
+        <triggered_effect trigger="onSelfCrouch"               action="CallGameEvent" event="styx_input_crouch"    allow_client_call="true"/>
+        <triggered_effect trigger="onReloadStart"              action="CallGameEvent" event="styx_input_reload"    allow_client_call="true"/>
+        <triggered_effect trigger="onSelfPrimaryActionStart"   action="CallGameEvent" event="styx_input_primary"   allow_client_call="true"/>
+        <triggered_effect trigger="onSelfSecondaryActionStart" action="CallGameEvent" event="styx_input_secondary" allow_client_call="true"/>
+    </effect_group>
+</buff>
+*/
+
 [Info("StyxInputProbe", "Doowkcol", "0.3.0")]
 public class StyxInputProbe : StyxPlugin
 {

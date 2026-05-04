@@ -1,0 +1,6 @@
+{
+  "_comment_PluginManifestSynthesis": "Plugin manifest synthesis: at boot, the framework regenerates Config/buffs.xml (and other vanilla-named files) from /* @styx-buffs */, /* @styx-xui-windows */, /* @styx-xui-window-group */ and /* @styx-localization */ blocks embedded in plugin .cs files. Set Enabled=false to disable synthesis entirely so you can hand-edit the generated files for live iteration during plugin development. Generated content sources from plugin blocks; for server-specific custom content, ship your own mod folder (Mods/<your-name>/Config/buffs.xml) instead of editing inside Mods/Styx/.",
+  "PluginManifestSynthesis": {
+    "Enabled": true
+  }
+}

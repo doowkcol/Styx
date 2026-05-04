@@ -45,6 +45,62 @@ using Styx.Data;
 using Styx.Plugins;
 using Styx.Scheduling;
 
+/* @styx-buffs
+<!--
+    Three reference VIP / donor buffs shipped with StyxBuffs. They're
+    referenced by the default StyxBuffs config under the styx.buffs.vip
+    perm; operators can rebrand or replace them in their own buffs config.
+    Fixed-duration variant: no CVar-driven timer, no display_value_format="time".
+    Server applies via Player.ApplyBuff(name, duration); client ticks it
+    down with the standard buff machinery. Simpler and crash-free.
+-->
+
+<!-- +100% damage vs zombies -->
+<buff name="buffStyxVipUndead"
+      name_key="buffStyxVipUndeadName"
+      description_key="buffStyxVipUndeadDesc"
+      icon="ui_game_symbol_zombie">
+    <stack_type value="replace"/>
+    <duration value="3600"/>
+
+    <effect_group>
+        <passive_effect name="EntityDamage" operation="perc_add" value="1.0"/>
+        <requirement name="EntityTagCompare" target="other" tags="zombie"/>
+    </effect_group>
+</buff>
+
+<!-- +100% harvest yield + 50% block damage -->
+<buff name="buffStyxVipHarvest"
+      name_key="buffStyxVipHarvestName"
+      description_key="buffStyxVipHarvestDesc"
+      icon="ui_game_symbol_tool">
+    <stack_type value="replace"/>
+    <duration value="3600"/>
+
+    <effect_group>
+        <passive_effect name="HarvestCount" operation="perc_add" value="1"/>
+        <passive_effect name="BlockDamage" operation="perc_add" value=".5"/>
+    </effect_group>
+</buff>
+
+<!-- Big visible toughness package -->
+<buff name="buffStyxVipToughness"
+      name_key="buffStyxVipToughnessName"
+      description_key="buffStyxVipToughnessDesc"
+      icon="ui_game_symbol_armor_iron">
+    <stack_type value="replace"/>
+    <duration value="3600"/>
+
+    <effect_group>
+        <passive_effect name="PhysicalDamageResist" operation="base_add" value="60"/>
+        <passive_effect name="ElementalDamageResist" operation="base_add" value="60"/>
+        <passive_effect name="RunSpeed" operation="perc_add" value=".3"/>
+        <passive_effect name="CarryCapacity" operation="base_add" value="40"/>
+        <passive_effect name="HealthMax" operation="base_add" value="50"/>
+    </effect_group>
+</buff>
+*/
+
 [Info("StyxBuffs", "Doowkcol", "0.4.0")]
 public class StyxBuffs : StyxPlugin
 {
