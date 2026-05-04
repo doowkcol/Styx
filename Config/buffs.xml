@@ -12,7 +12,7 @@
         <buff name="buffStyxVipUndead"
               name_key="buffStyxVipUndeadName"
               description_key="buffStyxVipUndeadDesc"
-              icon="ui_game_symbol_fist">
+              icon="ui_game_symbol_zombie">
             <stack_type value="replace"/>
             <duration value="3600"/>
 
@@ -154,7 +154,7 @@
         <buff name="buffStyxShieldActive"
               name_key="buffStyxShieldActiveName"
               description_key="buffStyxShieldActiveDesc"
-              icon="ui_game_symbol_shield">
+              icon="ui_game_symbol_defense">
             <stack_type value="replace"/>
             <duration value="999999"/>
         </buff>
