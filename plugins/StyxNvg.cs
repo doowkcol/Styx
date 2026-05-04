@@ -40,6 +40,7 @@
 using System;
 using System.Collections.Generic;
 using Styx;
+using Styx.Data;
 using Styx.Plugins;
 using Styx.Scheduling;
 
