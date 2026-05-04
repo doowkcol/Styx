@@ -40,6 +40,16 @@ data/game_refs/
 # Auto-generated label cache (rebuilt at boot)
 data/_labels/
 
+# Plugin manifest synthesis output -- regenerated at every boot from the
+# embedded /* @styx-... */ blocks in plugin .cs files. Operator-owned
+# Config/buffs.xml, Config/XUi/windows.xml, Config/XUi/xui.xml and
+# Config/Localization.txt are tracked normally; the framework only writes
+# to its own _styx_generated_* namespace.
+Config/_styx_generated_buffs.xml
+Config/_styx_generated_localization.txt
+Config/XUi/_styx_generated_windows.xml
+Config/XUi/_styx_generated_xui.xml
+
 # OS / editor noise
 .DS_Store
 Thumbs.db
