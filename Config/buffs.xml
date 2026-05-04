@@ -159,5 +159,35 @@
             <duration value="999999"/>
         </buff>
 
+        <!--
+            StyxNvg — server-side "night vision" via the same camera-attached
+            light source the mining helmet light mod uses. Not a literal sky
+            override (engine doesn't expose that to mods), but a real Unity
+            point-light pinned to CameraNode that follows the player's view,
+            so they can see in the dark.
+
+            Mechanics: AddPartFPV + SetPartActive on buff start, RemovePart
+            on buff remove. Long duration; the StyxNvg plugin owns toggle
+            state and reapplies on spawn.
+
+            We deliberately skip AddPartTPV — that uses the helmet's
+            "Spotlight" bone as parent, which only exists when the helmet
+            is equipped. Skipping it means other players don't see a beam,
+            but the wearer still sees fine. The actual nvg effect (the
+            wearer's vision) is FPV-only anyway.
+        -->
+        <buff name="buffStyxNvg"
+              name_key="buffStyxNvgName"
+              description_key="buffStyxNvgDesc"
+              icon="ui_game_symbol_lightbulb">
+            <stack_type value="replace"/>
+            <duration value="999999"/>
+            <effect_group>
+                <triggered_effect trigger="onSelfBuffStart"  action="AddPartFPV"    part="StyxNvgLight" prefab="@:Entities/Lighting/miningHelmetLightSource.prefab" parentTransform="CameraNode" localPos="0,0.1,0" localRot="-90,180,0"/>
+                <triggered_effect trigger="onSelfBuffStart"  action="SetPartActive" part="StyxNvgLight" active="true"/>
+                <triggered_effect trigger="onSelfBuffRemove" action="RemovePart"    part="StyxNvgLight"/>
+            </effect_group>
+        </buff>
+
     </append>
 </configs>
