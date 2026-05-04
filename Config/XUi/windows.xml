@@ -265,15 +265,15 @@
                       visible="{#cvar('styx.builder.stage') == 0}">
 
                     <label depth="3" name="sub" text="Pick a block grade to operate on"
-                           font_size="14" justify="center"
-                           pos="260,0" width="520" height="18" pivot="top"
+                           font_size="17" justify="center"
+                           pos="260,0" width="520" height="22" pivot="top"
                            color="200,200,200,255" />
 
                     <!-- Empty-state hint when no tiers tracked in claim -->
                     <label depth="3" name="empty"
                            text="No tracked blocks in your current claim."
-                           font_size="14" justify="center"
-                           pos="260,-30" width="520" height="20" pivot="top"
+                           font_size="17" justify="center"
+                           pos="260,-30" width="520" height="22" pivot="top"
                            color="255,180,120,255"
                            visible="{#cvar('styx.builder.type_count') == 0}" />
 
@@ -282,12 +282,12 @@
                            visible="{#(cvar('styx.builder.row0_id') &gt;= 0) and (cvar('styx.builder.sel') == 0)}" />
                     <label depth="3" name="t0n"
                            text="{#localization('builder_tier_' + int(cvar('styx.builder.row0_id')))}"
-                           font_size="16"
-                           pos="50,-30" width="370" height="22" color="240,240,240,255"
+                           font_size="18"
+                           pos="50,-30" width="370" height="24" color="240,240,240,255"
                            visible="{#cvar('styx.builder.row0_id') &gt;= 0}" />
                     <label depth="3" name="t0k" text="x{cvar(styx.builder.row0_count:0)}"
-                           font_size="14" justify="right"
-                           pos="430,-30" width="70" height="22" color="180,220,255,255"
+                           font_size="16" justify="right"
+                           pos="430,-30" width="70" height="24" color="180,220,255,255"
                            visible="{#cvar('styx.builder.row0_id') &gt;= 0}" />
 
                     <label depth="3" name="t1c" text="&gt;" font_size="22" color="255,200,120,255"
@@ -295,12 +295,12 @@
                            visible="{#(cvar('styx.builder.row1_id') &gt;= 0) and (cvar('styx.builder.sel') == 1)}" />
                     <label depth="3" name="t1n"
                            text="{#localization('builder_tier_' + int(cvar('styx.builder.row1_id')))}"
-                           font_size="16"
-                           pos="50,-58" width="370" height="22" color="240,240,240,255"
+                           font_size="18"
+                           pos="50,-58" width="370" height="24" color="240,240,240,255"
                            visible="{#cvar('styx.builder.row1_id') &gt;= 0}" />
                     <label depth="3" name="t1k" text="x{cvar(styx.builder.row1_count:0)}"
-                           font_size="14" justify="right"
-                           pos="430,-58" width="70" height="22" color="180,220,255,255"
+                           font_size="16" justify="right"
+                           pos="430,-58" width="70" height="24" color="180,220,255,255"
                            visible="{#cvar('styx.builder.row1_id') &gt;= 0}" />
 
                     <label depth="3" name="t2c" text="&gt;" font_size="22" color="255,200,120,255"
@@ -308,12 +308,12 @@
                            visible="{#(cvar('styx.builder.row2_id') &gt;= 0) and (cvar('styx.builder.sel') == 2)}" />
                     <label depth="3" name="t2n"
                            text="{#localization('builder_tier_' + int(cvar('styx.builder.row2_id')))}"
-                           font_size="16"
-                           pos="50,-86" width="370" height="22" color="240,240,240,255"
+                           font_size="18"
+                           pos="50,-86" width="370" height="24" color="240,240,240,255"
                            visible="{#cvar('styx.builder.row2_id') &gt;= 0}" />
                     <label depth="3" name="t2k" text="x{cvar(styx.builder.row2_count:0)}"
-                           font_size="14" justify="right"
-                           pos="430,-86" width="70" height="22" color="180,220,255,255"
+                           font_size="16" justify="right"
+                           pos="430,-86" width="70" height="24" color="180,220,255,255"
                            visible="{#cvar('styx.builder.row2_id') &gt;= 0}" />
 
                     <label depth="3" name="t3c" text="&gt;" font_size="22" color="255,200,120,255"
@@ -321,12 +321,12 @@
                            visible="{#(cvar('styx.builder.row3_id') &gt;= 0) and (cvar('styx.builder.sel') == 3)}" />
                     <label depth="3" name="t3n"
                            text="{#localization('builder_tier_' + int(cvar('styx.builder.row3_id')))}"
-                           font_size="16"
-                           pos="50,-114" width="370" height="22" color="240,240,240,255"
+                           font_size="18"
+                           pos="50,-114" width="370" height="24" color="240,240,240,255"
                            visible="{#cvar('styx.builder.row3_id') &gt;= 0}" />
                     <label depth="3" name="t3k" text="x{cvar(styx.builder.row3_count:0)}"
-                           font_size="14" justify="right"
-                           pos="430,-114" width="70" height="22" color="180,220,255,255"
+                           font_size="16" justify="right"
+                           pos="430,-114" width="70" height="24" color="180,220,255,255"
                            visible="{#cvar('styx.builder.row3_id') &gt;= 0}" />
 
                     <label depth="3" name="t4c" text="&gt;" font_size="22" color="255,200,120,255"
@@ -334,12 +334,12 @@
                            visible="{#(cvar('styx.builder.row4_id') &gt;= 0) and (cvar('styx.builder.sel') == 4)}" />
                     <label depth="3" name="t4n"
                            text="{#localization('builder_tier_' + int(cvar('styx.builder.row4_id')))}"
-                           font_size="16"
-                           pos="50,-142" width="370" height="22" color="240,240,240,255"
+                           font_size="18"
+                           pos="50,-142" width="370" height="24" color="240,240,240,255"
                            visible="{#cvar('styx.builder.row4_id') &gt;= 0}" />
                     <label depth="3" name="t4k" text="x{cvar(styx.builder.row4_count:0)}"
-                           font_size="14" justify="right"
-                           pos="430,-142" width="70" height="22" color="180,220,255,255"
+                           font_size="16" justify="right"
+                           pos="430,-142" width="70" height="24" color="180,220,255,255"
                            visible="{#cvar('styx.builder.row4_id') &gt;= 0}" />
 
                     <label depth="3" name="t5c" text="&gt;" font_size="22" color="255,200,120,255"
@@ -347,18 +347,18 @@
                            visible="{#(cvar('styx.builder.row5_id') &gt;= 0) and (cvar('styx.builder.sel') == 5)}" />
                     <label depth="3" name="t5n"
                            text="{#localization('builder_tier_' + int(cvar('styx.builder.row5_id')))}"
-                           font_size="16"
-                           pos="50,-170" width="370" height="22" color="240,240,240,255"
+                           font_size="18"
+                           pos="50,-170" width="370" height="24" color="240,240,240,255"
                            visible="{#cvar('styx.builder.row5_id') &gt;= 0}" />
                     <label depth="3" name="t5k" text="x{cvar(styx.builder.row5_count:0)}"
-                           font_size="14" justify="right"
-                           pos="430,-170" width="70" height="22" color="180,220,255,255"
+                           font_size="16" justify="right"
+                           pos="430,-170" width="70" height="24" color="180,220,255,255"
                            visible="{#cvar('styx.builder.row5_id') &gt;= 0}" />
 
                     <label depth="3" name="hint0"
                            text="Stand inside YOUR land claim. Costs drawn from owned crates."
-                           font_size="12" justify="center"
-                           pos="260,-292" width="520" height="16" pivot="top"
+                           font_size="14" justify="center"
+                           pos="260,-292" width="520" height="20" pivot="top"
                            color="180,180,180,255" />
                 </rect>
 
@@ -368,8 +368,8 @@
 
                     <label depth="3" name="sub1"
                            text="Grade: {#localization('builder_tier_' + int(cvar('styx.builder.type_id')))}"
-                           font_size="14" justify="center"
-                           pos="260,0" width="520" height="18" pivot="top"
+                           font_size="17" justify="center"
+                           pos="260,0" width="520" height="22" pivot="top"
                            color="180,220,255,255" />
 
                     <!-- Row 0: Repair -->
@@ -398,8 +398,8 @@
 
                     <label depth="3" name="hint1"
                            text="Only blocks of the selected type will be touched."
-                           font_size="12" justify="center"
-                           pos="260,-148" width="520" height="16" pivot="top"
+                           font_size="14" justify="center"
+                           pos="260,-152" width="520" height="20" pivot="top"
                            color="180,180,180,255" />
                 </rect>
 
@@ -427,55 +427,55 @@
                     <!-- Show the tier being affected -->
                     <label depth="3" name="cTyp"
                            text="Grade: {#localization('builder_tier_' + int(cvar('styx.builder.type_id')))}"
-                           font_size="14" justify="center"
-                           pos="260,-32" width="520" height="18" pivot="top"
+                           font_size="17" justify="center"
+                           pos="260,-34" width="520" height="22" pivot="top"
                            color="180,220,255,255" />
 
                     <!-- Block count -->
                     <label depth="3" name="cnt"
                            text="Targeting {cvar(styx.builder.count:0)} block(s)"
-                           font_size="18" justify="center"
-                           pos="260,-58" width="520" height="22" pivot="top"
+                           font_size="20" justify="center"
+                           pos="260,-62" width="520" height="24" pivot="top"
                            color="240,240,240,255" />
 
                     <!-- FREE badge -->
                     <label depth="3" name="free" text="FREE -- no materials required"
-                           font_size="14" justify="center" style="outline"
-                           pos="260,-86" width="520" height="18" pivot="top"
+                           font_size="16" justify="center" style="outline"
+                           pos="260,-92" width="520" height="22" pivot="top"
                            color="100,255,140,255"
                            visible="{#cvar('styx.builder.free') == 1}" />
 
                     <!-- Cost-detail pointer (when not free) -->
                     <label depth="3" name="costRef" text="Cost breakdown shown in chat"
-                           font_size="13" justify="center"
-                           pos="260,-86" width="520" height="18" pivot="top"
+                           font_size="15" justify="center"
+                           pos="260,-92" width="520" height="22" pivot="top"
                            color="255,210,140,255"
                            visible="{#cvar('styx.builder.free') == 0}" />
 
                     <label depth="3" name="hint2"
                            text="Materials drawn from YOUR locked crates inside this claim."
-                           font_size="12" justify="center"
-                           pos="260,-114" width="520" height="16" pivot="top"
+                           font_size="14" justify="center"
+                           pos="260,-122" width="520" height="20" pivot="top"
                            color="180,180,180,255" />
                 </rect>
 
                 <!-- Stage-specific legend (anchored to bottom of window) -->
                 <label depth="3" name="legend0"
                        text="[SCROLL] choose   [LMB] select type   [RMB] back"
-                       font_size="14" justify="center"
-                       pos="260,-454" width="520" height="20" pivot="top"
+                       font_size="16" justify="center"
+                       pos="260,-450" width="520" height="22" pivot="top"
                        color="180,180,180,255"
                        visible="{#cvar('styx.builder.stage') == 0}" />
                 <label depth="3" name="legend1"
                        text="[SCROLL] choose   [LMB] scan   [RMB] back"
-                       font_size="14" justify="center"
-                       pos="260,-454" width="520" height="20" pivot="top"
+                       font_size="16" justify="center"
+                       pos="260,-450" width="520" height="22" pivot="top"
                        color="180,180,180,255"
                        visible="{#cvar('styx.builder.stage') == 1}" />
                 <label depth="3" name="legend2"
                        text="[LMB] CONFIRM   [RMB] back"
-                       font_size="14" justify="center"
-                       pos="260,-454" width="520" height="20" pivot="top"
+                       font_size="16" justify="center"
+                       pos="260,-450" width="520" height="22" pivot="top"
                        color="180,180,180,255"
                        visible="{#cvar('styx.builder.stage') == 2}" />
             </rect>
@@ -515,76 +515,76 @@
 
                 <!-- ===== Status row: ACTIVE / INACTIVE ===== -->
                 <label depth="3" name="stActive" text="ACTIVE"
-                       font_size="20" justify="center" style="outline"
-                       pos="260,-50" width="520" height="26" pivot="top"
+                       font_size="22" justify="center" style="outline"
+                       pos="260,-50" width="520" height="28" pivot="top"
                        color="100,255,140,255"
                        visible="{#cvar('styx.shield.active') == 1}" />
                 <label depth="3" name="stInactive" text="INACTIVE"
-                       font_size="20" justify="center" style="outline"
-                       pos="260,-50" width="520" height="26" pivot="top"
+                       font_size="22" justify="center" style="outline"
+                       pos="260,-50" width="520" height="28" pivot="top"
                        color="180,180,180,255"
                        visible="{#cvar('styx.shield.active') == 0}" />
 
                 <!-- ===== Bloodmoon suspension banner ===== -->
                 <label depth="3" name="bmBanner"
                        text="SUSPENDED — Blood Moon"
-                       font_size="14" justify="center" style="outline"
-                       pos="260,-78" width="520" height="20" pivot="top"
+                       font_size="16" justify="center" style="outline"
+                       pos="260,-80" width="520" height="22" pivot="top"
                        color="255,120,120,255"
                        visible="{#cvar('styx.shield.bloodmoon') == 1}" />
 
                 <!-- ===== Slot usage ===== -->
                 <label depth="3" name="slots"
                        text="Slots used: {cvar(styx.shield.slots_used:0)} / {cvar(styx.shield.slots_max:0)}"
-                       font_size="14" justify="center"
-                       pos="260,-104" width="520" height="20" pivot="top"
+                       font_size="16" justify="center"
+                       pos="260,-108" width="520" height="22" pivot="top"
                        color="200,220,255,255" />
 
                 <!-- ===== Description ===== -->
                 <label depth="3" name="d1"
                        text="Zombies don't notice you while inside your land claim."
-                       font_size="13" justify="center"
-                       pos="260,-140" width="500" height="18" pivot="top"
+                       font_size="15" justify="center"
+                       pos="260,-142" width="500" height="22" pivot="top"
                        color="220,220,220,255" />
                 <label depth="3" name="d2"
                        text="Walls of stealth: aggro, noise, and idle wander all filtered."
-                       font_size="13" justify="center"
-                       pos="260,-160" width="500" height="18" pivot="top"
+                       font_size="15" justify="center"
+                       pos="260,-166" width="500" height="22" pivot="top"
                        color="220,220,220,255" />
                 <label depth="3" name="d3"
                        text="Stand inside YOUR land claim to toggle. Suspends during blood moon."
-                       font_size="13" justify="center"
-                       pos="260,-180" width="500" height="18" pivot="top"
+                       font_size="15" justify="center"
+                       pos="260,-190" width="500" height="22" pivot="top"
                        color="180,200,220,255" />
 
                 <!-- ===== Toggle prompt: depends on (here, here_active) ===== -->
                 <!-- (a) Not standing in own LCB -->
                 <label depth="3" name="needLcb"
                        text="STAND IN YOUR LCB TO TOGGLE"
-                       font_size="16" justify="center" style="outline"
-                       pos="260,-222" width="520" height="22" pivot="top"
+                       font_size="18" justify="center" style="outline"
+                       pos="260,-230" width="520" height="26" pivot="top"
                        color="255,180,120,255"
                        visible="{#cvar('styx.shield.here') == 0}" />
                 <!-- (b) In own LCB, this one is shielded -->
                 <label depth="3" name="canDeact"
                        text="[LMB] DEACTIVATE THIS CLAIM"
-                       font_size="16" justify="center" style="outline"
-                       pos="260,-222" width="520" height="22" pivot="top"
+                       font_size="18" justify="center" style="outline"
+                       pos="260,-230" width="520" height="26" pivot="top"
                        color="255,200,120,255"
                        visible="{#(cvar('styx.shield.here') == 1) and (cvar('styx.shield.here_active') == 1)}" />
                 <!-- (c) In own LCB, this one not shielded -->
                 <label depth="3" name="canAct"
                        text="[LMB] ACTIVATE THIS CLAIM"
-                       font_size="16" justify="center" style="outline"
-                       pos="260,-222" width="520" height="22" pivot="top"
+                       font_size="18" justify="center" style="outline"
+                       pos="260,-230" width="520" height="26" pivot="top"
                        color="120,255,180,255"
                        visible="{#(cvar('styx.shield.here') == 1) and (cvar('styx.shield.here_active') == 0)}" />
 
                 <!-- Legend -->
                 <label depth="3" name="legend"
                        text="[LMB] toggle   [RMB] back"
-                       font_size="14" justify="center"
-                       pos="260,-314" width="520" height="20" pivot="top"
+                       font_size="16" justify="center"
+                       pos="260,-310" width="520" height="22" pivot="top"
                        color="180,180,180,255" />
             </rect>
         </window>
