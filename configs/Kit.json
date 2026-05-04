@@ -2,51 +2,95 @@
   "KitPerms": {
     "styx.kit.basic": "Standard kits available to everyone",
     "styx.kit.vip": "VIP-tier kit access (donor / supporter)",
-    "styx.kit.master": "Admin-tier kit access (everything)"
+    "styx.kit.master": "Admin-tier kit access (everything)",
+    "styx.kit.lvl25": "Level 25 milestone kits",
+    "styx.kit.lvl50": "Level 50 milestone kits",
+    "styx.kit.lvl75": "Level 75 milestone kits",
+    "styx.kit.lvl100": "Level 100 milestone kits"
   },
   "Kits": {
     "starter": {
-      "Description": "Basic survival gear",
-      "CooldownSeconds": 0,
+      "Description": "Daily resource bundle: wood, stone, iron, coal, lead, shale, nitrate (24h cooldown)",
+      "CooldownSeconds": 86400,
       "Perm": "styx.kit.basic",
-      "Icon": "",
+      "Icon": "resourceWood",
       "Items": [
         {
-          "Item": "drinkJarBoiledWater",
-          "Count": 4,
+          "Item": "resourceWood",
+          "Count": 3000,
           "Quality": 1
         },
         {
-          "Item": "foodCanChili",
-          "Count": 4,
+          "Item": "resourceRockSmall",
+          "Count": 2000,
           "Quality": 1
         },
         {
-          "Item": "meleeToolRepairT0StoneAxe",
-          "Count": 1,
-          "Quality": 2
+          "Item": "resourceScrapIron",
+          "Count": 1000,
+          "Quality": 1
         },
         {
-          "Item": "meleeToolTorch",
-          "Count": 2,
+          "Item": "resourceCoal",
+          "Count": 300,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceScrapLead",
+          "Count": 200,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceOilShale",
+          "Count": 150,
+          "Quality": 1
+        },
+        {
+          "Item": "resourcePotassiumNitratePowder",
+          "Count": 50,
           "Quality": 1
         }
       ]
     },
     "daily": {
-      "Description": "Daily loot (24h cooldown)",
-      "CooldownSeconds": 86400,
+      "Description": "Building starter kit — LCB, blocks, doors, storage (1× per wipe, 7d cooldown)",
+      "CooldownSeconds": 604800,
       "Perm": "styx.kit.basic",
-      "Icon": "",
+      "Icon": "keystoneBlock",
       "Items": [
         {
-          "Item": "resourceScrapIron",
-          "Count": 20,
+          "Item": "keystoneBlock",
+          "Count": 1,
           "Quality": 1
         },
         {
-          "Item": "resourceDuctTape",
-          "Count": 5,
+          "Item": "woodMaster",
+          "Count": 500,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceWood",
+          "Count": 4000,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceCobblestones",
+          "Count": 2000,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceConcreteMix",
+          "Count": 1000,
+          "Quality": 1
+        },
+        {
+          "Item": "ironDoorBlockVariantHelper",
+          "Count": 2,
+          "Quality": 1
+        },
+        {
+          "Item": "cntIronWritableCrate",
+          "Count": 2,
           "Quality": 1
         }
       ]
@@ -158,6 +202,373 @@
         {
           "Item": "drugPainkillers",
           "Count": 3,
+          "Quality": 1
+        }
+      ]
+    },
+    "basic_loadout": {
+      "Description": "Q6 stone tools + primitive weapons + Primitive armour — 1× per wipe",
+      "CooldownSeconds": 604800,
+      "Perm": "styx.kit.basic",
+      "Icon": "meleeToolRepairT0StoneAxe",
+      "Items": [
+        {
+          "Item": "meleeToolRepairT0StoneAxe",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "meleeToolTorch",
+          "Count": 4,
+          "Quality": 1
+        },
+        {
+          "Item": "meleeWpnSpearT0StoneSpear",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "meleeWpnClubT0WoodenClub",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "gunBowT0PrimitiveBow",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "ammoArrowStone",
+          "Count": 30,
+          "Quality": 1
+        },
+        {
+          "Item": "armorPrimitiveHelmet",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorPrimitiveOutfit",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorPrimitiveGloves",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorPrimitiveBoots",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "drinkJarBoiledWater",
+          "Count": 6,
+          "Quality": 1
+        },
+        {
+          "Item": "foodCanChili",
+          "Count": 6,
+          "Quality": 1
+        },
+        {
+          "Item": "medicalBandage",
+          "Count": 5,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl25_loadout": {
+      "Description": "L25 loadout: T1 pistol + iron spear + Preacher armour — 1× per wipe",
+      "CooldownSeconds": 604800,
+      "Perm": "styx.kit.lvl25",
+      "Icon": "gunHandgunT1Pistol",
+      "Items": [
+        {
+          "Item": "gunHandgunT1Pistol",
+          "Count": 1,
+          "Quality": 4
+        },
+        {
+          "Item": "ammo9mmBulletBall",
+          "Count": 200,
+          "Quality": 1
+        },
+        {
+          "Item": "meleeWpnSpearT1IronSpear",
+          "Count": 1,
+          "Quality": 4
+        },
+        {
+          "Item": "armorPreacherHelmet",
+          "Count": 1,
+          "Quality": 4
+        },
+        {
+          "Item": "armorPreacherOutfit",
+          "Count": 1,
+          "Quality": 4
+        },
+        {
+          "Item": "armorPreacherGloves",
+          "Count": 1,
+          "Quality": 4
+        },
+        {
+          "Item": "armorPreacherBoots",
+          "Count": 1,
+          "Quality": 4
+        },
+        {
+          "Item": "medicalFirstAidBandage",
+          "Count": 3,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl25_daily": {
+      "Description": "L25 daily: 200 dukes + 50 scrap iron + 50 9mm — every 24h",
+      "CooldownSeconds": 86400,
+      "Perm": "styx.kit.lvl25",
+      "Icon": "casinoCoin",
+      "Items": [
+        {
+          "Item": "casinoCoin",
+          "Count": 200,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceScrapIron",
+          "Count": 50,
+          "Quality": 1
+        },
+        {
+          "Item": "ammo9mmBulletBall",
+          "Count": 50,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl50_loadout": {
+      "Description": "L50 loadout: T2 magnum + iron sledge + Ranger armour — 1× per wipe",
+      "CooldownSeconds": 604800,
+      "Perm": "styx.kit.lvl50",
+      "Icon": "gunHandgunT2Magnum44",
+      "Items": [
+        {
+          "Item": "gunHandgunT2Magnum44",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "ammo44MagnumBulletBall",
+          "Count": 100,
+          "Quality": 1
+        },
+        {
+          "Item": "meleeWpnSledgeT1IronSledgehammer",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorRangerHelmet",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorRangerOutfit",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorRangerGloves",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorRangerBoots",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "medicalFirstAidKit",
+          "Count": 2,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl50_daily": {
+      "Description": "L50 daily: 500 dukes + 30 forged iron + 50 .44 mag — every 24h",
+      "CooldownSeconds": 86400,
+      "Perm": "styx.kit.lvl50",
+      "Icon": "casinoCoin",
+      "Items": [
+        {
+          "Item": "casinoCoin",
+          "Count": 500,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceForgedIron",
+          "Count": 30,
+          "Quality": 1
+        },
+        {
+          "Item": "ammo44MagnumBulletBall",
+          "Count": 50,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl75_loadout": {
+      "Description": "L75 loadout: T2 lever rifle + steel club + Enforcer armour — 1× per wipe",
+      "CooldownSeconds": 604800,
+      "Perm": "styx.kit.lvl75",
+      "Icon": "gunRifleT2LeverActionRifle",
+      "Items": [
+        {
+          "Item": "gunRifleT2LeverActionRifle",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "ammo762mmBulletBall",
+          "Count": 150,
+          "Quality": 1
+        },
+        {
+          "Item": "meleeWpnClubT3SteelClub",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorEnforcerHelmet",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorEnforcerOutfit",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorEnforcerGloves",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "armorEnforcerBoots",
+          "Count": 1,
+          "Quality": 5
+        },
+        {
+          "Item": "medicalFirstAidKit",
+          "Count": 3,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl75_daily": {
+      "Description": "L75 daily: 1000 dukes + 20 forged steel + 30 7.62 AP — every 24h",
+      "CooldownSeconds": 86400,
+      "Perm": "styx.kit.lvl75",
+      "Icon": "casinoCoin",
+      "Items": [
+        {
+          "Item": "casinoCoin",
+          "Count": 1000,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceForgedSteel",
+          "Count": 20,
+          "Quality": 1
+        },
+        {
+          "Item": "ammo762mmBulletAP",
+          "Count": 30,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl100_loadout": {
+      "Description": "L100 loadout: T3 sniper + steel sledge + nailgun + Q6 Ranger — 1× per wipe",
+      "CooldownSeconds": 604800,
+      "Perm": "styx.kit.lvl100",
+      "Icon": "gunRifleT3SniperRifle",
+      "Items": [
+        {
+          "Item": "gunRifleT3SniperRifle",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "ammo762mmBulletAP",
+          "Count": 200,
+          "Quality": 1
+        },
+        {
+          "Item": "meleeWpnSledgeT3SteelSledgehammer",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "meleeToolRepairT3Nailgun",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorRangerHelmet",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorRangerOutfit",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorRangerGloves",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "armorRangerBoots",
+          "Count": 1,
+          "Quality": 6
+        },
+        {
+          "Item": "medicalFirstAidKit",
+          "Count": 5,
+          "Quality": 1
+        }
+      ]
+    },
+    "lvl100_daily": {
+      "Description": "L100 daily: 2000 dukes + 50 forged steel + 100 concrete + 60 7.62 AP",
+      "CooldownSeconds": 86400,
+      "Perm": "styx.kit.lvl100",
+      "Icon": "casinoCoin",
+      "Items": [
+        {
+          "Item": "casinoCoin",
+          "Count": 2000,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceForgedSteel",
+          "Count": 50,
+          "Quality": 1
+        },
+        {
+          "Item": "resourceConcreteMix",
+          "Count": 100,
+          "Quality": 1
+        },
+        {
+          "Item": "ammo762mmBulletAP",
+          "Count": 60,
           "Quality": 1
         }
       ]
