@@ -35,6 +35,115 @@ using Styx.Plugins;
 using Styx.Scheduling;
 using UnityEngine;
 
+
+/* @styx-xui-windows
+<!--
+    styxAdminRadar — through-walls entity readout for admins.
+    Five categories (players / zombies / animals / items / vehicles),
+    each with count + nearest distance. All cvars driven by AdminRadar
+    plugin. Visibility gated by styx.aradar.visible so the panel
+    disappears for non-admins or when the plugin's perm check fails.
+
+    Position: stacks below styxRadar (which sits at LeftTop, pos
+    10,-300, height 56 → ends at y=-356). Admin radar starts a few px
+    below at y=-365. Width 280 to fit "ANIMALS 99 nearest 999m".
+-->
+<window name="styxAdminRadar"
+        anchor="LeftTop" pos="10,-365"
+        width="280" height="148"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="40">
+
+    <rect name="wrap" pos="0,0" width="280" height="148"
+          visible="{#cvar('styx.aradar.visible') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,180"     type="sliced" width="280" height="148" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="120,200,255,200" type="sliced" width="280" height="148" fillcenter="false" />
+
+        <label depth="2" name="hdr"
+               text="ADMIN RADAR ({cvar(styx.aradar.radius:0)}m)"
+               font_size="13" justify="center" style="outline"
+               color="120,200,255,255"
+               pos="140,-4" width="280" height="16" pivot="top" />
+
+        <!-- Row layout per category:
+               label "CATEGORY"   (left)
+               count value        (centre)
+               "n NNm" distance   (right)
+             Y positions: -22, -42, -62, -82, -102 -->
+
+        <!-- PLAYERS -->
+        <label depth="2" name="lblP" text="PLAYERS" font_size="14" color="200,220,255,255"
+               pos="10,-22" width="80" height="18" />
+        <label depth="2" name="cntP" text="{cvar(styx.aradar.players_count:0)}"
+               font_size="14" justify="center" color="255,255,200,255"
+               pos="140,-22" width="40" height="18" pivot="top" />
+        <label depth="2" name="distP"
+               text="{cvar(styx.aradar.players_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.players_dir')))}"
+               font_size="13" justify="right" color="200,200,200,255"
+               pos="190,-22" width="80" height="18"
+               visible="{#cvar('styx.aradar.players_count') &gt; 0}" />
+
+        <!-- ZOMBIES -->
+        <label depth="2" name="lblZ" text="ZOMBIES" font_size="14" color="255,180,180,255"
+               pos="10,-42" width="80" height="18" />
+        <label depth="2" name="cntZ" text="{cvar(styx.aradar.zombies_count:0)}"
+               font_size="14" justify="center" color="255,255,200,255"
+               pos="140,-42" width="40" height="18" pivot="top" />
+        <label depth="2" name="distZ"
+               text="{cvar(styx.aradar.zombies_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.zombies_dir')))}"
+               font_size="13" justify="right" color="200,200,200,255"
+               pos="190,-42" width="80" height="18"
+               visible="{#cvar('styx.aradar.zombies_count') &gt; 0}" />
+
+        <!-- ANIMALS -->
+        <label depth="2" name="lblA" text="ANIMALS" font_size="14" color="180,255,180,255"
+               pos="10,-62" width="80" height="18" />
+        <label depth="2" name="cntA" text="{cvar(styx.aradar.animals_count:0)}"
+               font_size="14" justify="center" color="255,255,200,255"
+               pos="140,-62" width="40" height="18" pivot="top" />
+        <label depth="2" name="distA"
+               text="{cvar(styx.aradar.animals_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.animals_dir')))}"
+               font_size="13" justify="right" color="200,200,200,255"
+               pos="190,-62" width="80" height="18"
+               visible="{#cvar('styx.aradar.animals_count') &gt; 0}" />
+
+        <!-- ITEMS (loot bags + dropped) -->
+        <label depth="2" name="lblI" text="ITEMS" font_size="14" color="255,220,140,255"
+               pos="10,-82" width="80" height="18" />
+        <label depth="2" name="cntI" text="{cvar(styx.aradar.items_count:0)}"
+               font_size="14" justify="center" color="255,255,200,255"
+               pos="140,-82" width="40" height="18" pivot="top" />
+        <label depth="2" name="distI"
+               text="{cvar(styx.aradar.items_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.items_dir')))}"
+               font_size="13" justify="right" color="200,200,200,255"
+               pos="190,-82" width="80" height="18"
+               visible="{#cvar('styx.aradar.items_count') &gt; 0}" />
+
+        <!-- VEHICLES -->
+        <label depth="2" name="lblV" text="VEHICLES" font_size="14" color="200,180,255,255"
+               pos="10,-102" width="80" height="18" />
+        <label depth="2" name="cntV" text="{cvar(styx.aradar.vehicles_count:0)}"
+               font_size="14" justify="center" color="255,255,200,255"
+               pos="140,-102" width="40" height="18" pivot="top" />
+        <label depth="2" name="distV"
+               text="{cvar(styx.aradar.vehicles_dist:0)}m {#localization('aradar_dir_' + int(cvar('styx.aradar.vehicles_dir')))}"
+               font_size="13" justify="right" color="200,200,200,255"
+               pos="190,-102" width="80" height="18"
+               visible="{#cvar('styx.aradar.vehicles_count') &gt; 0}" />
+
+        <label depth="2" name="hint" text="/aradar to toggle"
+               font_size="11" justify="center" color="160,160,160,255"
+               pos="140,-128" width="280" height="14" pivot="top" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxAdminRadar" />
+*/
+
 [Info("AdminRadar", "Doowkcol", "0.1.0")]
 public class AdminRadar : StyxPlugin, Styx.Plugins.IRadarStatus
 {

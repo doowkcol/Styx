@@ -53,6 +53,245 @@ using Styx;
 using Styx.Data;
 using Styx.Plugins;
 
+
+/* @styx-xui-windows
+<!--
+    styxKits — Kit plugin's in-game picker (Kit.cs v0.2.0).
+
+    Demonstrates the Styx.Ui.Labels pattern: kit names and descriptions
+    are registered at Kit.OnLoad, baked into Mods/StyxRuntime/Config/
+    Localization.txt at server shutdown, and the next boot's engine
+    loads them as static localization keys. XUi rows reference them via
+    `{#localization('kit_name_' + int(cvar('styx.kits.rowK_id')))}`.
+
+    Description label tracks the highlighted row via styx.kits.desc_id,
+    so as the player navigates, the description updates live too.
+-->
+<window name="styxKits"
+        anchor="CenterCenter" pos="-260,400"
+        width="520" height="820"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="55">
+
+    <rect name="wrap" pos="0,0" width="520" height="820"
+          visible="{#cvar('styx.kits.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="520" height="820" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="120,255,180,220"  type="sliced" width="520" height="820" fillcenter="false" />
+
+        <label depth="2" name="hdr" text="STYX KITS"
+               font_size="28" justify="center" style="outline"
+               color="120,255,180,255"
+               pos="260,-10" width="520" height="32" pivot="top" />
+
+        <!-- 16 rows, count-gated. v0.4 layout — taller rows for 40x40 icons:
+                cursor (x=22, font 28)  icon (x=52, 40x40)  name (x=104, font 20)
+             Row spacing 44px. The plugin caps shown rows at MaxUiRows
+             (16). If you need more, add pagination — the cvars are
+             already per-page (row{N}_id), just need a page index. -->
+        <label  depth="3" name="c0" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-52" width="24" height="40" visible="{#cvar('styx.kits.sel') == 0}" />
+        <sprite depth="3" name="i0" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row0_id')))}"
+                pos="52,-52" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 0}" />
+        <label  depth="3" name="o0"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row0_id')))}"
+                font_size="20" pos="104,-60" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 0}" />
+
+        <label  depth="3" name="c1" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-96" width="24" height="40" visible="{#cvar('styx.kits.sel') == 1}" />
+        <sprite depth="3" name="i1" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row1_id')))}"
+                pos="52,-96" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 1}" />
+        <label  depth="3" name="o1"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row1_id')))}"
+                font_size="20" pos="104,-104" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 1}" />
+
+        <label  depth="3" name="c2" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-140" width="24" height="40" visible="{#cvar('styx.kits.sel') == 2}" />
+        <sprite depth="3" name="i2" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row2_id')))}"
+                pos="52,-140" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 2}" />
+        <label  depth="3" name="o2"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row2_id')))}"
+                font_size="20" pos="104,-148" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 2}" />
+
+        <label  depth="3" name="c3" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-184" width="24" height="40" visible="{#cvar('styx.kits.sel') == 3}" />
+        <sprite depth="3" name="i3" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row3_id')))}"
+                pos="52,-184" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 3}" />
+        <label  depth="3" name="o3"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row3_id')))}"
+                font_size="20" pos="104,-192" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 3}" />
+
+        <label  depth="3" name="c4" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-228" width="24" height="40" visible="{#cvar('styx.kits.sel') == 4}" />
+        <sprite depth="3" name="i4" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row4_id')))}"
+                pos="52,-228" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 4}" />
+        <label  depth="3" name="o4"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row4_id')))}"
+                font_size="20" pos="104,-236" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 4}" />
+
+        <label  depth="3" name="c5" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-272" width="24" height="40" visible="{#cvar('styx.kits.sel') == 5}" />
+        <sprite depth="3" name="i5" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row5_id')))}"
+                pos="52,-272" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 5}" />
+        <label  depth="3" name="o5"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row5_id')))}"
+                font_size="20" pos="104,-280" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 5}" />
+
+        <label  depth="3" name="c6" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-316" width="24" height="40" visible="{#cvar('styx.kits.sel') == 6}" />
+        <sprite depth="3" name="i6" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row6_id')))}"
+                pos="52,-316" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 6}" />
+        <label  depth="3" name="o6"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row6_id')))}"
+                font_size="20" pos="104,-324" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 6}" />
+
+        <label  depth="3" name="c7" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-360" width="24" height="40" visible="{#cvar('styx.kits.sel') == 7}" />
+        <sprite depth="3" name="i7" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row7_id')))}"
+                pos="52,-360" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 7}" />
+        <label  depth="3" name="o7"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row7_id')))}"
+                font_size="20" pos="104,-368" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 7}" />
+
+        <label  depth="3" name="c8" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-404" width="24" height="40" visible="{#cvar('styx.kits.sel') == 8}" />
+        <sprite depth="3" name="i8" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row8_id')))}"
+                pos="52,-404" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 8}" />
+        <label  depth="3" name="o8"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row8_id')))}"
+                font_size="20" pos="104,-412" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 8}" />
+
+        <label  depth="3" name="c9" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-448" width="24" height="40" visible="{#cvar('styx.kits.sel') == 9}" />
+        <sprite depth="3" name="i9" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row9_id')))}"
+                pos="52,-448" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 9}" />
+        <label  depth="3" name="o9"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row9_id')))}"
+                font_size="20" pos="104,-456" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 9}" />
+
+        <label  depth="3" name="c10" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-492" width="24" height="40" visible="{#cvar('styx.kits.sel') == 10}" />
+        <sprite depth="3" name="i10" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row10_id')))}"
+                pos="52,-492" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 10}" />
+        <label  depth="3" name="o10"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row10_id')))}"
+                font_size="20" pos="104,-500" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 10}" />
+
+        <label  depth="3" name="c11" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-536" width="24" height="40" visible="{#cvar('styx.kits.sel') == 11}" />
+        <sprite depth="3" name="i11" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row11_id')))}"
+                pos="52,-536" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 11}" />
+        <label  depth="3" name="o11"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row11_id')))}"
+                font_size="20" pos="104,-544" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 11}" />
+
+        <label  depth="3" name="c12" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-580" width="24" height="40" visible="{#cvar('styx.kits.sel') == 12}" />
+        <sprite depth="3" name="i12" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row12_id')))}"
+                pos="52,-580" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 12}" />
+        <label  depth="3" name="o12"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row12_id')))}"
+                font_size="20" pos="104,-588" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 12}" />
+
+        <label  depth="3" name="c13" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-624" width="24" height="40" visible="{#cvar('styx.kits.sel') == 13}" />
+        <sprite depth="3" name="i13" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row13_id')))}"
+                pos="52,-624" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 13}" />
+        <label  depth="3" name="o13"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row13_id')))}"
+                font_size="20" pos="104,-632" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 13}" />
+
+        <label  depth="3" name="c14" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-668" width="24" height="40" visible="{#cvar('styx.kits.sel') == 14}" />
+        <sprite depth="3" name="i14" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row14_id')))}"
+                pos="52,-668" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 14}" />
+        <label  depth="3" name="o14"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row14_id')))}"
+                font_size="20" pos="104,-676" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 14}" />
+
+        <label  depth="3" name="c15" text="&gt;" font_size="28" color="120,255,180,255"
+                pos="22,-712" width="24" height="40" visible="{#cvar('styx.kits.sel') == 15}" />
+        <sprite depth="3" name="i15" atlas="ItemIconAtlas"
+                sprite="{#localization('kit_icon_' + int(cvar('styx.kits.row15_id')))}"
+                pos="52,-712" width="40" height="40"
+                visible="{#cvar('styx.kits.count') &gt; 15}" />
+        <label  depth="3" name="o15"
+                text="{#localization('kit_name_' + int(cvar('styx.kits.row15_id')))}"
+                font_size="20" pos="104,-720" width="400" height="24" color="240,240,240,255"
+                visible="{#cvar('styx.kits.count') &gt; 15}" />
+        <!-- Description follows the highlighted row. -->
+        <label depth="3" name="descsep" text="—" font_size="16" justify="center"
+               color="120,255,180,180" pos="260,-770" width="520" height="18" pivot="top" />
+        <label depth="3" name="desc"
+               text="{#localization('kit_desc_' + int(cvar('styx.kits.desc_id')))}"
+               font_size="14" justify="center"
+               pos="260,-790" width="500" height="32" pivot="top"
+               color="220,220,200,255" />
+
+        <label depth="3" name="hint"
+               text="Whisper shows cooldown/permission status as you navigate."
+               font_size="12" justify="center"
+               pos="260,-820" width="520" height="16" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="legend"
+               text="[SCROLL] navigate   [LMB] claim   [RMB] back"
+               font_size="13" justify="center"
+               pos="260,-842" width="520" height="18" pivot="top"
+               color="180,180,180,255" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxKits" />
+*/
+
 [Info("Kit", "Doowkcol", "0.3.0")]
 public class Kit : StyxPlugin
 {

@@ -43,6 +43,142 @@ using Styx;
 using Styx.Plugins;
 using Styx.Scheduling;
 
+
+/* @styx-xui-windows
+<window name="styxHud"
+        anchor="LeftTop"
+        pos="10,-10"
+        width="260" height="200"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="-20">
+
+    <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,180"     type="sliced" width="260" height="200" />
+    <sprite depth="1" name="border" sprite="menu_empty3px" color="255,220,0,200" type="sliced" width="260" height="200" fillcenter="false" />
+
+    <!-- Header — text comes from StyxHud config (HeaderText) baked
+         into runtime localization at last shutdown. Default "STYX". -->
+    <label depth="2" name="hdr"
+           text="{#localization('styx_hud_header')}"
+           font_size="20" justify="center" style="outline"
+           color="255,220,0,255"
+           pos="130,-6" width="260" height="22" pivot="top" />
+
+    <!-- Vanish badge — small indicator in the top-right corner of the
+         panel, visible only when the local player has IsSpectator=true.
+         StyxHud's tick pushes styx.hud.vanish_active = 1 when vanished. -->
+    <label depth="2" name="vanishBadge"
+           text="VANISHED" font_size="11" style="outline"
+           color="220,120,255,255"
+           pos="195,-8" width="60" height="14"
+           visible="{#cvar('styx.hud.vanish_active') == 1}" />
+
+    <!-- Optional subheader (e.g. "Survival Hardcore", "PvP"), visible
+         only when StyxHud config Subheader is non-empty. -->
+    <label depth="2" name="subhdr"
+           text="{#localization('styx_hud_subheader')}"
+           font_size="13" justify="center"
+           pos="130,-28" width="260" height="16" pivot="top"
+           color="200,200,200,255"
+           visible="{#cvar('styx.hud.subheader_visible') == 1}" />
+
+    <!-- Player count + rank on one line. Y=-50 reserves space for the
+         optional subheader at -28 even when subheader is hidden — the
+         visible/hidden state of subheader doesn't reflow downstream
+         rows in XUi, so we always reserve. -->
+    <label depth="2" name="pcount"
+           text="Online: {cvar(styx.world.players:0)}"
+           font_size="14" pos="12,-50" width="120" height="18"
+           color="180,220,255,255" />
+    <label depth="2" name="rankLbl"
+           text="Rank:" font_size="14"
+           pos="135,-50" width="50" height="18"
+           color="180,220,255,255" />
+    <label depth="2" name="rankVal"
+           text="{#localization('styx_rank_' + int(cvar('styx.hud.rank_id')))}"
+           font_size="14" pos="180,-50" width="80" height="18"
+           color="255,200,100,255" />
+
+    <!-- Divider -->
+    <sprite depth="2" name="div1" sprite="menu_empty" color="255,220,0,80"
+            type="sliced" width="240" height="1" pos="10,-74" />
+
+    <!-- Server timing: wipe countdown (always shown) -->
+    <label depth="2" name="wipeLbl"
+           text="Next wipe:" font_size="14"
+           pos="12,-82" width="100" height="18"
+           color="180,255,200,255" />
+    <label depth="2" name="wipeVal"
+           text="{cvar(styx.srm.wipe_d:0)}d {cvar(styx.srm.wipe_h:0)}h"
+           font_size="14" justify="right"
+           pos="135,-82" width="115" height="18"
+           color="240,240,240,255" />
+
+    <!-- Restart warning — visible only when SRM signals warning window -->
+    <label depth="2" name="warnIcon"
+           text="*" font_size="14" color="255,80,80,255"
+           pos="12,-104" width="14" height="18"
+           visible="{#cvar('styx.srm.restart_warning') == 1}" />
+    <label depth="2" name="warnLbl"
+           text="Restart in" font_size="14"
+           pos="28,-104" width="80" height="18" color="255,160,80,255"
+           visible="{#cvar('styx.srm.restart_warning') == 1}" />
+    <label depth="2" name="warnVal"
+           text="{cvar(styx.srm.restart_h:0)}h {cvar(styx.srm.restart_m:0)}m {cvar(styx.srm.restart_s:00)}s"
+           font_size="14" justify="right"
+           pos="105,-104" width="145" height="18" color="255,200,100,255"
+           visible="{#cvar('styx.srm.restart_warning') == 1}" />
+
+    <!-- Optional zombie-radar section -->
+    <label depth="2" name="zCntLbl"
+           text="Zombies ({cvar(styx.radar.radius:0)}m):" font_size="14"
+           pos="12,-128" width="160" height="18" color="255,180,180,255"
+           visible="{#cvar('styx.radar.radius') &gt; 0}" />
+    <label depth="2" name="zCntVal"
+           text="{cvar(styx.radar.count:0)}" font_size="14" justify="right"
+           pos="180,-128" width="70" height="18" color="255,220,120,255"
+           visible="{#cvar('styx.radar.radius') &gt; 0}" />
+
+    <!-- Economy section. Visibility gated on styx.eco.loaded so the
+         row hides when StyxEconomy isn't installed (cvar absent => 0).
+         Currency name is plugin-config-driven, baked at boot via
+         Styx.Ui.Labels.Register("styx_eco_currency", ...). -->
+    <label depth="2" name="ecoLbl"
+           text="{#localization('styx_eco_currency')}:" font_size="14"
+           pos="12,-150" width="160" height="18" color="255,220,140,255"
+           visible="{#cvar('styx.eco.loaded') == 1}" />
+    <label depth="2" name="ecoVal"
+           text="{cvar(styx.eco.balance:0)}" font_size="14" justify="right"
+           pos="180,-150" width="70" height="18" color="255,240,180,255"
+           visible="{#cvar('styx.eco.loaded') == 1}" />
+
+    <!-- Level + XP section (StyxLeveling). Hidden if plugin not loaded. -->
+    <label depth="2" name="lvlLbl"
+           text="Level:" font_size="14"
+           pos="12,-168" width="60" height="18" color="200,220,255,255"
+           visible="{#cvar('styx.xp.loaded') == 1}" />
+    <label depth="2" name="lvlVal"
+           text="{cvar(styx.xp.level:0)}" font_size="14"
+           pos="76,-168" width="40" height="18" color="255,240,180,255"
+           visible="{#cvar('styx.xp.loaded') == 1}" />
+    <label depth="2" name="xpVal"
+           text="{cvar(styx.xp.balance:0)} / {cvar(styx.xp.next:0)}"
+           font_size="12" justify="right"
+           pos="120,-168" width="130" height="18" color="180,200,220,255"
+           visible="{#cvar('styx.xp.loaded') == 1}" />
+
+    <!-- Hint footer -->
+    <label depth="2" name="hint"
+           text="/m for menu" font_size="11" justify="center"
+           pos="130,-185" width="260" height="14" pivot="top"
+           color="160,160,160,255" />
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxHud" />
+*/
+
 [Info("StyxHud", "Doowkcol", "0.2.0")]
 public class StyxHud : StyxPlugin
 {

@@ -50,6 +50,532 @@ using Styx;
 using Styx.Permissions;
 using Styx.Plugins;
 
+
+/* @styx-xui-windows
+<!--
+    styxPermEditor — UI for granting/revoking perms per group.
+    Two stages share one window via stage-cvar gating:
+      styx.pe.stage == 0 → group picker rect
+      styx.pe.stage == 1 → perm-toggle rect
+    Group + perm names render via static labels (perm_grp_N,
+    perm_def_N) registered by PermEditor.OnLoad and persisted to
+    StyxRuntime/Localization.txt.
+-->
+<window name="styxPermEditor"
+        anchor="CenterCenter" pos="-280,340"
+        width="560" height="680"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="55">
+
+    <!-- Whole window gated by .open -->
+    <rect name="wrap" pos="0,0" width="560" height="680"
+          visible="{#cvar('styx.pe.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,220"        type="sliced" width="560" height="680" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="160,180,255,220"  type="sliced" width="560" height="680" fillcenter="false" />
+
+        <!-- ===== STAGE 0: GROUP PICKER ===== -->
+        <rect name="stage0" pos="0,0" width="560" height="680"
+              visible="{#cvar('styx.pe.stage') == 0}">
+
+            <label depth="2" name="hdr0" text="PERM EDITOR — pick a group"
+                   font_size="22" justify="center" style="outline"
+                   color="160,180,255,255"
+                   pos="280,-10" width="560" height="28" pivot="top" />
+
+            <!-- 8 group rows. Y: -52, -78, -104, -130, -156, -182, -208, -234 (26px steps) -->
+            <label depth="3" name="gc0" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-52" width="20" height="22" visible="{#cvar('styx.pe.sel') == 0}" />
+            <label depth="3" name="go0" text="{#localization('perm_grp_' + int(cvar('styx.pe.group0_id')))}"
+                   font_size="20" pos="50,-52" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 0}" />
+
+            <label depth="3" name="gc1" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-78" width="20" height="22" visible="{#cvar('styx.pe.sel') == 1}" />
+            <label depth="3" name="go1" text="{#localization('perm_grp_' + int(cvar('styx.pe.group1_id')))}"
+                   font_size="20" pos="50,-78" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 1}" />
+
+            <label depth="3" name="gc2" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-104" width="20" height="22" visible="{#cvar('styx.pe.sel') == 2}" />
+            <label depth="3" name="go2" text="{#localization('perm_grp_' + int(cvar('styx.pe.group2_id')))}"
+                   font_size="20" pos="50,-104" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 2}" />
+
+            <label depth="3" name="gc3" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-130" width="20" height="22" visible="{#cvar('styx.pe.sel') == 3}" />
+            <label depth="3" name="go3" text="{#localization('perm_grp_' + int(cvar('styx.pe.group3_id')))}"
+                   font_size="20" pos="50,-130" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 3}" />
+
+            <label depth="3" name="gc4" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-156" width="20" height="22" visible="{#cvar('styx.pe.sel') == 4}" />
+            <label depth="3" name="go4" text="{#localization('perm_grp_' + int(cvar('styx.pe.group4_id')))}"
+                   font_size="20" pos="50,-156" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 4}" />
+
+            <label depth="3" name="gc5" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-182" width="20" height="22" visible="{#cvar('styx.pe.sel') == 5}" />
+            <label depth="3" name="go5" text="{#localization('perm_grp_' + int(cvar('styx.pe.group5_id')))}"
+                   font_size="20" pos="50,-182" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 5}" />
+
+            <label depth="3" name="gc6" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-208" width="20" height="22" visible="{#cvar('styx.pe.sel') == 6}" />
+            <label depth="3" name="go6" text="{#localization('perm_grp_' + int(cvar('styx.pe.group6_id')))}"
+                   font_size="20" pos="50,-208" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 6}" />
+
+            <label depth="3" name="gc7" text="&gt;" font_size="22" color="160,180,255,255"
+                   pos="22,-234" width="20" height="22" visible="{#cvar('styx.pe.sel') == 7}" />
+            <label depth="3" name="go7" text="{#localization('perm_grp_' + int(cvar('styx.pe.group7_id')))}"
+                   font_size="20" pos="50,-234" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.group_count') &gt; 7}" />
+
+            <label depth="3" name="hint0"
+                   text="Group details (priority, tag, perm count) whispered to chat as you navigate."
+                   font_size="12" justify="center"
+                   pos="280,-340" width="560" height="16" pivot="top"
+                   color="200,200,160,255" />
+            <label depth="3" name="legend0"
+                   text="[SCROLL] navigate   [LMB] open group   [RMB] close"
+                   font_size="13" justify="center"
+                   pos="280,-370" width="560" height="18" pivot="top"
+                   color="180,180,180,255" />
+        </rect>
+
+        <!-- ===== STAGE 1: PLUGIN PICKER (12 rows) =====
+             Picks which plugin's perms to show in stage 2. Row 0 is
+             always "(All plugins)" — selecting it shows the full list.
+             Labels come from perm_plugin_N registered by PermEditor. -->
+        <rect name="stage1" pos="0,0" width="560" height="680"
+              visible="{#cvar('styx.pe.stage') == 1}">
+
+            <label depth="2" name="hdr1"
+                   text="PICK A PLUGIN — filters perms shown next"
+                   font_size="22" justify="center" style="outline"
+                   color="255,200,140,255"
+                   pos="280,-10" width="560" height="28" pivot="top" />
+
+            <label depth="2" name="hdr1b"
+                   text="group: {#localization('perm_grp_' + int(cvar('styx.pe.selected_group_id')))}"
+                   font_size="14" justify="center"
+                   color="160,255,180,255"
+                   pos="280,-38" width="560" height="18" pivot="top" />
+
+            <!-- Sliding-window position badge (top-right). Hidden when
+                 the picker is empty so it never shows "0/0". -->
+            <label depth="3" name="hdr1pos"
+                   text="{cvar(styx.pe.plugin_pos:1)}/{cvar(styx.pe.plugin_total:1)}"
+                   font_size="13" justify="right"
+                   color="180,180,180,255"
+                   pos="510,-38" width="50" height="18" pivot="top"
+                   visible="{#cvar('styx.pe.plugin_total') &gt; 0}" />
+
+            <!-- 20 plugin rows. Y: -68, -94, -120, -146, -172, -198, -224, -250, -276, -302, -328, -354, -380, -406, -432, -458, -484, -510, -536, -562 (26px steps) -->
+            <label depth="3" name="ppc0" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-68" width="20" height="22" visible="{#cvar('styx.pe.sel') == 0}" />
+            <label depth="3" name="ppo0" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin0_id')))}"
+                   font_size="20" pos="50,-68" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 0}" />
+
+            <label depth="3" name="ppc1" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-94" width="20" height="22" visible="{#cvar('styx.pe.sel') == 1}" />
+            <label depth="3" name="ppo1" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin1_id')))}"
+                   font_size="20" pos="50,-94" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 1}" />
+
+            <label depth="3" name="ppc2" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-120" width="20" height="22" visible="{#cvar('styx.pe.sel') == 2}" />
+            <label depth="3" name="ppo2" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin2_id')))}"
+                   font_size="20" pos="50,-120" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 2}" />
+
+            <label depth="3" name="ppc3" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-146" width="20" height="22" visible="{#cvar('styx.pe.sel') == 3}" />
+            <label depth="3" name="ppo3" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin3_id')))}"
+                   font_size="20" pos="50,-146" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 3}" />
+
+            <label depth="3" name="ppc4" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-172" width="20" height="22" visible="{#cvar('styx.pe.sel') == 4}" />
+            <label depth="3" name="ppo4" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin4_id')))}"
+                   font_size="20" pos="50,-172" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 4}" />
+
+            <label depth="3" name="ppc5" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-198" width="20" height="22" visible="{#cvar('styx.pe.sel') == 5}" />
+            <label depth="3" name="ppo5" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin5_id')))}"
+                   font_size="20" pos="50,-198" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 5}" />
+
+            <label depth="3" name="ppc6" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-224" width="20" height="22" visible="{#cvar('styx.pe.sel') == 6}" />
+            <label depth="3" name="ppo6" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin6_id')))}"
+                   font_size="20" pos="50,-224" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 6}" />
+
+            <label depth="3" name="ppc7" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-250" width="20" height="22" visible="{#cvar('styx.pe.sel') == 7}" />
+            <label depth="3" name="ppo7" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin7_id')))}"
+                   font_size="20" pos="50,-250" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 7}" />
+
+            <label depth="3" name="ppc8" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-276" width="20" height="22" visible="{#cvar('styx.pe.sel') == 8}" />
+            <label depth="3" name="ppo8" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin8_id')))}"
+                   font_size="20" pos="50,-276" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 8}" />
+
+            <label depth="3" name="ppc9" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-302" width="20" height="22" visible="{#cvar('styx.pe.sel') == 9}" />
+            <label depth="3" name="ppo9" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin9_id')))}"
+                   font_size="20" pos="50,-302" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 9}" />
+
+            <label depth="3" name="ppc10" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-328" width="20" height="22" visible="{#cvar('styx.pe.sel') == 10}" />
+            <label depth="3" name="ppo10" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin10_id')))}"
+                   font_size="20" pos="50,-328" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 10}" />
+
+            <label depth="3" name="ppc11" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-354" width="20" height="22" visible="{#cvar('styx.pe.sel') == 11}" />
+            <label depth="3" name="ppo11" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin11_id')))}"
+                   font_size="20" pos="50,-354" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 11}" />
+
+            <label depth="3" name="ppc12" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-380" width="20" height="22" visible="{#cvar('styx.pe.sel') == 12}" />
+            <label depth="3" name="ppo12" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin12_id')))}"
+                   font_size="20" pos="50,-380" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 12}" />
+
+            <label depth="3" name="ppc13" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-406" width="20" height="22" visible="{#cvar('styx.pe.sel') == 13}" />
+            <label depth="3" name="ppo13" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin13_id')))}"
+                   font_size="20" pos="50,-406" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 13}" />
+
+            <label depth="3" name="ppc14" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-432" width="20" height="22" visible="{#cvar('styx.pe.sel') == 14}" />
+            <label depth="3" name="ppo14" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin14_id')))}"
+                   font_size="20" pos="50,-432" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 14}" />
+
+            <label depth="3" name="ppc15" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-458" width="20" height="22" visible="{#cvar('styx.pe.sel') == 15}" />
+            <label depth="3" name="ppo15" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin15_id')))}"
+                   font_size="20" pos="50,-458" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 15}" />
+
+            <label depth="3" name="ppc16" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-484" width="20" height="22" visible="{#cvar('styx.pe.sel') == 16}" />
+            <label depth="3" name="ppo16" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin16_id')))}"
+                   font_size="20" pos="50,-484" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 16}" />
+
+            <label depth="3" name="ppc17" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-510" width="20" height="22" visible="{#cvar('styx.pe.sel') == 17}" />
+            <label depth="3" name="ppo17" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin17_id')))}"
+                   font_size="20" pos="50,-510" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 17}" />
+
+            <label depth="3" name="ppc18" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-536" width="20" height="22" visible="{#cvar('styx.pe.sel') == 18}" />
+            <label depth="3" name="ppo18" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin18_id')))}"
+                   font_size="20" pos="50,-536" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 18}" />
+
+            <label depth="3" name="ppc19" text="&gt;" font_size="22" color="255,200,140,255"
+                   pos="22,-562" width="20" height="22" visible="{#cvar('styx.pe.sel') == 19}" />
+            <label depth="3" name="ppo19" text="{#localization('perm_plugin_' + int(cvar('styx.pe.plugin19_id')))}"
+                   font_size="20" pos="50,-562" width="480" height="22" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.plugin_count') &gt; 19}" />
+
+            <label depth="3" name="hint1p"
+                   text="(All plugins) = unfiltered. List scrolls past 20 — top-right badge shows your position. Perm count per plugin whispered as you navigate."
+                   font_size="12" justify="center"
+                   pos="280,-602" width="560" height="16" pivot="top"
+                   color="200,200,160,255" />
+            <label depth="3" name="legend1p"
+                   text="[SCROLL] navigate   [LMB] pick   [RMB] back to groups"
+                   font_size="13" justify="center"
+                   pos="280,-632" width="560" height="18" pivot="top"
+                   color="180,180,180,255" />
+        </rect>
+
+        <!-- ===== STAGE 2: GROUP CONFIG (3 rows) + PERM TOGGLES (16 rows) ===== -->
+        <rect name="stage2" pos="0,0" width="560" height="680"
+              visible="{#cvar('styx.pe.stage') == 2}">
+
+            <label depth="2" name="hdr2"
+                   text="EDITING: {#localization('perm_grp_' + int(cvar('styx.pe.selected_group_id')))} — {#localization('perm_plugin_' + int(cvar('styx.pe.selected_plugin_id')))}"
+                   font_size="22" justify="center" style="outline"
+                   color="160,255,180,255"
+                   pos="280,-8" width="560" height="24" pivot="top" />
+
+            <!-- Sliding-window position badge (top-right). Only shown
+                 when the cursor is on a perm row (perm_pos > 0). -->
+            <label depth="3" name="hdr2pos"
+                   text="{cvar(styx.pe.perm_pos:1)}/{cvar(styx.pe.perm_total:1)}"
+                   font_size="13" justify="right"
+                   color="180,180,180,255"
+                   pos="510,-12" width="50" height="18" pivot="top"
+                   visible="{#cvar('styx.pe.perm_pos') &gt; 0}" />
+
+            <!-- ===== Group config rows (sel 0..2) ===== -->
+
+            <!-- Row 0: Priority -->
+            <label depth="3" name="cfgC0" text="&gt;" font_size="20" color="255,180,80,255"
+                   pos="22,-32" width="20" height="20" visible="{#cvar('styx.pe.sel') == 0}" />
+            <label depth="3" name="cfgL0" text="Priority"
+                   font_size="16" pos="50,-32" width="180" height="20" color="255,200,140,255" />
+            <label depth="3" name="cfgV0" text="{cvar(styx.pe.cfg_priority:0)}"
+                   font_size="16" pos="240,-32" width="100" height="20" color="240,240,240,255" />
+            <label depth="3" name="cfgH0" text="LMB cycles +10"
+                   font_size="12" justify="right" pos="450,-32" width="100" height="20" color="160,160,160,255" />
+
+            <!-- Row 1: Chat Tag -->
+            <label depth="3" name="cfgC1" text="&gt;" font_size="20" color="255,180,80,255"
+                   pos="22,-54" width="20" height="20" visible="{#cvar('styx.pe.sel') == 1}" />
+            <label depth="3" name="cfgL1" text="Chat Tag"
+                   font_size="16" pos="50,-54" width="180" height="20" color="255,200,140,255" />
+            <label depth="3" name="cfgV1"
+                   text="{#localization('perm_tag_' + int(cvar('styx.pe.cfg_tag_id')))}"
+                   font_size="16" pos="240,-54" width="180" height="20" color="240,240,240,255" />
+            <label depth="3" name="cfgH1" text="LMB cycles preset"
+                   font_size="12" justify="right" pos="430,-54" width="120" height="20" color="160,160,160,255" />
+
+            <!-- Row 2: Chat Color -->
+            <label depth="3" name="cfgC2" text="&gt;" font_size="20" color="255,180,80,255"
+                   pos="22,-76" width="20" height="20" visible="{#cvar('styx.pe.sel') == 2}" />
+            <label depth="3" name="cfgL2" text="Chat Color"
+                   font_size="16" pos="50,-76" width="180" height="20" color="255,200,140,255" />
+            <label depth="3" name="cfgV2"
+                   text="{#localization('perm_color_' + int(cvar('styx.pe.cfg_color_id')))}"
+                   font_size="16" pos="240,-76" width="120" height="20" color="240,240,240,255" />
+            <label depth="3" name="cfgH2" text="LMB cycles preset"
+                   font_size="12" justify="right" pos="430,-76" width="120" height="20" color="160,160,160,255" />
+
+            <!-- Visual divider between config + perms -->
+            <sprite depth="2" name="div1" sprite="menu_empty" color="160,255,180,80"
+                    type="sliced" width="540" height="1" pos="10,-94" />
+
+            <!-- ===== Perm rows (sel 3..14) ===== -->
+            <!-- Y starts at -106; 22px steps. Cursor sel offsets shifted by +3. -->
+            <label depth="3" name="pc0" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-106" width="20" height="20" visible="{#cvar('styx.pe.sel') == 3}" />
+            <label depth="3" name="pn0" text="{#localization('perm_def_' + int(cvar('styx.pe.perm0_id')))}"
+                   font_size="16" pos="50,-106" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 0}" />
+            <label depth="3" name="pg0" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-108" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 0  and cvar('styx.pe.perm0_status') == 1}" />
+            <label depth="3" name="pn0n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-108" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 0  and cvar('styx.pe.perm0_status') == 0}" />
+
+            <label depth="3" name="pc1" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-128" width="20" height="20" visible="{#cvar('styx.pe.sel') == 4}" />
+            <label depth="3" name="pn1" text="{#localization('perm_def_' + int(cvar('styx.pe.perm1_id')))}"
+                   font_size="16" pos="50,-128" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 1}" />
+            <label depth="3" name="pg1" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-130" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 1  and cvar('styx.pe.perm1_status') == 1}" />
+            <label depth="3" name="pn1n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-130" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 1  and cvar('styx.pe.perm1_status') == 0}" />
+
+            <label depth="3" name="pc2" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-150" width="20" height="20" visible="{#cvar('styx.pe.sel') == 5}" />
+            <label depth="3" name="pn2" text="{#localization('perm_def_' + int(cvar('styx.pe.perm2_id')))}"
+                   font_size="16" pos="50,-150" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 2}" />
+            <label depth="3" name="pg2" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-152" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 2  and cvar('styx.pe.perm2_status') == 1}" />
+            <label depth="3" name="pn2n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-152" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 2  and cvar('styx.pe.perm2_status') == 0}" />
+
+            <label depth="3" name="pc3" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-172" width="20" height="20" visible="{#cvar('styx.pe.sel') == 6}" />
+            <label depth="3" name="pn3" text="{#localization('perm_def_' + int(cvar('styx.pe.perm3_id')))}"
+                   font_size="16" pos="50,-172" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 3}" />
+            <label depth="3" name="pg3" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-174" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 3  and cvar('styx.pe.perm3_status') == 1}" />
+            <label depth="3" name="pn3n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-174" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 3  and cvar('styx.pe.perm3_status') == 0}" />
+
+            <label depth="3" name="pc4" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-194" width="20" height="20" visible="{#cvar('styx.pe.sel') == 7}" />
+            <label depth="3" name="pn4" text="{#localization('perm_def_' + int(cvar('styx.pe.perm4_id')))}"
+                   font_size="16" pos="50,-194" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 4}" />
+            <label depth="3" name="pg4" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-196" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 4  and cvar('styx.pe.perm4_status') == 1}" />
+            <label depth="3" name="pn4n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-196" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 4  and cvar('styx.pe.perm4_status') == 0}" />
+
+            <label depth="3" name="pc5" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-216" width="20" height="20" visible="{#cvar('styx.pe.sel') == 8}" />
+            <label depth="3" name="pn5" text="{#localization('perm_def_' + int(cvar('styx.pe.perm5_id')))}"
+                   font_size="16" pos="50,-216" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 5}" />
+            <label depth="3" name="pg5" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-218" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 5  and cvar('styx.pe.perm5_status') == 1}" />
+            <label depth="3" name="pn5n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-218" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 5  and cvar('styx.pe.perm5_status') == 0}" />
+
+            <label depth="3" name="pc6" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-238" width="20" height="20" visible="{#cvar('styx.pe.sel') == 9}" />
+            <label depth="3" name="pn6" text="{#localization('perm_def_' + int(cvar('styx.pe.perm6_id')))}"
+                   font_size="16" pos="50,-238" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 6}" />
+            <label depth="3" name="pg6" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-240" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 6  and cvar('styx.pe.perm6_status') == 1}" />
+            <label depth="3" name="pn6n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-240" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 6  and cvar('styx.pe.perm6_status') == 0}" />
+
+            <label depth="3" name="pc7" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-260" width="20" height="20" visible="{#cvar('styx.pe.sel') == 10}" />
+            <label depth="3" name="pn7" text="{#localization('perm_def_' + int(cvar('styx.pe.perm7_id')))}"
+                   font_size="16" pos="50,-260" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 7}" />
+            <label depth="3" name="pg7" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-262" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 7  and cvar('styx.pe.perm7_status') == 1}" />
+            <label depth="3" name="pn7n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-262" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 7  and cvar('styx.pe.perm7_status') == 0}" />
+
+            <label depth="3" name="pc8" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-282" width="20" height="20" visible="{#cvar('styx.pe.sel') == 11}" />
+            <label depth="3" name="pn8" text="{#localization('perm_def_' + int(cvar('styx.pe.perm8_id')))}"
+                   font_size="16" pos="50,-282" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 8}" />
+            <label depth="3" name="pg8" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-284" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 8  and cvar('styx.pe.perm8_status') == 1}" />
+            <label depth="3" name="pn8n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-284" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 8  and cvar('styx.pe.perm8_status') == 0}" />
+
+            <label depth="3" name="pc9" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-304" width="20" height="20" visible="{#cvar('styx.pe.sel') == 12}" />
+            <label depth="3" name="pn9" text="{#localization('perm_def_' + int(cvar('styx.pe.perm9_id')))}"
+                   font_size="16" pos="50,-304" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 9}" />
+            <label depth="3" name="pg9" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-306" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 9  and cvar('styx.pe.perm9_status') == 1}" />
+            <label depth="3" name="pn9n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-306" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 9  and cvar('styx.pe.perm9_status') == 0}" />
+
+            <label depth="3" name="pc10" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-326" width="20" height="20" visible="{#cvar('styx.pe.sel') == 13}" />
+            <label depth="3" name="pn10" text="{#localization('perm_def_' + int(cvar('styx.pe.perm10_id')))}"
+                   font_size="16" pos="50,-326" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 10}" />
+            <label depth="3" name="pg10" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-328" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 10  and cvar('styx.pe.perm10_status') == 1}" />
+            <label depth="3" name="pn10n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-328" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 10  and cvar('styx.pe.perm10_status') == 0}" />
+
+            <label depth="3" name="pc11" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-348" width="20" height="20" visible="{#cvar('styx.pe.sel') == 14}" />
+            <label depth="3" name="pn11" text="{#localization('perm_def_' + int(cvar('styx.pe.perm11_id')))}"
+                   font_size="16" pos="50,-348" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 11}" />
+            <label depth="3" name="pg11" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-350" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 11  and cvar('styx.pe.perm11_status') == 1}" />
+            <label depth="3" name="pn11n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-350" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 11  and cvar('styx.pe.perm11_status') == 0}" />
+
+            <label depth="3" name="pc12" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-370" width="20" height="20" visible="{#cvar('styx.pe.sel') == 15}" />
+            <label depth="3" name="pn12" text="{#localization('perm_def_' + int(cvar('styx.pe.perm12_id')))}"
+                   font_size="16" pos="50,-370" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 12}" />
+            <label depth="3" name="pg12" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-372" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 12  and cvar('styx.pe.perm12_status') == 1}" />
+            <label depth="3" name="pn12n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-372" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 12  and cvar('styx.pe.perm12_status') == 0}" />
+
+            <label depth="3" name="pc13" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-392" width="20" height="20" visible="{#cvar('styx.pe.sel') == 16}" />
+            <label depth="3" name="pn13" text="{#localization('perm_def_' + int(cvar('styx.pe.perm13_id')))}"
+                   font_size="16" pos="50,-392" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 13}" />
+            <label depth="3" name="pg13" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-394" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 13  and cvar('styx.pe.perm13_status') == 1}" />
+            <label depth="3" name="pn13n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-394" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 13  and cvar('styx.pe.perm13_status') == 0}" />
+
+            <label depth="3" name="pc14" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-414" width="20" height="20" visible="{#cvar('styx.pe.sel') == 17}" />
+            <label depth="3" name="pn14" text="{#localization('perm_def_' + int(cvar('styx.pe.perm14_id')))}"
+                   font_size="16" pos="50,-414" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 14}" />
+            <label depth="3" name="pg14" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-416" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 14  and cvar('styx.pe.perm14_status') == 1}" />
+            <label depth="3" name="pn14n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-416" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 14  and cvar('styx.pe.perm14_status') == 0}" />
+
+            <label depth="3" name="pc15" text="&gt;" font_size="20" color="160,255,180,255"
+                   pos="22,-436" width="20" height="20" visible="{#cvar('styx.pe.sel') == 18}" />
+            <label depth="3" name="pn15" text="{#localization('perm_def_' + int(cvar('styx.pe.perm15_id')))}"
+                   font_size="16" pos="50,-436" width="380" height="20" color="240,240,240,255"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 15}" />
+            <label depth="3" name="pg15" text="GRANTED" font_size="13" color="100,220,120,255"
+                   pos="450,-438" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 15  and cvar('styx.pe.perm15_status') == 1}" />
+            <label depth="3" name="pn15n" text="not granted" font_size="13" color="160,160,160,255"
+                   pos="450,-438" width="100" height="18"
+                   visible="{#cvar('styx.pe.perm_count') &gt; 15  and cvar('styx.pe.perm15_status') == 0}" />
+
+            <label depth="3" name="hint1"
+                   text="Top 3 rows edit group identity. Below = perm grants. Long lists scroll past 16 — top-right badge shows position. Description whispered as you navigate."
+                   font_size="12" justify="center"
+                   pos="280,-490" width="560" height="16" pivot="top"
+                   color="200,200,160,255" />
+            <label depth="3" name="legend1"
+                   text="[SCROLL] navigate   [LMB] cycle/toggle   [RMB] back to plugins"
+                   font_size="13" justify="center"
+                   pos="280,-540" width="560" height="18" pivot="top"
+                   color="180,180,180,255" />
+        </rect>
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxPermEditor" />
+*/
+
 [Info("PermEditor", "Doowkcol", "0.3.0")]
 public class PermEditor : StyxPlugin
 {

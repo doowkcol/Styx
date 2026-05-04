@@ -37,6 +37,39 @@ using Styx;
 using Styx.Plugins;
 using Styx.Scheduling;
 
+
+/* @styx-xui-windows
+<!-- Position: below the STYX HUD panel (which is LeftTop 280x280 at
+     pos=10,-10 → occupies y=-10 down to y=-290). Radar sits just below
+     that. Using LeftTop keeps it in the always-visible demo cluster. -->
+<window name="styxRadar"
+        anchor="LeftTop" pos="10,-300"
+        width="220" height="56"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="40">
+
+    <rect name="wrap" pos="0,0" width="220" height="56"
+          visible="{#cvar('styx.radar.visible') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,170"     type="sliced" width="220" height="56" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="200,60,60,200" type="sliced" width="220" height="56" fillcenter="false" />
+
+        <label depth="2" name="hdr"
+               text="ZOMBIES ({cvar(styx.radar.radius:0)}m)"
+               font_size="14" justify="center" style="outline"
+               color="200,60,60,255"
+               pos="110,-4" width="220" height="18" pivot="top" />
+
+        <label depth="2" name="cnt"
+               text="{cvar(styx.radar.count:0)}"
+               font_size="28" justify="center" style="outline"
+               color="255,220,120,255"
+               pos="110,-20" width="220" height="32" pivot="top" />
+    </rect>
+</window>
+*/
+
 [Info("StyxZombieRadar", "Doowkcol", "0.1.0")]
 public class StyxZombieRadar : StyxPlugin
 {

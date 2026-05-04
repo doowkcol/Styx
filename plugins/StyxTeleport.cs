@@ -33,6 +33,297 @@ using Styx.Plugins;
 using Styx.Scheduling;
 using UnityEngine;
 
+
+/* @styx-xui-windows
+<!--
+    styxTeleport — StyxTeleport plugin picker (homes / trader / death).
+
+    Heterogeneous rows: each row is one of {home, trader, death, empty}.
+    Plugin sets per-row cvars row{K}_kind (0=home, 1=trader, 2=death,
+    3=empty), row{K}_id (label index inside that kind's namespace),
+    and row{K}_status (1=set/ready, 0=empty/unavailable).
+
+    Each row in XUi has THREE label variants stacked at the same pos,
+    each gated by its kind. Only one fires per row at a time.
+
+    Status badges (right edge): SET / empty for home rows, READY for
+    trader/death when status==1. Cooldown details + daily counter are
+    whispered to chat as the cursor moves (cleaner than packing more
+    cvars into a static panel).
+-->
+<window name="styxTeleport"
+        anchor="CenterCenter" pos="-260,180"
+        width="520" height="360"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="55">
+
+    <rect name="wrap" pos="0,0" width="520" height="360"
+          visible="{#cvar('styx.tp.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="520" height="360" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="120,200,255,220"  type="sliced" width="520" height="360" fillcenter="false" />
+
+        <label depth="2" name="hdr" text="TELEPORT"
+               font_size="26" justify="center" style="outline"
+               color="120,200,255,255"
+               pos="260,-10" width="520" height="30" pivot="top" />
+
+        <!-- 8 rows. Each row K has:
+               cursor "&gt;" gated by sel == K
+               three label variants gated by row{K}_kind == 0|1|2
+               two status badges (SET / empty) for home rows; READY for
+               trader/death when status == 1
+             Y positions for rows 0..7: -52, -76, -100, -124, -148, -172, -196, -220 -->
+
+        <!-- Row 0 -->
+        <label depth="3" name="c0" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-52" width="20" height="22" visible="{#cvar('styx.tp.sel') == 0}" />
+        <label depth="3" name="hn0"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row0_id')))}"
+               font_size="18" pos="50,-52" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 0}" />
+        <label depth="3" name="tn0"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row0_id')))}"
+               font_size="18" pos="50,-52" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 1}" />
+        <label depth="3" name="dn0"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-52" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 2}" />
+        <label depth="3" name="bSet0" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-54" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 0  and cvar('styx.tp.row0_status') == 1}" />
+        <label depth="3" name="bEmpty0" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-54" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 0  and cvar('styx.tp.row0_status') == 0}" />
+        <label depth="3" name="bReady0" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-54" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') &gt; 0  and cvar('styx.tp.row0_status') == 1}" />
+        <label depth="3" name="bNone0" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-54" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 0  and cvar('styx.tp.row0_kind') == 2  and cvar('styx.tp.row0_status') == 0}" />
+
+        <!-- Row 1 -->
+        <label depth="3" name="c1" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-76" width="20" height="22" visible="{#cvar('styx.tp.sel') == 1}" />
+        <label depth="3" name="hn1"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row1_id')))}"
+               font_size="18" pos="50,-76" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 0}" />
+        <label depth="3" name="tn1"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row1_id')))}"
+               font_size="18" pos="50,-76" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 1}" />
+        <label depth="3" name="dn1"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-76" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 2}" />
+        <label depth="3" name="bSet1" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-78" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 0  and cvar('styx.tp.row1_status') == 1}" />
+        <label depth="3" name="bEmpty1" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-78" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 0  and cvar('styx.tp.row1_status') == 0}" />
+        <label depth="3" name="bReady1" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-78" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') &gt; 0  and cvar('styx.tp.row1_status') == 1}" />
+        <label depth="3" name="bNone1" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-78" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 1  and cvar('styx.tp.row1_kind') == 2  and cvar('styx.tp.row1_status') == 0}" />
+
+        <!-- Row 2 -->
+        <label depth="3" name="c2" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-100" width="20" height="22" visible="{#cvar('styx.tp.sel') == 2}" />
+        <label depth="3" name="hn2"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row2_id')))}"
+               font_size="18" pos="50,-100" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 0}" />
+        <label depth="3" name="tn2"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row2_id')))}"
+               font_size="18" pos="50,-100" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 1}" />
+        <label depth="3" name="dn2"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-100" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 2}" />
+        <label depth="3" name="bSet2" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-102" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 0  and cvar('styx.tp.row2_status') == 1}" />
+        <label depth="3" name="bEmpty2" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-102" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 0  and cvar('styx.tp.row2_status') == 0}" />
+        <label depth="3" name="bReady2" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-102" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') &gt; 0  and cvar('styx.tp.row2_status') == 1}" />
+        <label depth="3" name="bNone2" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-102" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 2  and cvar('styx.tp.row2_kind') == 2  and cvar('styx.tp.row2_status') == 0}" />
+
+        <!-- Row 3 -->
+        <label depth="3" name="c3" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-124" width="20" height="22" visible="{#cvar('styx.tp.sel') == 3}" />
+        <label depth="3" name="hn3"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row3_id')))}"
+               font_size="18" pos="50,-124" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 0}" />
+        <label depth="3" name="tn3"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row3_id')))}"
+               font_size="18" pos="50,-124" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 1}" />
+        <label depth="3" name="dn3"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-124" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 2}" />
+        <label depth="3" name="bSet3" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-126" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 0  and cvar('styx.tp.row3_status') == 1}" />
+        <label depth="3" name="bEmpty3" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-126" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 0  and cvar('styx.tp.row3_status') == 0}" />
+        <label depth="3" name="bReady3" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-126" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') &gt; 0  and cvar('styx.tp.row3_status') == 1}" />
+        <label depth="3" name="bNone3" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-126" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 3  and cvar('styx.tp.row3_kind') == 2  and cvar('styx.tp.row3_status') == 0}" />
+
+        <!-- Row 4 -->
+        <label depth="3" name="c4" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-148" width="20" height="22" visible="{#cvar('styx.tp.sel') == 4}" />
+        <label depth="3" name="hn4"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row4_id')))}"
+               font_size="18" pos="50,-148" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 0}" />
+        <label depth="3" name="tn4"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row4_id')))}"
+               font_size="18" pos="50,-148" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 1}" />
+        <label depth="3" name="dn4"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-148" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 2}" />
+        <label depth="3" name="bSet4" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-150" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 0  and cvar('styx.tp.row4_status') == 1}" />
+        <label depth="3" name="bEmpty4" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-150" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 0  and cvar('styx.tp.row4_status') == 0}" />
+        <label depth="3" name="bReady4" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-150" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') &gt; 0  and cvar('styx.tp.row4_status') == 1}" />
+        <label depth="3" name="bNone4" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-150" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 4  and cvar('styx.tp.row4_kind') == 2  and cvar('styx.tp.row4_status') == 0}" />
+
+        <!-- Row 5 -->
+        <label depth="3" name="c5" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-172" width="20" height="22" visible="{#cvar('styx.tp.sel') == 5}" />
+        <label depth="3" name="hn5"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row5_id')))}"
+               font_size="18" pos="50,-172" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 0}" />
+        <label depth="3" name="tn5"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row5_id')))}"
+               font_size="18" pos="50,-172" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 1}" />
+        <label depth="3" name="dn5"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-172" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 2}" />
+        <label depth="3" name="bSet5" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-174" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 0  and cvar('styx.tp.row5_status') == 1}" />
+        <label depth="3" name="bEmpty5" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-174" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 0  and cvar('styx.tp.row5_status') == 0}" />
+        <label depth="3" name="bReady5" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-174" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') &gt; 0  and cvar('styx.tp.row5_status') == 1}" />
+        <label depth="3" name="bNone5" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-174" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 5  and cvar('styx.tp.row5_kind') == 2  and cvar('styx.tp.row5_status') == 0}" />
+
+        <!-- Row 6 -->
+        <label depth="3" name="c6" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-196" width="20" height="22" visible="{#cvar('styx.tp.sel') == 6}" />
+        <label depth="3" name="hn6"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row6_id')))}"
+               font_size="18" pos="50,-196" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 0}" />
+        <label depth="3" name="tn6"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row6_id')))}"
+               font_size="18" pos="50,-196" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 1}" />
+        <label depth="3" name="dn6"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-196" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 2}" />
+        <label depth="3" name="bSet6" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-198" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 0  and cvar('styx.tp.row6_status') == 1}" />
+        <label depth="3" name="bEmpty6" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-198" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 0  and cvar('styx.tp.row6_status') == 0}" />
+        <label depth="3" name="bReady6" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-198" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') &gt; 0  and cvar('styx.tp.row6_status') == 1}" />
+        <label depth="3" name="bNone6" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-198" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 6  and cvar('styx.tp.row6_kind') == 2  and cvar('styx.tp.row6_status') == 0}" />
+
+        <!-- Row 7 -->
+        <label depth="3" name="c7" text="&gt;" font_size="22" color="120,200,255,255"
+               pos="22,-220" width="20" height="22" visible="{#cvar('styx.tp.sel') == 7}" />
+        <label depth="3" name="hn7"
+               text="{#localization('tp_home_' + int(cvar('styx.tp.row7_id')))}"
+               font_size="18" pos="50,-220" width="320" height="22" color="240,240,240,255"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 0}" />
+        <label depth="3" name="tn7"
+               text="{#localization('tp_trader_' + int(cvar('styx.tp.row7_id')))}"
+               font_size="18" pos="50,-220" width="320" height="22" color="200,230,255,255"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 1}" />
+        <label depth="3" name="dn7"
+               text="{#localization('tp_death')}"
+               font_size="18" pos="50,-220" width="320" height="22" color="255,200,200,255"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 2}" />
+        <label depth="3" name="bSet7" text="SET" font_size="14" color="100,220,120,255"
+               pos="430,-222" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 0  and cvar('styx.tp.row7_status') == 1}" />
+        <label depth="3" name="bEmpty7" text="empty" font_size="14" color="160,160,160,255"
+               pos="430,-222" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 0  and cvar('styx.tp.row7_status') == 0}" />
+        <label depth="3" name="bReady7" text="READY" font_size="14" color="100,220,120,255"
+               pos="430,-222" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') &gt; 0  and cvar('styx.tp.row7_status') == 1}" />
+        <label depth="3" name="bNone7" text="none" font_size="14" color="160,160,160,255"
+               pos="430,-222" width="70" height="20"
+               visible="{#cvar('styx.tp.count') &gt; 7  and cvar('styx.tp.row7_kind') == 2  and cvar('styx.tp.row7_status') == 0}" />
+
+        <!-- Hint + legend -->
+        <label depth="3" name="hint"
+               text="Cooldown / daily-limit details whispered to chat as you navigate."
+               font_size="13" justify="center"
+               pos="260,-272" width="520" height="18" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="hint2"
+               text="Quest active? Press LMB twice within 5s to confirm."
+               font_size="12" justify="center"
+               pos="260,-292" width="520" height="16" pivot="top"
+               color="220,180,140,255" />
+        <label depth="3" name="legend"
+               text="[SCROLL] navigate   [LMB] confirm   [RMB] back"
+               font_size="13" justify="center"
+               pos="260,-322" width="520" height="18" pivot="top"
+               color="180,180,180,255" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxTeleport" />
+*/
+
 [Info("StyxTeleport", "Doowkcol", "0.1.2")]
 public class StyxTeleport : StyxPlugin
 {

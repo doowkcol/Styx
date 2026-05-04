@@ -35,6 +35,80 @@ using Styx;
 using Styx.Commands;
 using Styx.Plugins;
 
+
+/* @styx-xui-windows
+<!--
+    styxAdminTools — sub-menu opened from /m → "Admin Tools".
+    Two rows currently (Vanish, Admin Radar) — extensible by adding
+    rows here + a case in AdminTools.cs ToggleRow + RowCount bump.
+    Each row: cursor + label + ON/OFF status (gated visibility).
+-->
+<window name="styxAdminTools"
+        anchor="CenterCenter" pos="-220,140"
+        width="440" height="220"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="55">
+
+    <rect name="wrap" pos="0,0" width="440" height="220"
+          visible="{#cvar('styx.adt.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="440" height="220" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="255,160,80,220"   type="sliced" width="440" height="220" fillcenter="false" />
+
+        <label depth="2" name="hdr" text="ADMIN TOOLS"
+               font_size="24" justify="center" style="outline"
+               color="255,160,80,255"
+               pos="220,-10" width="440" height="28" pivot="top" />
+
+        <!-- Row 0 — Vanish -->
+        <label depth="3" name="c0" text="&gt;" font_size="22" color="255,200,120,255"
+               pos="22,-58" width="20" height="22" visible="{#cvar('styx.adt.sel') == 0}" />
+        <label depth="3" name="o0" text="Vanish"
+               font_size="20" pos="50,-58" width="280" height="22" color="240,240,240,255" />
+        <label depth="3" name="sOn0" text="ON" font_size="14" color="100,220,120,255"
+               pos="350,-60" width="70" height="20"
+               visible="{#cvar('styx.adt.vanish_status') == 1}" />
+        <label depth="3" name="sOff0" text="OFF" font_size="14" color="220,120,100,255"
+               pos="350,-60" width="70" height="20"
+               visible="{#cvar('styx.adt.vanish_status') == 0}" />
+
+        <!-- Row 1 — Admin Radar -->
+        <label depth="3" name="c1" text="&gt;" font_size="22" color="255,200,120,255"
+               pos="22,-86" width="20" height="22" visible="{#cvar('styx.adt.sel') == 1}" />
+        <label depth="3" name="o1" text="Admin Radar"
+               font_size="20" pos="50,-86" width="280" height="22" color="240,240,240,255" />
+        <label depth="3" name="sOn1" text="ON" font_size="14" color="100,220,120,255"
+               pos="350,-88" width="70" height="20"
+               visible="{#cvar('styx.adt.radar_status') == 1}" />
+        <label depth="3" name="sOff1" text="OFF" font_size="14" color="220,120,100,255"
+               pos="350,-88" width="70" height="20"
+               visible="{#cvar('styx.adt.radar_status') == 0}" />
+
+        <!-- Hint + legend -->
+        <label depth="3" name="hint"
+               text="Vanish: invisible to players + ignored by AI."
+               font_size="12" justify="center"
+               pos="220,-150" width="440" height="16" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="hint2"
+               text="Admin Radar: through-walls entity readout."
+               font_size="12" justify="center"
+               pos="220,-168" width="440" height="16" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="legend"
+               text="[SCROLL] navigate   [LMB] toggle   [RMB] back"
+               font_size="13" justify="center"
+               pos="220,-194" width="440" height="18" pivot="top"
+               color="180,180,180,255" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxAdminTools" />
+*/
+
 [Info("AdminTools", "Doowkcol", "0.1.0")]
 public class AdminTools : StyxPlugin
 {

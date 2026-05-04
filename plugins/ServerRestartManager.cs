@@ -36,6 +36,110 @@ using Styx;
 using Styx.Plugins;
 using Styx.Scheduling;
 
+
+/* @styx-xui-windows
+<!--
+    styxSrm — Server Restart Manager admin sub-menu.
+    4 actionable rows + display footer. Driven by ServerRestartManager.cs:
+      styx.srm.open / sel — UI navigation
+      styx.srm.enabled — current Enabled state (ON/OFF badges)
+      styx.srm.cycle — current WipeCycleDays
+      styx.srm.last_wipe_d — days since last wipe (display)
+      styx.srm.confirm_pending — restart-now two-tap arm state
+      styx.srm.wipe_d / wipe_h — countdown to next wipe (display)
+      styx.srm.restart_d/h/m — countdown to next restart (display)
+-->
+<window name="styxSrm"
+        anchor="CenterCenter" pos="-260,180"
+        width="520" height="360"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="55">
+
+    <rect name="wrap" pos="0,0" width="520" height="360"
+          visible="{#cvar('styx.srm.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,220"        type="sliced" width="520" height="360" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="255,180,80,220"   type="sliced" width="520" height="360" fillcenter="false" />
+
+        <label depth="2" name="hdr" text="SERVER RESTART MANAGER"
+               font_size="22" justify="center" style="outline"
+               color="255,180,80,255"
+               pos="260,-10" width="520" height="28" pivot="top" />
+
+        <!-- Row 0: Status (toggleable) -->
+        <label depth="3" name="c0" text="&gt;" font_size="22" color="255,200,120,255"
+               pos="22,-50" width="20" height="22" visible="{#cvar('styx.srm.sel') == 0}" />
+        <label depth="3" name="o0" text="Status"
+               font_size="18" pos="50,-50" width="200" height="22" color="240,240,240,255" />
+        <label depth="3" name="bOn" text="ENABLED" font_size="14" color="100,220,120,255"
+               pos="380,-52" width="120" height="20"
+               visible="{#cvar('styx.srm.enabled') == 1}" />
+        <label depth="3" name="bOff" text="DISABLED" font_size="14" color="220,120,100,255"
+               pos="380,-52" width="120" height="20"
+               visible="{#cvar('styx.srm.enabled') == 0}" />
+
+        <!-- Row 1: Wipe cycle (cycles preset) -->
+        <label depth="3" name="c1" text="&gt;" font_size="22" color="255,200,120,255"
+               pos="22,-78" width="20" height="22" visible="{#cvar('styx.srm.sel') == 1}" />
+        <label depth="3" name="o1" text="Wipe cycle"
+               font_size="18" pos="50,-78" width="200" height="22" color="240,240,240,255" />
+        <label depth="3" name="o1v" text="{cvar(styx.srm.cycle:0)} days"
+               font_size="16" justify="right"
+               pos="350,-80" width="150" height="20" color="255,220,140,255" />
+
+        <!-- Row 2: Reset last wipe to NOW -->
+        <label depth="3" name="c2" text="&gt;" font_size="22" color="255,200,120,255"
+               pos="22,-106" width="20" height="22" visible="{#cvar('styx.srm.sel') == 2}" />
+        <label depth="3" name="o2" text="Reset last-wipe to NOW"
+               font_size="18" pos="50,-106" width="320" height="22" color="240,240,240,255" />
+        <label depth="3" name="o2v" text="({cvar(styx.srm.last_wipe_d:0)}d ago)"
+               font_size="14" justify="right"
+               pos="350,-108" width="150" height="20" color="180,180,180,255" />
+
+        <!-- Row 3: Trigger restart NOW (two-tap confirm) -->
+        <label depth="3" name="c3" text="&gt;" font_size="22" color="255,200,120,255"
+               pos="22,-134" width="20" height="22" visible="{#cvar('styx.srm.sel') == 3}" />
+        <label depth="3" name="o3" text="Trigger restart NOW"
+               font_size="18" pos="50,-134" width="280" height="22" color="240,240,240,255" />
+        <label depth="3" name="o3idle" text="(two-tap LMB to confirm)" font_size="13"
+               pos="320,-136" width="180" height="20" color="160,160,160,255"
+               visible="{#cvar('styx.srm.confirm_pending') == 0}" />
+        <label depth="3" name="o3pend" text="CONFIRM ?" font_size="14" color="255,80,80,255"
+               pos="380,-136" width="120" height="20"
+               visible="{#cvar('styx.srm.confirm_pending') == 1}" />
+
+        <!-- Divider + display section -->
+        <sprite depth="2" name="div1" sprite="menu_empty" color="255,180,80,80"
+                type="sliced" width="500" height="1" pos="10,-170" />
+
+        <label depth="3" name="dispNextWipe"
+               text="Next wipe in:   {cvar(styx.srm.wipe_d:0)}d {cvar(styx.srm.wipe_h:0)}h"
+               font_size="14" pos="22,-184" width="400" height="20" color="180,255,200,255" />
+
+        <label depth="3" name="dispNextRestart"
+               text="Next restart in: {cvar(styx.srm.restart_d:0)}d {cvar(styx.srm.restart_h:0)}h {cvar(styx.srm.restart_m:0)}m"
+               font_size="14" pos="22,-206" width="400" height="20" color="180,220,255,255" />
+
+        <!-- Hint + legend -->
+        <label depth="3" name="hint"
+               text="Toggling Status pauses scheduled restarts. Reset last-wipe after performing an actual wipe."
+               font_size="12" justify="center"
+               pos="260,-280" width="520" height="16" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="legend"
+               text="[SCROLL] navigate   [LMB] act   [RMB] back to launcher"
+               font_size="13" justify="center"
+               pos="260,-320" width="520" height="18" pivot="top"
+               color="180,180,180,255" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxSrm" />
+*/
+
 [Info("ServerRestartManager", "Doowkcol", "0.1.0")]
 public class ServerRestartManager : StyxPlugin
 {

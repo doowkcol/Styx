@@ -46,6 +46,72 @@ using Styx.Plugins;
 using Styx.Scheduling;
 using UnityEngine;
 
+
+/* @styx-xui-windows
+<!-- StyxZombieHealth panel — crosshair entity-health HUD, top-center
+     under the compass.
+     Position math: width=320, anchor=LeftTop with pos x=800 puts the
+     centre of the panel at 800+160 = 960 = screen-center on a 1920
+     reference resolution. y=-80 sits just below the compass HUD
+     (compass occupies ~0..-50 area).
+
+     Mounting requires BOTH this window definition AND a registration
+     entry in xui.xml under the toolbelt window_group — without the
+     xui.xml entry the window exists but is never displayed (learned
+     this the hard way).
+
+     Element names are zh_-prefixed to keep them distinct from any
+     same-named children in other Styx panels (no observed conflicts
+     but cheap defensive measure). -->
+<window name="styxZombieHealth"
+        anchor="LeftTop"
+        pos="800,-80"
+        width="320" height="60"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="-15">
+
+    <!-- Wrap rect with cvar-gated visibility. Plugin sets
+         styx.zhealth.visible = 1 when targeting an entity, 0 otherwise.
+         Same pattern as styxRadar. -->
+    <rect name="zh_wrap" pos="0,0" width="320" height="60"
+          visible="{#cvar('styx.zhealth.visible') == 1}">
+
+        <sprite depth="0" name="zh_bg"
+                sprite="menu_empty" type="sliced"
+                color="0,0,0,180"
+                width="320" height="60" />
+        <sprite depth="1" name="zh_border"
+                sprite="menu_empty3px" type="sliced"
+                color="220,80,80,220"
+                width="320" height="60" fillcenter="false" />
+
+        <!-- Entity name (top line). Indexed-localization binding:
+             int cvar styx.zhealth.classid is concatenated into key
+             "styx_zh_e_<classid>" via NCalc, looked up against the
+             ~292 labels StyxZombieHealth.cs registers (one per
+             EntityClass). Class IDs are hashed ints (often negative)
+             — the key resolves fine either way. -->
+        <label depth="2" name="zh_name"
+               text="{#localization('styx_zh_e_' + int(cvar('styx.zhealth.classid')))}"
+               font_size="18" justify="center" style="outline"
+               color="255,210,210,255"
+               pos="160,-6" width="300" height="22" pivot="top" />
+
+        <!-- HP numeric (bottom line). Bar version is v0.3 candidate. -->
+        <label depth="2" name="zh_hp"
+               text="HP: {cvar(styx.zhealth.hp_curr)} / {cvar(styx.zhealth.hp_max)}"
+               font_size="14" justify="center" style="outline"
+               color="255,255,255,255"
+               pos="160,-32" width="300" height="18" pivot="top" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxZombieHealth" />
+*/
+
 [Info("StyxZombieHealth", "Doowkcol", "0.2.4")]
 public class StyxZombieHealth : StyxPlugin
 {

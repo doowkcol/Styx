@@ -25,6 +25,95 @@ using System.Linq;
 using Styx;
 using Styx.Plugins;
 
+
+/* @styx-xui-windows
+<!--
+    styxPerms — PermManager interactive UI.
+
+    Admin-only (gated via 'styx.perm.admin' permission in plugin).
+    Action-launcher pattern: pick an action with scroll wheel + LMB, the
+    plugin whispers the formatted result to the admin's chat.
+
+    Names (players, groups, perms) are dynamic strings, which XUi labels
+    can't carry without a client-DLL-resolvable binding token, so we
+    route those through chat whisper instead of trying to paint them on
+    the panel. Grant/revoke uses existing /perm chat commands which
+    already handle name resolution.
+-->
+<window name="styxPerms"
+        anchor="CenterCenter" pos="-260,140"
+        width="520" height="280"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="50">
+
+    <rect name="wrap" pos="0,0" width="520" height="280"
+          visible="{#cvar('styx.perms.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,210"        type="sliced" width="520" height="280" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="160,180,255,220"  type="sliced" width="520" height="280" fillcenter="false" />
+
+        <label depth="2" name="hdr" text="STYX PERM MANAGER"
+               font_size="28" justify="center" style="outline"
+               color="160,180,255,255"
+               pos="260,-10" width="520" height="32" pivot="top" />
+
+        <!-- 5 rows, row.sel cvar drives the cursor position -->
+        <label depth="3" name="pc0" text="&gt;" font_size="22" color="160,180,255,255"
+               pos="20,-50" width="20" height="24"
+               visible="{#cvar('styx.perms.sel') == 0}" />
+        <label depth="3" name="po0" text="{#localization('styxPerms_0')}" font_size="20"
+               pos="50,-50" width="460" height="24" color="240,240,240,255" />
+
+        <label depth="3" name="pc1" text="&gt;" font_size="22" color="160,180,255,255"
+               pos="20,-76" width="20" height="24"
+               visible="{#cvar('styx.perms.sel') == 1}" />
+        <label depth="3" name="po1" text="{#localization('styxPerms_1')}" font_size="20"
+               pos="50,-76" width="460" height="24" color="240,240,240,255" />
+
+        <label depth="3" name="pc2" text="&gt;" font_size="22" color="160,180,255,255"
+               pos="20,-102" width="20" height="24"
+               visible="{#cvar('styx.perms.sel') == 2}" />
+        <label depth="3" name="po2" text="{#localization('styxPerms_2')}" font_size="20"
+               pos="50,-102" width="460" height="24" color="240,240,240,255" />
+
+        <label depth="3" name="pc3" text="&gt;" font_size="22" color="160,180,255,255"
+               pos="20,-128" width="20" height="24"
+               visible="{#cvar('styx.perms.sel') == 3}" />
+        <label depth="3" name="po3" text="{#localization('styxPerms_3')}" font_size="20"
+               pos="50,-128" width="460" height="24" color="240,240,240,255" />
+
+        <label depth="3" name="pc4" text="&gt;" font_size="22" color="160,180,255,255"
+               pos="20,-154" width="20" height="24"
+               visible="{#cvar('styx.perms.sel') == 4}" />
+        <label depth="3" name="po4" text="{#localization('styxPerms_4')}" font_size="20"
+               pos="50,-154" width="460" height="24" color="240,240,240,255" />
+
+        <!-- Hint line -->
+        <label depth="3" name="hint"
+               text="Grant/revoke uses /perm grant &lt;player&gt; &lt;perm&gt; in chat."
+               font_size="14" justify="center"
+               pos="260,-200" width="520" height="18" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="hint2"
+               text="Whispers show the result of each action."
+               font_size="14" justify="center"
+               pos="260,-220" width="520" height="18" pivot="top"
+               color="200,200,160,255" />
+
+        <label depth="3" name="legend"
+               text="[SCROLL] navigate   [LMB] confirm   [RMB] back"
+               font_size="14" justify="center"
+               pos="260,-248" width="520" height="20" pivot="top"
+               color="180,180,180,255" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxPerms" />
+*/
+
 [Info("StyxPerms", "Doowkcol", "0.2.0")]
 public class StyxPerms : StyxPlugin
 {

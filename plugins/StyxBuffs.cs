@@ -45,6 +45,644 @@ using Styx.Data;
 using Styx.Plugins;
 using Styx.Scheduling;
 
+
+/* @styx-xui-windows
+<!--
+    styxBuffs — StyxBuffs toggle UI.
+    Per-row name + ON/OFF status (visibility-gated labels) + a
+    description line that tracks the cursor. Same wiring as styxKits:
+    row content driven by styx.buffs.rowK_id, styx.buffs.rowK_status.
+-->
+<window name="styxBuffs"
+        anchor="CenterCenter" pos="-250,330"
+        width="500" height="660"
+        pivot="TopLeft"
+        controller="ToolbeltWindow"
+        depth="55">
+
+    <rect name="wrap" pos="0,0" width="500" height="660"
+          visible="{#cvar('styx.buffs.open') == 1}">
+
+        <sprite depth="0" name="bg"     sprite="menu_empty"    color="0,0,0,215"        type="sliced" width="500" height="660" />
+        <sprite depth="1" name="border" sprite="menu_empty3px" color="220,140,255,220"  type="sliced" width="500" height="660" fillcenter="false" />
+
+        <label depth="2" name="hdr" text="MY BUFFS"
+               font_size="26" justify="center" style="outline"
+               color="220,140,255,255"
+               pos="250,-10" width="500" height="30" pivot="top" />
+
+        <!-- 20 rows. Each row has: cursor, icon, name, and SIX visibility-gated
+             status labels (NoPerm/Off/On/Ready/Active/Cooldown), plus a
+             cooldown countdown cvar (row{N}_cd) consumed by Active and
+             Cooldown labels. The plugin pushes a status int per row at
+             menu-open and on-click; this is a static snapshot, not live. -->
+        <!-- Row 0 -->
+        <label  depth="3" name="c0" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-52" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 0}" />
+        <sprite depth="3" name="i0"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row0_id')))}"
+                pos="46,-52" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 0}" />
+        <label  depth="3" name="o0"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row0_id')))}"
+                font_size="18" pos="76,-52" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 0}" />
+        <label depth="3" name="snp0" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-54" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 0}" />
+        <label depth="3" name="soff0" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-54" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 1}" />
+        <label depth="3" name="son0" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-54" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 2}" />
+        <label depth="3" name="srdy0" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-54" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 3}" />
+        <label depth="3" name="sact0" text="Active {cvar(styx.buffs.row0_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-54" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 4}" />
+        <label depth="3" name="scd0" text="{cvar(styx.buffs.row0_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-54" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 0  and cvar('styx.buffs.row0_status') == 5}" />
+        <!-- Row 1 -->
+        <label  depth="3" name="c1" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-76" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 1}" />
+        <sprite depth="3" name="i1"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row1_id')))}"
+                pos="46,-76" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 1}" />
+        <label  depth="3" name="o1"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row1_id')))}"
+                font_size="18" pos="76,-76" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 1}" />
+        <label depth="3" name="snp1" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-78" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 0}" />
+        <label depth="3" name="soff1" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-78" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 1}" />
+        <label depth="3" name="son1" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-78" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 2}" />
+        <label depth="3" name="srdy1" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-78" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 3}" />
+        <label depth="3" name="sact1" text="Active {cvar(styx.buffs.row1_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-78" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 4}" />
+        <label depth="3" name="scd1" text="{cvar(styx.buffs.row1_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-78" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 1  and cvar('styx.buffs.row1_status') == 5}" />
+        <!-- Row 2 -->
+        <label  depth="3" name="c2" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-100" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 2}" />
+        <sprite depth="3" name="i2"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row2_id')))}"
+                pos="46,-100" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 2}" />
+        <label  depth="3" name="o2"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row2_id')))}"
+                font_size="18" pos="76,-100" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 2}" />
+        <label depth="3" name="snp2" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-102" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 0}" />
+        <label depth="3" name="soff2" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-102" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 1}" />
+        <label depth="3" name="son2" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-102" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 2}" />
+        <label depth="3" name="srdy2" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-102" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 3}" />
+        <label depth="3" name="sact2" text="Active {cvar(styx.buffs.row2_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-102" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 4}" />
+        <label depth="3" name="scd2" text="{cvar(styx.buffs.row2_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-102" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 2  and cvar('styx.buffs.row2_status') == 5}" />
+        <!-- Row 3 -->
+        <label  depth="3" name="c3" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-124" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 3}" />
+        <sprite depth="3" name="i3"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row3_id')))}"
+                pos="46,-124" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 3}" />
+        <label  depth="3" name="o3"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row3_id')))}"
+                font_size="18" pos="76,-124" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 3}" />
+        <label depth="3" name="snp3" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-126" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 0}" />
+        <label depth="3" name="soff3" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-126" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 1}" />
+        <label depth="3" name="son3" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-126" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 2}" />
+        <label depth="3" name="srdy3" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-126" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 3}" />
+        <label depth="3" name="sact3" text="Active {cvar(styx.buffs.row3_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-126" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 4}" />
+        <label depth="3" name="scd3" text="{cvar(styx.buffs.row3_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-126" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 3  and cvar('styx.buffs.row3_status') == 5}" />
+        <!-- Row 4 -->
+        <label  depth="3" name="c4" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-148" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 4}" />
+        <sprite depth="3" name="i4"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row4_id')))}"
+                pos="46,-148" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 4}" />
+        <label  depth="3" name="o4"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row4_id')))}"
+                font_size="18" pos="76,-148" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 4}" />
+        <label depth="3" name="snp4" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-150" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 0}" />
+        <label depth="3" name="soff4" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-150" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 1}" />
+        <label depth="3" name="son4" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-150" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 2}" />
+        <label depth="3" name="srdy4" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-150" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 3}" />
+        <label depth="3" name="sact4" text="Active {cvar(styx.buffs.row4_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-150" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 4}" />
+        <label depth="3" name="scd4" text="{cvar(styx.buffs.row4_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-150" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 4  and cvar('styx.buffs.row4_status') == 5}" />
+        <!-- Row 5 -->
+        <label  depth="3" name="c5" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-172" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 5}" />
+        <sprite depth="3" name="i5"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row5_id')))}"
+                pos="46,-172" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 5}" />
+        <label  depth="3" name="o5"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row5_id')))}"
+                font_size="18" pos="76,-172" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 5}" />
+        <label depth="3" name="snp5" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-174" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 0}" />
+        <label depth="3" name="soff5" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-174" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 1}" />
+        <label depth="3" name="son5" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-174" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 2}" />
+        <label depth="3" name="srdy5" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-174" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 3}" />
+        <label depth="3" name="sact5" text="Active {cvar(styx.buffs.row5_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-174" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 4}" />
+        <label depth="3" name="scd5" text="{cvar(styx.buffs.row5_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-174" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 5  and cvar('styx.buffs.row5_status') == 5}" />
+        <!-- Row 6 -->
+        <label  depth="3" name="c6" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-196" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 6}" />
+        <sprite depth="3" name="i6"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row6_id')))}"
+                pos="46,-196" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 6}" />
+        <label  depth="3" name="o6"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row6_id')))}"
+                font_size="18" pos="76,-196" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 6}" />
+        <label depth="3" name="snp6" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-198" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 0}" />
+        <label depth="3" name="soff6" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-198" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 1}" />
+        <label depth="3" name="son6" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-198" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 2}" />
+        <label depth="3" name="srdy6" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-198" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 3}" />
+        <label depth="3" name="sact6" text="Active {cvar(styx.buffs.row6_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-198" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 4}" />
+        <label depth="3" name="scd6" text="{cvar(styx.buffs.row6_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-198" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 6  and cvar('styx.buffs.row6_status') == 5}" />
+        <!-- Row 7 -->
+        <label  depth="3" name="c7" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-220" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 7}" />
+        <sprite depth="3" name="i7"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row7_id')))}"
+                pos="46,-220" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 7}" />
+        <label  depth="3" name="o7"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row7_id')))}"
+                font_size="18" pos="76,-220" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 7}" />
+        <label depth="3" name="snp7" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-222" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 0}" />
+        <label depth="3" name="soff7" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-222" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 1}" />
+        <label depth="3" name="son7" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-222" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 2}" />
+        <label depth="3" name="srdy7" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-222" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 3}" />
+        <label depth="3" name="sact7" text="Active {cvar(styx.buffs.row7_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-222" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 4}" />
+        <label depth="3" name="scd7" text="{cvar(styx.buffs.row7_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-222" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 7  and cvar('styx.buffs.row7_status') == 5}" />
+        <!-- Row 8 -->
+        <label  depth="3" name="c8" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-244" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 8}" />
+        <sprite depth="3" name="i8"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row8_id')))}"
+                pos="46,-244" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 8}" />
+        <label  depth="3" name="o8"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row8_id')))}"
+                font_size="18" pos="76,-244" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 8}" />
+        <label depth="3" name="snp8" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-246" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 0}" />
+        <label depth="3" name="soff8" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-246" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 1}" />
+        <label depth="3" name="son8" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-246" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 2}" />
+        <label depth="3" name="srdy8" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-246" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 3}" />
+        <label depth="3" name="sact8" text="Active {cvar(styx.buffs.row8_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-246" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 4}" />
+        <label depth="3" name="scd8" text="{cvar(styx.buffs.row8_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-246" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 8  and cvar('styx.buffs.row8_status') == 5}" />
+        <!-- Row 9 -->
+        <label  depth="3" name="c9" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-268" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 9}" />
+        <sprite depth="3" name="i9"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row9_id')))}"
+                pos="46,-268" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 9}" />
+        <label  depth="3" name="o9"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row9_id')))}"
+                font_size="18" pos="76,-268" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 9}" />
+        <label depth="3" name="snp9" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-270" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 0}" />
+        <label depth="3" name="soff9" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-270" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 1}" />
+        <label depth="3" name="son9" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-270" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 2}" />
+        <label depth="3" name="srdy9" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-270" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 3}" />
+        <label depth="3" name="sact9" text="Active {cvar(styx.buffs.row9_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-270" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 4}" />
+        <label depth="3" name="scd9" text="{cvar(styx.buffs.row9_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-270" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 9  and cvar('styx.buffs.row9_status') == 5}" />
+        <!-- Row 10 -->
+        <label  depth="3" name="c10" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-292" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 10}" />
+        <sprite depth="3" name="i10"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row10_id')))}"
+                pos="46,-292" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 10}" />
+        <label  depth="3" name="o10"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row10_id')))}"
+                font_size="18" pos="76,-292" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 10}" />
+        <label depth="3" name="snp10" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-294" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 0}" />
+        <label depth="3" name="soff10" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-294" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 1}" />
+        <label depth="3" name="son10" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-294" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 2}" />
+        <label depth="3" name="srdy10" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-294" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 3}" />
+        <label depth="3" name="sact10" text="Active {cvar(styx.buffs.row10_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-294" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 4}" />
+        <label depth="3" name="scd10" text="{cvar(styx.buffs.row10_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-294" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 10  and cvar('styx.buffs.row10_status') == 5}" />
+        <!-- Row 11 -->
+        <label  depth="3" name="c11" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-316" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 11}" />
+        <sprite depth="3" name="i11"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row11_id')))}"
+                pos="46,-316" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 11}" />
+        <label  depth="3" name="o11"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row11_id')))}"
+                font_size="18" pos="76,-316" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 11}" />
+        <label depth="3" name="snp11" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-318" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 0}" />
+        <label depth="3" name="soff11" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-318" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 1}" />
+        <label depth="3" name="son11" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-318" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 2}" />
+        <label depth="3" name="srdy11" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-318" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 3}" />
+        <label depth="3" name="sact11" text="Active {cvar(styx.buffs.row11_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-318" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 4}" />
+        <label depth="3" name="scd11" text="{cvar(styx.buffs.row11_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-318" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 11  and cvar('styx.buffs.row11_status') == 5}" />
+        <!-- Row 12 -->
+        <label  depth="3" name="c12" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-340" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 12}" />
+        <sprite depth="3" name="i12"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row12_id')))}"
+                pos="46,-340" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 12}" />
+        <label  depth="3" name="o12"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row12_id')))}"
+                font_size="18" pos="76,-340" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 12}" />
+        <label depth="3" name="snp12" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-342" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 0}" />
+        <label depth="3" name="soff12" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-342" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 1}" />
+        <label depth="3" name="son12" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-342" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 2}" />
+        <label depth="3" name="srdy12" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-342" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 3}" />
+        <label depth="3" name="sact12" text="Active {cvar(styx.buffs.row12_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-342" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 4}" />
+        <label depth="3" name="scd12" text="{cvar(styx.buffs.row12_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-342" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 12  and cvar('styx.buffs.row12_status') == 5}" />
+        <!-- Row 13 -->
+        <label  depth="3" name="c13" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-364" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 13}" />
+        <sprite depth="3" name="i13"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row13_id')))}"
+                pos="46,-364" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 13}" />
+        <label  depth="3" name="o13"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row13_id')))}"
+                font_size="18" pos="76,-364" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 13}" />
+        <label depth="3" name="snp13" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-366" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 0}" />
+        <label depth="3" name="soff13" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-366" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 1}" />
+        <label depth="3" name="son13" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-366" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 2}" />
+        <label depth="3" name="srdy13" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-366" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 3}" />
+        <label depth="3" name="sact13" text="Active {cvar(styx.buffs.row13_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-366" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 4}" />
+        <label depth="3" name="scd13" text="{cvar(styx.buffs.row13_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-366" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 13  and cvar('styx.buffs.row13_status') == 5}" />
+        <!-- Row 14 -->
+        <label  depth="3" name="c14" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-388" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 14}" />
+        <sprite depth="3" name="i14"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row14_id')))}"
+                pos="46,-388" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 14}" />
+        <label  depth="3" name="o14"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row14_id')))}"
+                font_size="18" pos="76,-388" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 14}" />
+        <label depth="3" name="snp14" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-390" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 0}" />
+        <label depth="3" name="soff14" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-390" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 1}" />
+        <label depth="3" name="son14" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-390" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 2}" />
+        <label depth="3" name="srdy14" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-390" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 3}" />
+        <label depth="3" name="sact14" text="Active {cvar(styx.buffs.row14_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-390" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 4}" />
+        <label depth="3" name="scd14" text="{cvar(styx.buffs.row14_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-390" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 14  and cvar('styx.buffs.row14_status') == 5}" />
+        <!-- Row 15 -->
+        <label  depth="3" name="c15" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-412" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 15}" />
+        <sprite depth="3" name="i15"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row15_id')))}"
+                pos="46,-412" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 15}" />
+        <label  depth="3" name="o15"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row15_id')))}"
+                font_size="18" pos="76,-412" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 15}" />
+        <label depth="3" name="snp15" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-414" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 0}" />
+        <label depth="3" name="soff15" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-414" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 1}" />
+        <label depth="3" name="son15" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-414" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 2}" />
+        <label depth="3" name="srdy15" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-414" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 3}" />
+        <label depth="3" name="sact15" text="Active {cvar(styx.buffs.row15_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-414" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 4}" />
+        <label depth="3" name="scd15" text="{cvar(styx.buffs.row15_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-414" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 15  and cvar('styx.buffs.row15_status') == 5}" />
+        <!-- Row 16 -->
+        <label  depth="3" name="c16" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-436" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 16}" />
+        <sprite depth="3" name="i16"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row16_id')))}"
+                pos="46,-436" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 16}" />
+        <label  depth="3" name="o16"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row16_id')))}"
+                font_size="18" pos="76,-436" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 16}" />
+        <label depth="3" name="snp16" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-438" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 0}" />
+        <label depth="3" name="soff16" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-438" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 1}" />
+        <label depth="3" name="son16" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-438" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 2}" />
+        <label depth="3" name="srdy16" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-438" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 3}" />
+        <label depth="3" name="sact16" text="Active {cvar(styx.buffs.row16_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-438" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 4}" />
+        <label depth="3" name="scd16" text="{cvar(styx.buffs.row16_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-438" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 16  and cvar('styx.buffs.row16_status') == 5}" />
+        <!-- Row 17 -->
+        <label  depth="3" name="c17" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-460" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 17}" />
+        <sprite depth="3" name="i17"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row17_id')))}"
+                pos="46,-460" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 17}" />
+        <label  depth="3" name="o17"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row17_id')))}"
+                font_size="18" pos="76,-460" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 17}" />
+        <label depth="3" name="snp17" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-462" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 0}" />
+        <label depth="3" name="soff17" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-462" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 1}" />
+        <label depth="3" name="son17" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-462" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 2}" />
+        <label depth="3" name="srdy17" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-462" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 3}" />
+        <label depth="3" name="sact17" text="Active {cvar(styx.buffs.row17_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-462" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 4}" />
+        <label depth="3" name="scd17" text="{cvar(styx.buffs.row17_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-462" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 17  and cvar('styx.buffs.row17_status') == 5}" />
+        <!-- Row 18 -->
+        <label  depth="3" name="c18" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-484" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 18}" />
+        <sprite depth="3" name="i18"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row18_id')))}"
+                pos="46,-484" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 18}" />
+        <label  depth="3" name="o18"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row18_id')))}"
+                font_size="18" pos="76,-484" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 18}" />
+        <label depth="3" name="snp18" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-486" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 0}" />
+        <label depth="3" name="soff18" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-486" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 1}" />
+        <label depth="3" name="son18" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-486" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 2}" />
+        <label depth="3" name="srdy18" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-486" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 3}" />
+        <label depth="3" name="sact18" text="Active {cvar(styx.buffs.row18_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-486" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 4}" />
+        <label depth="3" name="scd18" text="{cvar(styx.buffs.row18_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-486" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 18  and cvar('styx.buffs.row18_status') == 5}" />
+        <!-- Row 19 -->
+        <label  depth="3" name="c19" text="&gt;" font_size="22" color="220,140,255,255"
+                pos="22,-508" width="20" height="22" visible="{#cvar('styx.buffs.sel') == 19}" />
+        <sprite depth="3" name="i19"
+                sprite="{#localization('buffs_icon_' + int(cvar('styx.buffs.row19_id')))}"
+                pos="46,-508" width="22" height="22"
+                visible="{#cvar('styx.buffs.count') &gt; 19}" />
+        <label  depth="3" name="o19"
+                text="{#localization('buffs_name_' + int(cvar('styx.buffs.row19_id')))}"
+                font_size="18" pos="76,-508" width="300" height="22" color="240,240,240,255"
+                visible="{#cvar('styx.buffs.count') &gt; 19}" />
+        <label depth="3" name="snp19" text="(No Perm)" font_size="14" color="130,130,130,255"
+               pos="384,-510" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 0}" />
+        <label depth="3" name="soff19" text="OFF" font_size="14" color="220,120,100,255"
+               pos="384,-510" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 1}" />
+        <label depth="3" name="son19" text="ON" font_size="14" color="100,220,120,255"
+               pos="384,-510" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 2}" />
+        <label depth="3" name="srdy19" text="Ready" font_size="14" color="130,200,255,255"
+               pos="384,-510" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 3}" />
+        <label depth="3" name="sact19" text="Active {cvar(styx.buffs.row19_cd:0)}s" font_size="14" color="100,220,120,255"
+               pos="384,-510" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 4}" />
+        <label depth="3" name="scd19" text="{cvar(styx.buffs.row19_cd:0)}s cd" font_size="14" color="240,180,100,255"
+               pos="384,-510" width="110" height="20"
+               visible="{#cvar('styx.buffs.count') &gt; 19  and cvar('styx.buffs.row19_status') == 5}" />
+        <!-- Description follows the cursor -->
+        <label depth="3" name="descsep" text="—" font_size="16" justify="center"
+               color="220,140,255,180" pos="250,-540" width="500" height="18" pivot="top" />
+        <label depth="3" name="desc"
+               text="{#localization('buffs_desc_' + int(cvar('styx.buffs.desc_id')))}"
+               font_size="14" justify="center"
+               pos="250,-560" width="480" height="32" pivot="top"
+               color="220,220,200,255" />
+
+        <label depth="3" name="hint"
+               text="(No Perm) = need a perm. ON/OFF = toggle. Ready/Active/Cooldown = on-demand buffs."
+               font_size="12" justify="center"
+               pos="250,-600" width="500" height="16" pivot="top"
+               color="200,200,160,255" />
+        <label depth="3" name="legend"
+               text="[SCROLL] navigate   [LMB] toggle / activate   [RMB] back"
+               font_size="13" justify="center"
+               pos="250,-622" width="500" height="18" pivot="top"
+               color="180,180,180,255" />
+    </rect>
+</window>
+*/
+
+/* @styx-xui-window-group toolbelt
+<window name="styxBuffs" />
+*/
+
 /* @styx-buffs
 <!--
     Three reference VIP / donor buffs shipped with StyxBuffs. They're
