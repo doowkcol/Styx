@@ -1,10 +1,10 @@
-# Plugin authoring — embedded manifests
+# Plugin authoring
 
-Styx plugins are single `.cs` files that drop into `Mods/Styx/plugins/`. The framework compiles them at boot, hot-reloads them on save, and — using the **plugin manifest synthesis** system documented here — *also* extracts XML payloads embedded in the source file and writes them to the canonical 7DTD config files at boot.
+Styx plugins are single `.cs` files that drop into `Mods/Styx/plugins/`. The framework compiles them at boot and hot-reloads them on save. Two authoring concerns this document covers:
 
-Result: a plugin that needs its own buff definition, XUi panel, or localization rows can ship those alongside its C# code in **one file** the operator drops into `plugins/`. No separate XML files to merge, no operator hand-editing of `Config/buffs.xml` or `Config/XUi/windows.xml`.
+1. **Embedded manifests** — XML payloads in `/* @styx-* */` block comments. The framework extracts them at boot and writes the canonical 7DTD config files (`Config/buffs.xml`, `Config/XUi/windows.xml`, `Config/XUi/xui.xml`, `Config/Localization.txt`) so a plugin that needs its own buff definition, XUi panel, or localization rows ships everything in one file. No separate XML files to merge, no operator hand-editing.
 
-This document covers the marker format, the synthesis lifecycle, every supported section, and the gotchas that bite on the way.
+2. **Harmony patches** — `[HarmonyPatch]`-decorated classes inside the plugin file. The framework owns the lifecycle: patches auto-apply after `OnLoad`, auto-remove before `OnUnload`, hot-reload cleanly. For named lifecycle events (`OnPlayerSpawned`, `OnEntityDeath`, `OnPlayerDamage`, ~30 others) the framework already ships first-party hooks and you don't need to write patches at all — but for everything else, plugin-author Harmony is supported.
 
 ---
 
@@ -195,18 +195,113 @@ These are framework-owned when synthesis is enabled. Treat them as generated art
 
 ---
 
+## Harmony patches
+
+Beyond the named lifecycle hooks the framework already exposes (`OnPlayerSpawned`, `OnEntityDeath`, `OnPlayerDamage`, `OnLootContainerOpened`, `OnPlayerLevelUp`, `OnBlockPlaced`, `OnVehicleMount`, ~30 others — see `src/Styx.Core/Hooks/FirstPartyPatches.cs`), plugins can patch any vanilla method directly using `[HarmonyPatch]`. The framework owns the lifecycle: patches auto-apply after `OnLoad()` and auto-remove before `OnUnload()`, so hot-reload comes off cleanly.
+
+**Use Harmony when:** you need a vanilla method no named hook covers — connection gating, block-placement filtering, tile-entity tick postfixes, custom packet interception, anything where a method-level cut is the right tool.
+
+**Don't use Harmony when:** a named hook already exists. If you want `OnEntityDeath`, just declare `void OnEntityDeath(EntityAlive victim)` on your plugin class — the framework's first-party patch fires it for you. Named hooks are cheaper, idiomatic, and survive vanilla-method-signature drift across V2.6 point releases better than rolling your own patch.
+
+### The pattern
+
+`[HarmonyPatch]`-decorated nested static class anywhere in the file. The framework calls `harmony.PatchAll(yourAssembly)` automatically — no imperative wiring in `OnLoad`.
+
+```csharp
+using HarmonyLib;
+using Styx;
+using Styx.Plugins;
+
+[Info("MyPlugin", "Author", "1.0.0")]
+public class MyPlugin : StyxPlugin
+{
+    // Patch classes are static — they can't capture the plugin instance.
+    // Mirror what they need into a static pointer, set in OnLoad, cleared
+    // in OnUnload.
+    internal static MyPlugin Current { get; private set; }
+    private bool _logDrops;
+
+    public override void OnLoad()    { Current = this; _logDrops = true; }
+    public override void OnUnload()  { Current = null; }
+
+    [HarmonyPatch(typeof(GameManager), nameof(GameManager.ItemDropServer),
+        new[] { typeof(ItemStack), typeof(UnityEngine.Vector3), typeof(UnityEngine.Vector3),
+                typeof(int), typeof(float), typeof(bool) })]
+    static class ItemDropServerProbe
+    {
+        static void Prefix(ItemStack _itemStack, int _entityId)
+        {
+            if (Current == null || !Current._logDrops) return;
+            Log.Out("[MyPlugin] Drop: itemType={0} to entityId {1}",
+                _itemStack?.itemValue?.type ?? -1, _entityId);
+        }
+    }
+}
+```
+
+Verbatim shape from `HelloSource.cs` — the shipped probe-as-demo. Read it as the canonical hello-world.
+
+### Lifecycle
+
+| Plugin event | Harmony action | Source |
+|---|---|---|
+| Plugin loads | After `OnLoad()` returns, framework calls `harmony.PatchAll(plugin assembly)` under Harmony id `styx.plugin.<name-lowercase>` | `PluginLoader.cs` `LoadAssemblyBytes` |
+| Plugin unloads (or hot-reload) | Before `OnUnload()` runs, framework calls `harmony.UnpatchSelf()` for that plugin's id, removing only its own patches | `PluginLoader.cs` `UnloadFile` |
+| Save the .cs file | Roslyn recompiles → old plugin unloads (patches off) → new plugin loads (patches on) | Same lifecycle, twice |
+
+Implementation: `src/Styx.Core/Patching/HarmonyPatchManager.cs`. Read it once if you want to know exactly what runs when.
+
+### Inspecting active patches
+
+```
+styx patches
+```
+
+Lists framework-owned patches (Harmony id `styx.core`) plus every loaded plugin's patches, grouped by id with patch count. Useful for confirming hot-reload removed your patches cleanly, or spotting cross-plugin patch pile-up on the same target.
+
+### `HarmonyLib` reference path
+
+`using HarmonyLib;` works without any project setup. The plugin compiler scans sibling mod folders at boot and picks up `0Harmony.dll` from `0_TFP_Harmony` (vanilla 7DTD ships Harmony) — already on the compile reference path. See `PluginCompiler.cs` `BuildReferences` for the scan order.
+
+### Cancellable damage hooks
+
+Three of the framework's damage-related hooks are cancellable — return non-null from your handler:
+
+| Hook | Return | Effect |
+|---|---|---|
+| `OnEntityDamage(EntityAlive victim, DamageSource source, int strength, bool critical)` | `null` | pass through (default) |
+| `OnEntityDamage` / `OnPlayerDamage` | `false` | cancel damage entirely |
+| `OnEntityDamage` / `OnPlayerDamage` | `int N`, `N > 0` | override damage to N |
+| `OnEntityDamage` / `OnPlayerDamage` | `int N`, `N <= 0` | cancel damage |
+| `OnPreDamageApplied(EntityAlive victim, DamageResponse response)` | non-null | cancel HP deduction |
+
+Semantics defined in `Styx.Hooks.FirstParty.DamageHookHelpers`. For damage-output anti-cheat (catch a player dealing impossibly-large damage), patch `EntityAlive.OnEntityDeath` and inspect the killing-blow `DamageResponse.Strength` directly — that pattern doesn't fit the cancellable hook shape because by then the entity is already dying, and you want to inspect the strike that killed it.
+
+### Gotchas
+
+- **Vanilla method signature drift.** A V2.6 point release can rename a method or change its parameter list. Patches fail at `harmony.PatchAll` time; the framework logs `Harmony PatchAll failed for <plugin>: ...`, calls `UnpatchSelf` to roll back, and continues loading the plugin without patches. Watch for that line after engine updates.
+- **`PatchAll` is all-or-nothing per plugin.** If one `[HarmonyPatch]` class fails (target method gone), the whole batch for that plugin is rolled back via `UnpatchSelf` and the plugin runs without any patches. Split brittle patches across multiple plugins if you need partial-success behaviour.
+- **Patch classes are static — don't capture the plugin instance.** Mirror what the patch needs into a static `Current` property set in `OnLoad` and cleared in `OnUnload` (see the example above and `HelloSource.cs`).
+- **Don't bind to or remove framework patches.** Anything under Harmony id `styx.core` is framework-private API. Patches living there can shift between framework versions. If a named hook exists for what you want, use the hook.
+- **Multiple plugins patching the same target.** Harmony runs prefixes / postfixes in priority order (default `Priority.Normal`). When ordering matters use `[HarmonyPriority]`. When it doesn't, don't — gratuitous priority annotations make the patch graph harder to reason about. Use `styx patches` to see who's patching what.
+- **Roslyn happily compiles a wrong target.** A typo in a method name `nameof(...)` resolves locally but fails at `PatchAll` time as a runtime log line. Test the round-trip after every patch edit.
+
+---
+
 ## Reference plugins
 
-Browse these as embedded-manifest examples:
+Browse these as authoring examples:
 
-| Plugin | Sections used |
+| Plugin | What it shows |
 |---|---|
-| `StyxNvg.cs` | `@styx-buffs` (single buff with onSelfBuffStart triggers) |
-| `StyxShield.cs` | `@styx-buffs`, `@styx-xui-windows`, `@styx-xui-window-group toolbelt` (panel + buff + group reg) |
-| `StyxBuffs.cs` | `@styx-buffs` (multiple buffs in one block), `@styx-xui-windows` (large picker panel), `@styx-xui-window-group toolbelt` |
-| `PermEditor.cs` | `@styx-xui-windows` (multi-stage UI with sliding window), `@styx-xui-window-group toolbelt` |
-| `StyxMenu.cs` | Two windows in one plugin (`styxMenu` + `styxLauncher`), each with its own group reg |
-| `StyxZombieRadar.cs` | `@styx-xui-windows` only — no `@styx-xui-window-group` block, so the window is defined but not mounted (intentionally disabled by default) |
+| `StyxNvg.cs` | Embedded manifest: `@styx-buffs` (single buff with onSelfBuffStart triggers) |
+| `StyxShield.cs` | Embedded manifest: `@styx-buffs`, `@styx-xui-windows`, `@styx-xui-window-group toolbelt` (panel + buff + group reg) |
+| `StyxBuffs.cs` | Embedded manifest: `@styx-buffs` (multiple buffs in one block), `@styx-xui-windows` (large picker panel), `@styx-xui-window-group toolbelt` |
+| `PermEditor.cs` | Embedded manifest: `@styx-xui-windows` (multi-stage UI with sliding window), `@styx-xui-window-group toolbelt` |
+| `StyxMenu.cs` | Embedded manifest: two windows in one plugin (`styxMenu` + `styxLauncher`), each with its own group reg |
+| `StyxZombieRadar.cs` | Embedded manifest: `@styx-xui-windows` only — no `@styx-xui-window-group` block, so the window is defined but not mounted (intentionally disabled by default) |
+| `HelloSource.cs` | Harmony: single-method probe on `GameManager.ItemDropServer`. Demonstrates the static-`Current`-pointer pattern and the hot-reload round-trip |
+| `StyxCrafting.cs` | Harmony: four substantial patches across `EffectManager.GetValue`, `TileEntityWorkstation.read` / `.HandleRecipeQueue` / `.UpdateTick` for perm-tiered craft-time / output-multiplier / auto-shutdown behaviour. Real-world reference for non-trivial patch authoring |
 
 ---
 
@@ -230,9 +325,27 @@ public class MyPlugin : StyxPlugin
 
     void OnPlayerSpawned(ClientInfo ci, RespawnType reason, Vector3i pos)
     {
-        // Lifecycle hooks discovered by name. No registration needed.
+        // Named lifecycle hooks discovered by method name. No registration needed.
+    }
+
+    [HarmonyPatch(typeof(SomeGameClass), nameof(SomeGameClass.SomeMethod))]
+    static class SomeGameClass_SomeMethod_Patch
+    {
+        // [HarmonyPatch] classes auto-applied by the framework after OnLoad
+        // and removed before OnUnload. See the Harmony patches section above.
     }
 }
 ```
 
-The `/* @styx-* */` blocks get processed at framework `InitMod()` (before the engine reads XML). Then 7DTD reads the synthesised XML files. Then your plugin's `OnLoad()` runs once `OnGameStartDone` fires. By the time `OnLoad` runs, the buff/window/locale you embedded already exists in the engine.
+Boot order:
+
+1. Framework `InitMod()` runs the manifest synthesis pass — `/* @styx-* */` blocks are extracted from every plugin file and written to `Config/buffs.xml` / `Config/XUi/windows.xml` / `Config/XUi/xui.xml` / `Config/Localization.txt` *before* the engine reads them.
+2. 7DTD reads the synthesised XML.
+3. Once `OnGameStartDone` fires, the framework loads each plugin: instantiates it, scans for named-hook methods, calls `OnLoad()`, then calls `harmony.PatchAll(plugin assembly)` to apply any `[HarmonyPatch]` classes.
+4. By the time `OnLoad` runs, your embedded buff/window/locale already exists in the engine. By the time your patches apply, `OnLoad` has already run and your `Current = this;` static pointer is set.
+
+On unload (manual unload, hot-reload, or shutdown):
+
+1. Framework calls `harmony.UnpatchSelf()` for that plugin's id — patches off, vanilla behaviour restored.
+2. `OnUnload()` runs — your cleanup code sees the world without your patches.
+3. Framework unbinds named hooks, unregisters commands, flushes the plugin's data stores.
