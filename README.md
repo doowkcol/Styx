@@ -2,7 +2,7 @@
 
 A **server-side plugin framework for 7 Days to Die V2.6 dedicated servers.**
 
-- **Server-side only.** No client install required. Players join with vanilla / console-style clients.
+- **Server-side only.** No client install required. Players join with vanilla PC clients.
 - **EAC-compatible.** Anti-cheat stays enabled. The framework adds nothing to the client.
 - **Hot-reload `.cs` plugins.** Drop a plugin file in `Mods/Styx/plugins/`, save changes — the framework compiles and reloads it live. No restart for plugin code, no build step.
 - **Single-file plugins.** Plugin authors embed buff defs, XUi panels, window-group registrations and localization rows directly in the `.cs` source as `/* @styx-* */` block comments. The framework extracts them at boot and writes the canonical `Config/buffs.xml`, `Config/XUi/windows.xml`, `Config/XUi/xui.xml`. Operators drop one file, restart, done — no XML editing, no manual merging. See [`docs/plugin-authoring.md`](./docs/plugin-authoring.md).
@@ -10,7 +10,7 @@ A **server-side plugin framework for 7 Days to Die V2.6 dedicated servers.**
 
 Built on the native `IModApi` + Harmony. Plugin source is compiled by Roslyn at boot and on save. Ships with 30+ reference plugins covering economy, progression, base management, perm-tiered perks, admin tooling and HUDs — the whole thing is the framework you'd build for yourself the third time you wrote a server-side mod.
 
-Why it exists: nothing else in the 7DTD ecosystem ships this combination — especially the EAC-on + no-client-install constraint that lets console-style players join a modded server, and the live hot-reload of plugin source.
+Why it exists: nothing else in the 7DTD ecosystem ships this combination — especially the EAC-on + no-client-install constraint that lets unmodified clients join a modded server, and the live hot-reload of plugin source.
 
 ---
 
