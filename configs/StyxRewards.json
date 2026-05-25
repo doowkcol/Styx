@@ -1,0 +1,43 @@
+{
+  "EarnPerm": "styx.eco.earn",
+  "StartingBalance": 100,
+  "StartingXp": 0,
+  "DailyLoginBonus": 25,
+  "DailyLoginXp": 50,
+  "OnlineStipend": 5,
+  "OnlineStipendXp": 10,
+  "OnlineStipendIntervalMinutes": 5,
+  "ZombieBountyDefault": 1,
+  "ZombieXpDefault": 5,
+  "ZombieBountyByClass": {},
+  "ZombieXpByClass": {},
+  "LootBountyDefault": 5,
+  "LootXpDefault": 10,
+  "LootBountyByClass": {},
+  "LootXpByClass": {},
+  "HarvestBountyDefault": 1,
+  "HarvestXpDefault": 1,
+  "HarvestRequireTool": true,
+  "HarvestBountyByBlock": {},
+  "HarvestXpByBlock": {},
+  "QuestRewardDefault": 25,
+  "QuestXpDefault": 100,
+  "QuestRewardByID": {},
+  "QuestXpByID": {},
+  "Multipliers": [
+    {
+      "Perm": "styx.eco.x3",
+      "Multiplier": 3.0
+    },
+    {
+      "Perm": "styx.eco.x2",
+      "Multiplier": 2.0
+    }
+  ],
+  "WhisperOnLogin": true,
+  "WhisperOnQuest": true,
+  "WhisperOnStipend": true,
+  "WhisperOnKill": false,
+  "WhisperOnLoot": false,
+  "WhisperOnHarvest": false
+}

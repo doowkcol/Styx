@@ -1,0 +1,9 @@
+{
+  "ScanRadiusOverride": 0,
+  "RequireSecureContainerOwnership": false,
+  "ScanResultTtlSeconds": 300,
+  "FlushIntervalSeconds": 30,
+  "SkipTileEntityBlocksOnUpgrade": true,
+  "CostDowngrade": false,
+  "Verbose": true
+}

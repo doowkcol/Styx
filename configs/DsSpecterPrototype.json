@@ -1,0 +1,11 @@
+{
+  "MaxHealth": 250,
+  "Death": {
+    "KillWindowSec": 5.0,
+    "SpawnCount": 2,
+    "AggroDurationSec": 60
+  },
+  "Trail": {
+    "IntervalSec": 1.5
+  }
+}

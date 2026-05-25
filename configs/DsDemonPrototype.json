@@ -1,0 +1,8 @@
+{
+  "MaxHealth": 0,
+  "Wrath": {
+    "Radius": 50.0,
+    "CooldownSec": 2.0,
+    "DurationSec": 60
+  }
+}

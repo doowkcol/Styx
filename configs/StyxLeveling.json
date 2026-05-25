@@ -1,0 +1,34 @@
+{
+  "BaseXp": 650.0,
+  "Exponent": 2.0,
+  "MaxLevel": 100,
+  "CustomXpTable": {},
+  "Milestones": [
+    {
+      "Level": 25,
+      "Group": "lvl25",
+      "Broadcast": "{name} reached level 25!",
+      "Whisper": "[00FF66]You earned level 25 bonuses![-]"
+    },
+    {
+      "Level": 50,
+      "Group": "lvl50",
+      "Broadcast": "{name} reached level 50!",
+      "Whisper": "[00FF66]You earned level 50 bonuses![-]"
+    },
+    {
+      "Level": 75,
+      "Group": "lvl75",
+      "Broadcast": "{name} reached level 75!",
+      "Whisper": "[00FF66]You earned level 75 bonuses![-]"
+    },
+    {
+      "Level": 100,
+      "Group": "lvl100",
+      "Broadcast": "{name} reached the maximum level (100)!",
+      "Whisper": "[FFAA00]You have reached level 100 -- the apex rank.[-]"
+    }
+  ],
+  "DriveHudCvar": true,
+  "LogTransactions": false
+}

@@ -1,0 +1,10 @@
+{
+  "UsePerm": "styx.shop.use",
+  "SellEnabled": true,
+  "SellPerm": "styx.shop.sell",
+  "SellBinRows": 6,
+  "SellBinCols": 8,
+  "SellPriceRatio": 0.5,
+  "DefaultSellPrice": 1,
+  "AllowSellUncataloged": true
+}

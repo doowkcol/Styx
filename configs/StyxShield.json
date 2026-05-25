@@ -1,0 +1,9 @@
+{
+  "MaxActivePerPlayer": 1,
+  "BlockOnBloodmoon": true,
+  "BlockRegularAnimals": false,
+  "BlockBandits": false,
+  "ProtectPartyMembers": true,
+  "FlushIntervalSeconds": 30,
+  "Verbose": true
+}

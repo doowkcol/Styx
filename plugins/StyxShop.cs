@@ -31,6 +31,28 @@ using Styx.Plugins;
 using Styx.Scheduling;
 using UnityEngine;
 
+/* @styx-entityclasses
+<!--
+    StyxSellBin — visually identical to a vanilla Backpack but a distinct
+    entity class so its loot window header reads "Sell Terminal" instead
+    of "Backpack". Localization key matches the class name (see Localization.txt).
+    Used by the StyxShop /sell command.
+-->
+<entity_class name="StyxSellBin">
+    <property name="Class" value="EntityBackpack"/>
+    <property name="UserSpawnType" value="None"/>
+    <property name="Mesh" value="@:Entities/LootContainers/backpack_droppedPrefab.prefab"/>
+    <property name="ModelType" value="Custom"/>
+    <property name="Prefab" value="Backpack"/>
+    <property name="Parent" value="Backpack"/>
+    <property name="TimeStayAfterDeath" value="3600"/>
+    <property name="IsEnemyEntity" value="false"/>
+    <property name="LootListOnDeath" value="playerBackpack"/>
+    <property name="Faction" value="none"/>
+    <property name="NavObject" value="backpack"/>
+</entity_class>
+*/
+
 
 /* @styx-xui-windows
 <!--

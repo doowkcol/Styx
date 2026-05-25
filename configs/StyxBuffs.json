@@ -1,0 +1,204 @@
+{
+  "ReapplyIntervalSeconds": 1800,
+  "Buffs": [
+    {
+      "Buff": "buffStyxVipUndead",
+      "Perm": "styx.buffs.vip",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "VIP: Undead Slayer",
+      "Description": "+100% damage to zombies",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_zombie"
+    },
+    {
+      "Buff": "buffStyxVipHarvest",
+      "Perm": "styx.buffs.vip",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "VIP: Harvest Master",
+      "Description": "+100% harvest yield, +50% block damage",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_wrench"
+    },
+    {
+      "Buff": "buffStyxVipToughness",
+      "Perm": "styx.buffs.vip",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "VIP: Toughness",
+      "Description": "+60 resist, +30% run speed, +40 carry, +50 HP",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_armor_iron"
+    },
+    {
+      "Buff": "buffDrugAtomJunkies",
+      "Perm": "styx.buffs.vip",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "Atom Junkies",
+      "Description": "Vanilla drug -- periodic HP regen",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_medical"
+    },
+    {
+      "Buff": "buffDrugRecog",
+      "Perm": "styx.buffs.vip",
+      "DurationSeconds": 1800,
+      "CooldownSeconds": 0,
+      "DisplayName": "Recog",
+      "Description": "Vanilla drug -- loot quality bonus",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_loot_sack"
+    },
+    {
+      "Buff": "buffDrugSteroids",
+      "Perm": "styx.buffs.admin",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "Steroids",
+      "Description": "Vanilla drug -- +50 carry, +10% run speed",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_steroids"
+    },
+    {
+      "Buff": "buffMegaCrush",
+      "Perm": "styx.buffs.vip",
+      "DurationSeconds": 600,
+      "CooldownSeconds": 3600,
+      "DisplayName": "Mega Crush (10m)",
+      "Description": "Vanilla energy drink -- 10 min stamina + damage rush, 1h cooldown",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_pills"
+    },
+    {
+      "Buff": "buffDrugVitamins",
+      "Perm": "styx.buffs.lvl25",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L25: Vitamins",
+      "Description": "Resist infection + dysentery from food/drink",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_pills"
+    },
+    {
+      "Buff": "buffDrugSugarButts",
+      "Perm": "styx.buffs.lvl25",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L25: Sugar Butts",
+      "Description": "+10% trader buy + sell prices",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_sugar_butts"
+    },
+    {
+      "Buff": "buffDrugPainkillers",
+      "Perm": "styx.buffs.lvl25",
+      "DurationSeconds": 30,
+      "CooldownSeconds": 600,
+      "DisplayName": "L25: Painkillers (heal)",
+      "Description": "Burst-heal 40 HP + stun resist. 10min cooldown.",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_pills"
+    },
+    {
+      "Buff": "buffDrugSkullCrushers",
+      "Perm": "styx.buffs.lvl50",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L50: Skull Crushers",
+      "Description": "+50% melee damage with most weapon perks",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_skull_crushers"
+    },
+    {
+      "Buff": "buffDrugCovertCats",
+      "Perm": "styx.buffs.lvl50",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L50: Covert Cats",
+      "Description": "+50% sneak attack damage while crouched + unalerted",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_covert_cats"
+    },
+    {
+      "Buff": "buffDrugFortBites",
+      "Perm": "styx.buffs.lvl50",
+      "DurationSeconds": 600,
+      "CooldownSeconds": 1800,
+      "DisplayName": "L50: Fort Bites (resist)",
+      "Description": "+40% general damage resist for 10 min. 30 min cooldown.",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_fortitude"
+    },
+    {
+      "Buff": "buffDrugRockBusters",
+      "Perm": "styx.buffs.lvl75",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L75: Rock Busters",
+      "Description": "+20% wood + ore harvest yield",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_rock_busters"
+    },
+    {
+      "Buff": "buffDrugHackers",
+      "Perm": "styx.buffs.lvl75",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L75: Hackers",
+      "Description": "+20% salvage harvest yield",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_hackers"
+    },
+    {
+      "Buff": "buffDrugJailBreakers",
+      "Perm": "styx.buffs.lvl75",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L75: Jail Breakers",
+      "Description": "Lockpicks break drastically less often",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_jail_breakers"
+    },
+    {
+      "Buff": "buffDrugEyeKandy",
+      "Perm": "styx.buffs.lvl100",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L100: Eye Kandy",
+      "Description": "+5 LootStage flat + 10% extra -- noticeably better loot rolls",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_eye_candy"
+    },
+    {
+      "Buff": "buffDrugHealthBar",
+      "Perm": "styx.buffs.lvl100",
+      "DurationSeconds": 3600,
+      "CooldownSeconds": 0,
+      "DisplayName": "L100: Health Bar",
+      "Description": "+10 max HP + 25% resist to bleed/sprain/infection trigger",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_candy_health_bar"
+    },
+    {
+      "Buff": "buffBerserker",
+      "Perm": "styx.buffs.lvl100",
+      "DurationSeconds": 300,
+      "CooldownSeconds": 1200,
+      "DisplayName": "L100: Berserker (rage)",
+      "Description": "+25% damage resist for 5 min. 20 min cooldown.",
+      "UserToggleable": true,
+      "Icon": "ui_game_symbol_berserker"
+    }
+  ],
+  "CVars": [
+    {
+      "Name": "$treatedCommando",
+      "Value": 0.5,
+      "Perm": "styx.buffs.vip"
+    }
+  ],
+  "GroupBuffs": null,
+  "GroupCVars": null
+}

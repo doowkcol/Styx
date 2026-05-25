@@ -24,6 +24,11 @@
 //     drift past will steer around)
 //   - Bloodmoon: protection auto-suspends. Slot stays used; coverage
 //     resumes after blood moon ends.
+//   - Party-mates (vanilla 7DTD party, social menu invite) standing inside
+//     YOUR LCB are protected too -- toggle via Config.ProtectPartyMembers
+//     (default true). Both you and the mate must be online; disconnects
+//     drop a player from their party, so an offline owner's mates fall
+//     back to unprotected.
 //
 // Mechanics live in framework: Styx.Shield static registry +
 // Styx.Hooks.FirstParty.ShieldGuard Harmony patches. This plugin owns
@@ -232,6 +237,14 @@ public class StyxShield : StyxPlugin
         // -- bandits are a distinct threat class.
         public bool BlockBandits = false;
 
+        // When true (default), members of the LCB owner's vanilla 7DTD
+        // Party are also protected while standing inside the shielded
+        // claim. Both must be online — disconnect strips a player from
+        // their party, so an offline owner's mates fall back to
+        // unprotected (consistent with the offline owner themselves).
+        // Set false for strict-owner semantics.
+        public bool ProtectPartyMembers = true;
+
         // Dirty-batch flush interval for the zones file.
         public int FlushIntervalSeconds = 30;
 
@@ -272,6 +285,10 @@ public class StyxShield : StyxPlugin
         // Wire opt-in threat-class flags. Default false: undead only.
         Shield.BlockRegularAnimals = _cfg.BlockRegularAnimals;
         Shield.BlockBandits        = _cfg.BlockBandits;
+
+        // Party-protection flag. Default true: party-mates of the LCB
+        // owner are shielded too while standing inside the claim.
+        Shield.ProtectPartyMembers = _cfg.ProtectPartyMembers;
 
         // Single-purpose chat command: bare /shield toggles. The UI carries
         // the discoverability and status display.
@@ -317,9 +334,9 @@ public class StyxShield : StyxPlugin
         // visual feedback without burning CPU.
         _presenceTick = Scheduler.Every(2.0, RefreshAllPresenceBuffs, name: "StyxShield.presence");
 
-        Log.Out("[StyxShield] Loaded v0.3.0 -- {0} shield(s) restored, max-per-player={1}, bloodmoon-suspends={2}, animals={3}, bandits={4}",
+        Log.Out("[StyxShield] Loaded v0.3.0 -- {0} shield(s) restored, max-per-player={1}, bloodmoon-suspends={2}, animals={3}, bandits={4}, party-protect={5}",
             restored, _cfg.MaxActivePerPlayer, _cfg.BlockOnBloodmoon,
-            _cfg.BlockRegularAnimals, _cfg.BlockBandits);
+            _cfg.BlockRegularAnimals, _cfg.BlockBandits, _cfg.ProtectPartyMembers);
     }
 
     public override void OnUnload()
@@ -336,6 +353,9 @@ public class StyxShield : StyxPlugin
         // a hot-reload that uses a different config.
         Shield.BlockRegularAnimals = false;
         Shield.BlockBandits        = false;
+        // Party protection defaults true — restore framework default on
+        // unload so a hot-reload starts from a clean slate.
+        Shield.ProtectPartyMembers = true;
         StyxCore.Perms.UnregisterKnownByOwner(Name);
         Styx.Ui.Menu.UnregisterAll(this);
 

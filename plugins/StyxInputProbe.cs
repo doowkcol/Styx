@@ -37,11 +37,22 @@ using Styx.Plugins;
 <buff name="buffStyxInputProbe"
       name_key="buffStyxInputProbeName"
       description_key="buffStyxInputProbeDesc"
-      hidden="true">
+      hidden="true"
+      remove_on_death="false">
     <stack_type value="replace"/>
     <!-- Long duration (not 0 — that triggers the CVar-driven-duration NRE
          trap at client load). Plugin reapplies on each spawn anyway. -->
     <duration value="999999"/>
+    <!-- remove_on_death="false" — vanilla game_on_death_default fires
+         RemoveDeathBuffs which strips every buff with the default
+         RemoveOnDeath=true. Without this we lose the routing buff on
+         every player death; framework partially recovers by re-Acquire
+         on next menu open, but during the dead window LMB/RMB go
+         unhandled and the user sees clicks not register in any open
+         UI. Pairing with the periodic heartbeat (Ui.Input.Heartbeat)
+         covers the residual cases (modlet RemoveAllBuffs, network
+         desync where client buff state lags server). -->
+
 
     <effect_group>
         <!--

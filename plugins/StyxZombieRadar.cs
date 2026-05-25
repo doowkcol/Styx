@@ -95,6 +95,29 @@ public class StyxZombieRadar : StyxPlugin
     private Config _cfg;
     private TimerHandle _tick;
 
+    /// <summary>Tag set used to identify any entity that should be counted as
+    /// a "zombie" for the radar. Vanilla applies the "zombie" tag to both
+    /// humanoid zombies (zombieBoe, zombieMoe, etc.) and zombie animals
+    /// (animalZombieDog, animalZombieVulture, animalDireWolf — and any DS
+    /// variant that extends a zombie-animal base, e.g. dsHellhound,
+    /// entityDsKamikazeVulture). Plain hostile animals (animalCoyote,
+    /// animalWolf) are tagged "hostile" but NOT "zombie", so they're
+    /// correctly excluded — a "Zombies" radar shouldn't count wildlife.
+    /// Tag-based filter replaces the previous `ea is EntityZombie` check
+    /// which only caught humanoid zombies and missed every zombie-animal
+    /// variant (their C# class is EntityZombieDog / EntityVulture /
+    /// EntityEnemyAnimal, none of which derive from EntityZombie).</summary>
+    private static readonly FastTags<TagGroup.Global> _zombieTags =
+        FastTags<TagGroup.Global>.Parse("zombie");
+
+    /// <summary>True when the entity's class carries the "zombie" tag.</summary>
+    private static bool IsZombieClass(int entityClassHash)
+    {
+        if (!EntityClass.list.ContainsKey(entityClassHash)) return false;
+        var ec = EntityClass.list[entityClassHash];
+        return ec != null && ec.Tags.Test_AnySet(_zombieTags);
+    }
+
     public override void OnLoad()
     {
         _cfg = StyxCore.Configs.Load<Config>(this);
@@ -174,7 +197,12 @@ public class StyxZombieRadar : StyxPlugin
             for (int i = 0; i < nearby.Count; i++)
             {
                 var ea = nearby[i];
-                if (!(ea is EntityZombie)) continue;
+                // Tag-based "zombie" check — covers humanoid zombies AND
+                // zombie animals (animalZombieDog, animalZombieVulture,
+                // animalDireWolf, dsHellhound, entityDsKamikazeVulture, etc.)
+                // in one go. Excludes plain hostile animals (coyote / wolf)
+                // which are tagged "hostile" but not "zombie".
+                if (!IsZombieClass(ea.entityClass)) continue;
                 if (ea.IsDead()) continue;
                 var d = ea.position - pos;
                 if (d.sqrMagnitude <= r2) count++;

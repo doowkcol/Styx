@@ -179,6 +179,49 @@ using Styx.Scheduling;
 <window name="styxHud" />
 */
 
+/* @styx-patch xui-windows
+<!-- Vanilla windowGroupBars (the team-mate name + HP + direction-arrow
+     readout) is anchored LeftTop at pos=(9,-88) — overlaps the StyxHud
+     panel which occupies LeftTop ~10,-10 to ~290,-280. Visual collision:
+     the team-mate readout text shows over our HUD panel.
+
+     Patch flips the window's anchor to RightTop and mirrors the child
+     positions onto the right side, BELOW the area used by the vanilla
+     biome label / version / tutorial-challenge HUD elements (which run
+     from y≈0 down to y≈240 in normal play). Grid starts at y=-280 so
+     the first row clears the tutorial area with 40px breathing room.
+
+     IMPORTANT — cell visual extent vs grid cell_width.
+     The grid declares cell_width=168, but the party_entry control
+     inside (controls.xml:1034) renders an inner rect of width=200 PLUS
+     an arrowContent indicator at pos=216,-18 with style icon22px
+     (pivot=center → right edge at x=227 in cell-local coords). The
+     direction arrow sits OUTSIDE the nominal 168px grid cell. Setting
+     grid pos by cell_width alone clips the arrow off the right edge.
+
+     Numbers (right margin = 10px):
+       grid pos.x = -(arrow_right_edge + margin) = -(227 + 10) = -237
+       voiceStatus mic icon: pos=(-222,-260), pivot=center. Aligns
+         horizontally with the per-row speaker icon (cell-local x=15)
+         to mirror the vanilla LeftTop layout's mic-over-speaker
+         alignment. 20px above the first row (mirrors original 88-68
+         vertical offset between mic and grid).
+       grid hud (party + companion both): pos=(-237,-280). Single
+         XPath set@pos updates both elements (XmlPatchMethods.SetByXPath
+         applies to all matching nodes — verified in decomp).
+
+     Far-team distance label (controls.xml:1053) extends to ~x=290 in
+     cell-local coords; at -237 it would clip slightly when a team-mate
+     is far enough away to show distance. If that becomes a real
+     annoyance, push grid pos to -300 — no rebuild needed.
+
+     Vanilla element names are case-sensitive in XPath — windowGroupBars
+     and the inner sprite/grid names must match exactly. -->
+<set xpath="/windows/window[@name='windowGroupBars']/@anchor">RightTop</set>
+<set xpath="/windows/window[@name='windowGroupBars']/sprite[@name='voiceStatus']/@pos">-222,-260</set>
+<set xpath="/windows/window[@name='windowGroupBars']/grid[@name='hud']/@pos">-237,-280</set>
+*/
+
 [Info("StyxHud", "Doowkcol", "0.2.0")]
 public class StyxHud : StyxPlugin
 {

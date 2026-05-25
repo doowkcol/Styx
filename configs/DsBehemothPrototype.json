@@ -1,0 +1,11 @@
+{
+  "Helpers": {
+    "Class": "dsHellhound",
+    "Buff": "buffDsHellhoundFire",
+    "SpawnPuffBuff": "buffDsHellhoundSpawnPuff",
+    "CountPerSummon": 3,
+    "SpawnRadius": 4.0,
+    "CooldownSec": 8.0,
+    "MaxSummonsPerBehemoth": 0
+  }
+}

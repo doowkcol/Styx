@@ -13,7 +13,21 @@
 //   - night-time tier boost (zombies are harder at night → better loot)
 //   - blood-moon suppression (no spam during hordes)
 //   - per-zombie-type loot tables within each quality tier
-//   - configurable bag lifetime + scheduled despawn
+//   - configurable bag lifetime + persistent periodic despawn sweep
+//
+// Bag cleanup (v0.4.1+): every BagLifetimeSeconds the engine tries its
+// own despawn, but vanilla `entityBackpack` has `TimeStayAfterDeath=3600`
+// (1 hour) AND `deathUpdateTicks` only accumulates while the chunk is
+// loaded — so a bag in an unloaded chunk effectively persists forever
+// from a player's perspective. The plugin compensates with a persistent
+// periodic sweep: a `bags.json` DataStore records every bag's spawn
+// time (entityId → unix epoch seconds), survives server restarts, and
+// the sweep tick (every BagSweepIntervalSeconds, default 30s) iterates
+// `world.Entities` adopting any RefPlayerId==-1 EntityBackpack it sees
+// on first sighting and despawning ones older than BagLifetimeSeconds.
+// "Adopt on sight" also handles orphan bags from prior sessions whose
+// state file was lost: they get treated as freshly observed and
+// despawn one TTL later (worst case ~5min + 30s sweep latency).
 //
 // Bag-only: v0.3 had a block-first / bag-fallback pathway, but custom-block
 // placement was unreliable on uneven terrain so we dropped the block path
@@ -36,6 +50,7 @@
 using System;
 using System.Collections.Generic;
 using Styx;
+using Styx.Data;
 using Styx.Plugins;
 using Styx.Scheduling;
 using UnityEngine;
@@ -83,9 +98,20 @@ public class ZombieLoot : StyxPlugin
         /// Stops degenerate configs from creating massive bags.</summary>
         public int MaxItemsPerBag = 8;
 
-        /// <summary>Bag lifetime in seconds. Bag is scheduled for removal
-        /// after this delay. Set to 0 to disable scheduled despawn.</summary>
+        /// <summary>Bag lifetime in seconds. Bags older than this are
+        /// despawned by the periodic sweep on its next pass. Set to 0
+        /// to disable cleanup entirely (bags persist until vanilla's
+        /// 1-hour <c>TimeStayAfterDeath</c> elapses in loaded time —
+        /// effectively forever for chunks that mostly stay unloaded).</summary>
         public int BagLifetimeSeconds = 300;  // 5 min
+
+        /// <summary>How often the bag-cleanup sweep runs (seconds).
+        /// Drives both the despawn cadence for aged bags AND the
+        /// "adopt-on-sight" registration of new spawns. Worst-case
+        /// despawn latency is BagLifetimeSeconds + BagSweepIntervalSeconds.
+        /// Default 30s — cheap (one EntityBackpack filter pass over
+        /// world.Entities), responsive enough for the 5-min TTL.</summary>
+        public int BagSweepIntervalSeconds = 30;
 
         // ---- Night boost ----
 
@@ -795,6 +821,7 @@ public class ZombieLoot : StyxPlugin
     private int _killsAttributed;
     private int _killsNight;
     private int _killsDeduped;
+    private int _bagsDespawned;
 
     /// <summary>Entity ids of zombies we've already dropped a bag for in
     /// this session. The engine's <c>Kill(DamageResponse)</c> isn't guarded
@@ -809,9 +836,31 @@ public class ZombieLoot : StyxPlugin
     private readonly object _dedupeLock = new object();
     private TimerHandle _dedupeCleaner;
 
+    /// <summary>Persistent bag-age tracker. Keyed by <c>EntityBackpack.entityId</c>,
+    /// value is the Unix epoch second the bag was first observed in the world.
+    /// Survives server restarts via the DataStore. Bags older than
+    /// <c>BagLifetimeSeconds</c> are despawned by the sweep tick. Entries
+    /// for entityIds that haven't been seen for &gt; 24h are GC'd as a
+    /// safety net so the dict doesn't grow unbounded across long uptimes.
+    /// </summary>
+    public class BagState
+    {
+        public Dictionary<int, double> SpawnedAt = new Dictionary<int, double>();
+    }
+
+    private DataStore<BagState> _bagStateStore;
+    private TimerHandle _bagSweepTick;
+    private bool _bagStateDirty;
+    /// <summary>Tracker entries with no live entity sighting older than
+    /// this many seconds are evicted by the sweep's GC pass. 24h is well
+    /// past any plausible chunk-load-delay so we don't accidentally
+    /// double-adopt a bag that's about to reload.</summary>
+    private const double BagTrackerGcSeconds = 86400.0;
+
     public override void OnLoad()
     {
         _cfg = StyxCore.Configs.Load<Config>(this);
+        _bagStateStore = this.Data.Store<BagState>("bags");
 
         // Register every tier perm with PermEditor so admins can toggle them
         // per group from the UI without editing config files.
@@ -824,12 +873,26 @@ public class ZombieLoot : StyxPlugin
                 Name);
         }
 
-        StyxCore.Commands.Register("zloot", "ZombieLoot status — /zloot stats", (ctx, args) =>
+        StyxCore.Commands.Register("zloot",
+            "ZombieLoot status — /zloot [stats|cleanup]", (ctx, args) =>
         {
+            string sub = args.Length > 0 ? args[0].ToLowerInvariant() : "stats";
+            if (sub == "cleanup")
+            {
+                int before = _bagStateStore.Value.SpawnedAt.Count;
+                int despawned = BagSweep(forceAll: true);
+                int after = _bagStateStore.Value.SpawnedAt.Count;
+                ctx.Reply(string.Format(
+                    "[00ff66][zloot] Forced cleanup: {0} bag(s) despawned. Tracker {1} → {2} entries.[-]",
+                    despawned, before, after));
+                return;
+            }
             ctx.Reply(string.Format(
-                "[ccddff]ZombieLoot v0.4:[-] enabled={0} kills={1} attributed={2} night={3} bags={4} deduped={5} cap={6} life={7}s bm-suppress={8}",
+                "[ccddff]ZombieLoot v0.4:[-] enabled={0} kills={1} attributed={2} night={3} bags={4} deduped={5} despawned={6} cap={7} life={8}s sweep={9}s bm-suppress={10} tracked={11}",
                 _cfg.Enabled, _kills, _killsAttributed, _killsNight, _bagsSpawned, _killsDeduped,
-                _cfg.MaxItemsPerBag, _cfg.BagLifetimeSeconds, _cfg.SuppressOnBloodMoon));
+                _bagsDespawned, _cfg.MaxItemsPerBag, _cfg.BagLifetimeSeconds,
+                _cfg.BagSweepIntervalSeconds, _cfg.SuppressOnBloodMoon,
+                _bagStateStore.Value.SpawnedAt.Count));
             ctx.Reply(string.Format("[ccddff]Night boost:[-] enabled={0} window={1:00}:00–{2:00}:00 currentlyNight={3}",
                 _cfg.NightBoostEnabled, _cfg.NightStartHour, _cfg.NightEndHour, IsNightNow()));
             ctx.Reply("[ccddff]Drop tiers (first match wins):[-]");
@@ -838,6 +901,7 @@ public class ZombieLoot : StyxPlugin
                     t.Perm, t.DropChance, t.Quality));
             ctx.Reply(string.Format("[ccddff]Quality tables:[-] {0} (order: {1})",
                 _cfg.QualityTiers.Count, string.Join(" → ", _cfg.TierOrder)));
+            ctx.Reply("Subcommands: /zloot stats  /zloot cleanup");
         });
 
         // Periodic flush of the dedupe set — keeps memory bounded on long
@@ -849,16 +913,37 @@ public class ZombieLoot : StyxPlugin
             lock (_dedupeLock) _alreadyDroppedFor.Clear();
         }, "ZombieLoot.dedupe-cleaner");
 
-        Log.Out("[ZombieLoot] Loaded v0.4.0 — {0} drop tier(s), {1} quality table(s), night-boost={2}, life={3}s",
+        // Bag-cleanup sweep — see BagSweep() docstring. Cadence comes from
+        // config; floor to 5s so a typo of 0 doesn't tight-loop.
+        if (_cfg.BagLifetimeSeconds > 0)
+        {
+            int sweepEvery = Math.Max(5, _cfg.BagSweepIntervalSeconds);
+            _bagSweepTick = Scheduler.Every(sweepEvery, () => BagSweep(forceAll: false),
+                name: "ZombieLoot.bag-sweep");
+        }
+
+        Log.Out("[ZombieLoot] Loaded v0.4.0 — {0} drop tier(s), {1} quality table(s), night-boost={2}, life={3}s, sweep={4}s, tracked={5}",
             _cfg.DropTiers.Count, _cfg.QualityTiers.Count,
-            _cfg.NightBoostEnabled, _cfg.BagLifetimeSeconds);
+            _cfg.NightBoostEnabled, _cfg.BagLifetimeSeconds,
+            _cfg.BagSweepIntervalSeconds, _bagStateStore.Value.SpawnedAt.Count);
     }
 
     public override void OnUnload()
     {
         _dedupeCleaner?.Destroy();
         _dedupeCleaner = null;
+        _bagSweepTick?.Destroy();
+        _bagSweepTick = null;
         lock (_dedupeLock) _alreadyDroppedFor.Clear();
+        // Persist tracker state so a clean shutdown preserves age info for
+        // the next session's sweep — restart with bags already aged out
+        // means they despawn on the first post-boot sweep.
+        if (_bagStateDirty && _bagStateStore != null)
+        {
+            try { _bagStateStore.Save(); }
+            catch (Exception e) { Log.Warning("[ZombieLoot] state save on unload threw: " + e.Message); }
+            _bagStateDirty = false;
+        }
         StyxCore.Perms.UnregisterKnownByOwner(Name);
     }
 
@@ -1100,8 +1185,12 @@ public class ZombieLoot : StyxPlugin
 
             // Best-effort: try to set the engine-side lifetime field too,
             // in case it exists and the engine respects it. If the field
-            // name differs across engine versions, this catches silently
-            // and we rely on the scheduled despawn below.
+            // name differs or the field is absent in V2.6 (confirmed: it
+            // is — vanilla EntityBackpack tracks age via `deathUpdateTicks`
+            // gated by `TimeStayAfterDeath` property, not a `lifetime`
+            // field), this catches silently. The authoritative cleanup
+            // is the BagSweep tick that despawns aged bags regardless of
+            // any engine-side hint.
             try
             {
                 var lifetimeField = typeof(EntityBackpack).GetField("lifetime",
@@ -1119,12 +1208,14 @@ public class ZombieLoot : StyxPlugin
             entity.OnEntityUnload();
             gm.RequestToSpawnEntityServer(ecd);
 
-            // Belt-and-braces despawn schedule — the entity gets a real id
-            // assigned during spawn, so we can't capture it here. Instead
-            // schedule a scan that finds + removes our bag after lifetime
-            // expires by matching position + entity-class. Cheap.
-            if (_cfg.BagLifetimeSeconds > 0)
-                ScheduleBagDespawn(pos, _cfg.BagLifetimeSeconds);
+            // Bag registration happens via adopt-on-sight in BagSweep:
+            // the entityId isn't known at this point (RequestToSpawnEntityServer
+            // is async — engine assigns id on actual spawn), and any attempt
+            // to capture it via a position scan races chunk-load + gravity
+            // settling. The sweep tick (every BagSweepIntervalSeconds) picks
+            // up new RefPlayerId==-1 bags as they appear and registers them
+            // with spawnedAt=now, then despawns them after BagLifetimeSeconds.
+            // Worst-case extra latency: one sweep interval. Cheap.
 
             return true;
         }
@@ -1136,31 +1227,132 @@ public class ZombieLoot : StyxPlugin
     }
 
     /// <summary>
-    /// Schedule a one-shot scan that despawns any EntityBackpack entities
-    /// whose position is within 1.5m of the original drop point. Doesn't
-    /// despawn player death bags (those have RefPlayerId > 0; ours has -1).
+    /// Periodic bag-cleanup sweep. Iterates every loaded entity in the
+    /// world; for each <see cref="EntityBackpack"/> with
+    /// <c>RefPlayerId &lt;= 0</c> (our drops + any leftover from prior
+    /// sessions, never player-death bags whose <c>RefPlayerId &gt; 0</c>):
+    ///
+    /// <list type="bullet">
+    /// <item><b>First sighting:</b> register in <c>BagState.SpawnedAt</c>
+    ///       with <c>spawnedAt = now</c> ("adopt on sight"). Handles both
+    ///       newly-spawned bags from this session AND orphans from prior
+    ///       sessions where the tracker state was lost.</item>
+    /// <item><b>Already tracked, aged out (<c>now - spawnedAt &gt; TTL</c>):</b>
+    ///       call <see cref="World.RemoveEntity"/> with reason Despawned,
+    ///       remove tracker entry.</item>
+    /// <item><b>Already tracked, not yet aged:</b> leave alone, will revisit
+    ///       on next tick.</item>
+    /// </list>
+    ///
+    /// <para><b>Tracker GC:</b> entries whose <c>spawnedAt</c> is older
+    /// than <see cref="BagTrackerGcSeconds"/> (24h) AND whose entity is no
+    /// longer in the loaded world are evicted. Catches "bag was looted by
+    /// a player so the engine removed it" — we don't get a callback, but
+    /// the next sweep finds it missing and eventually GCs the stale entry.</para>
+    ///
+    /// <para><b>Why iterate every entity instead of using stored positions?</b>
+    /// Bags in unloaded chunks don't appear in <c>world.Entities</c>; storing
+    /// positions wouldn't help us despawn them until the chunk reloads
+    /// anyway. The current scheme cleanly handles all cases:
+    /// loaded-at-TTL = despawn immediately; unloaded-at-TTL = despawn on
+    /// first sweep after chunk reload.</para>
+    ///
+    /// <para><b>Cost:</b> one pass over <c>world.Entities.list</c> per
+    /// <c>BagSweepIntervalSeconds</c>. With typical entity counts (~100s)
+    /// and an <c>is EntityBackpack</c> filter, sub-millisecond.</para>
     /// </summary>
-    private void ScheduleBagDespawn(Vector3 pos, int seconds)
+    /// <param name="forceAll">When true, despawns every tracked bag
+    /// regardless of age (used by <c>/zloot cleanup</c>).</param>
+    /// <returns>Number of bags despawned this pass.</returns>
+    private int BagSweep(bool forceAll)
     {
-        Scheduler.Once(seconds, () =>
+        int despawned = 0;
+        try
         {
-            try
-            {
-                var world = GameManager.Instance?.World;
-                if (world == null) return;
+            var world = GameManager.Instance?.World;
+            if (world == null) return 0;
+            if (_cfg.BagLifetimeSeconds <= 0 && !forceAll) return 0;
 
-                var nearby = StyxCore.World.EntitiesInRadius(pos, 1.5f);
-                foreach (var e in nearby)
+            double now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            double ttl = _cfg.BagLifetimeSeconds;
+            var state = _bagStateStore.Value;
+
+            // Snapshot to avoid concurrent-modification issues if a hook
+            // mutates entity state mid-iteration. DictionaryList exposes
+            // .list as a contiguous List<Entity> — copy refs into a local
+            // array sized to the current count.
+            var ents = world.Entities?.list;
+            if (ents == null) return 0;
+            // Iterate by index; despawn calls won't mutate the underlying
+            // list synchronously (engine queues entity removals).
+            int n = ents.Count;
+            HashSet<int> sightedThisPass = new HashSet<int>();
+            for (int i = 0; i < n; i++)
+            {
+                var ent = ents[i];
+                if (!(ent is EntityBackpack bag)) continue;
+                if (bag.RefPlayerId > 0) continue;  // player death bag — leave alone
+                int eid = bag.entityId;
+                sightedThisPass.Add(eid);
+
+                if (!state.SpawnedAt.TryGetValue(eid, out double spawnedAt))
                 {
-                    if (!(e is EntityBackpack bag)) continue;
-                    if (bag.RefPlayerId > 0) continue;  // player death bag — leave alone
-                    world.RemoveEntity(bag.entityId, EnumRemoveEntityReason.Despawned);
+                    // First sighting — adopt with current timestamp.
+                    state.SpawnedAt[eid] = now;
+                    _bagStateDirty = true;
+                    continue;
+                }
+
+                if (forceAll || (ttl > 0 && (now - spawnedAt) > ttl))
+                {
+                    try { world.RemoveEntity(eid, EnumRemoveEntityReason.Despawned); }
+                    catch (Exception e)
+                    {
+                        Log.Warning("[ZombieLoot] RemoveEntity({0}) threw: {1}", eid, e.Message);
+                        continue;
+                    }
+                    state.SpawnedAt.Remove(eid);
+                    _bagStateDirty = true;
+                    despawned++;
                 }
             }
-            catch (Exception e)
+
+            // GC pass — evict tracker entries for entityIds we haven't seen
+            // in 24h AND whose entity is no longer in the loaded world.
+            // Two-stage gate prevents accidentally evicting bags whose
+            // chunks are temporarily unloaded.
+            double gcCutoff = now - BagTrackerGcSeconds;
+            List<int> toEvict = null;
+            foreach (var kv in state.SpawnedAt)
             {
-                Log.Warning("[ZombieLoot] Scheduled despawn failed: " + e.Message);
+                if (kv.Value > gcCutoff) continue;
+                if (sightedThisPass.Contains(kv.Key)) continue;
+                (toEvict ??= new List<int>()).Add(kv.Key);
             }
-        }, name: "ZombieLoot.despawn");
+            if (toEvict != null)
+            {
+                foreach (var id in toEvict) state.SpawnedAt.Remove(id);
+                _bagStateDirty = true;
+            }
+
+            _bagsDespawned += despawned;
+
+            // Persist state if anything changed. DataStore.Save is small
+            // (one JSON write); doing it inline keeps the file consistent
+            // with in-memory tracker after every sweep.
+            if (_bagStateDirty)
+            {
+                try { _bagStateStore.Save(); _bagStateDirty = false; }
+                catch (Exception e)
+                {
+                    Log.Warning("[ZombieLoot] state save threw: " + e.Message);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warning("[ZombieLoot] BagSweep failed: " + e.Message);
+        }
+        return despawned;
     }
 }

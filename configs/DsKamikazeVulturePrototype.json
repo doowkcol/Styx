@@ -1,0 +1,9 @@
+{
+  "MaxHealth": 150,
+  "Aggro": {
+    "AttackHealthThreshold": 1.0,
+    "AlertRadius": 30.0,
+    "AggroDurationSec": 60,
+    "TickIntervalSec": 1.0
+  }
+}

@@ -70,6 +70,28 @@ using Styx.Plugins;
 using Styx.Scheduling;
 using UnityEngine;
 
+/* @styx-entityclasses
+<!--
+    StyxBackpack — used by the StyxBackpack plugin's /b command. Same
+    visuals as a vanilla Backpack; loot window header reads "Styx Backpack"
+    so players can tell at a glance whether they're looking at their
+    persistent stash, a vanilla death bag, or a sell terminal.
+-->
+<entity_class name="StyxBackpack">
+    <property name="Class" value="EntityBackpack"/>
+    <property name="UserSpawnType" value="None"/>
+    <property name="Mesh" value="@:Entities/LootContainers/backpack_droppedPrefab.prefab"/>
+    <property name="ModelType" value="Custom"/>
+    <property name="Prefab" value="Backpack"/>
+    <property name="Parent" value="Backpack"/>
+    <property name="TimeStayAfterDeath" value="3600"/>
+    <property name="IsEnemyEntity" value="false"/>
+    <property name="LootListOnDeath" value="playerBackpack"/>
+    <property name="Faction" value="none"/>
+    <property name="NavObject" value="backpack"/>
+</entity_class>
+*/
+
 [Info("StyxBackpack", "Doowkcol", "0.3.0")]
 public class StyxBackpack : StyxPlugin
 {

@@ -149,11 +149,22 @@ public class StyxZombieHealth : StyxPlugin
         /// <summary>The perm checked when <see cref="RequirePerm"/> is true.</summary>
         public string Perm = "styx.zhealth.use";
 
-        /// <summary>Show readout on zombies (the headline use case).</summary>
+        /// <summary>Show readout on humanoid zombies (the headline use case).</summary>
         public bool ShowZombies = true;
 
-        /// <summary>Show readout on animals (deer, wolves, snakes, etc.).</summary>
-        public bool ShowAnimals = false;
+        /// <summary>Show readout on any animal — tag-based filter (entity_class
+        /// has the "animal" tag in its Tags property). Covers friendly animals
+        /// (deer, rabbit, chicken), hostile animals (coyote, wolf, bear), and
+        /// zombie-animal variants (animalZombieDog, animalZombieVulture,
+        /// animalDireWolf, dsHellhound, entityDsKamikazeVulture). All vanilla
+        /// animal entities tag themselves "animal"; modlets that extend those
+        /// classes inherit it, so this filter picks up DS:Threats canid /
+        /// aerial variants without any plugin-side coupling.
+        ///
+        /// Default true because hostile animals (and zombie animals) attack the
+        /// player and seeing their HP is useful — same use case as zombie HP
+        /// readout. Friendly animals being included is harmless extra info.</summary>
+        public bool ShowAnimals = true;
 
         /// <summary>Show readout on other players. Off by default — PvP servers
         /// usually consider this an unfair info advantage. Toggle on if you
@@ -260,7 +271,7 @@ public class StyxZombieHealth : StyxPlugin
         // Default: status
         ctx.Reply(string.Format("[ccddff]ZombieHealth v0.2.1:[-] enabled={0} range={1}m cone={2}° tick={3}s diag={4}",
             _cfg.Enabled, _cfg.MaxRange, _cfg.ConeAngleDegrees, _cfg.TickSeconds, _diagLogs ? "ON" : "off"));
-        ctx.Reply(string.Format("[ccddff]Filter:[-] zombies={0} animals={1} players={2}",
+        ctx.Reply(string.Format("[ccddff]Filter:[-] zombies={0} animals(any)={1} players={2}",
             _cfg.ShowZombies, _cfg.ShowAnimals, _cfg.ShowOtherPlayers));
         ctx.Reply(string.Format("[ccddff]Perm:[-] requirePerm={0} perm={1}",
             _cfg.RequirePerm, _cfg.Perm));
@@ -288,22 +299,27 @@ public class StyxZombieHealth : StyxPlugin
         var target = FindAimedTarget(p, world);
         if (target == null)
         {
-            // Provide context on nearby zombies so the user can see whether ANY
-            // are in range / in cone / dead.
-            int nearbyZombies = 0, deadZombies = 0;
-            float closestZombieDist = float.PositiveInfinity;
+            // Provide context on nearby zombies + animals (any kind) so the
+            // user can see whether ANY are in range / in cone / dead.
+            int nearbyZombies = 0, nearbyAnimals = 0, deadCount = 0;
+            float closestDist = float.PositiveInfinity;
             var list = world.Entities.list;
             for (int i = 0; i < list.Count; i++)
             {
-                var e = list[i] as EntityZombie;
-                if (e == null) continue;
-                if (e.IsDead()) { deadZombies++; continue; }
-                nearbyZombies++;
-                float d = Vector3.Distance(e.position, p.position);
-                if (d < closestZombieDist) closestZombieDist = d;
+                var ea = list[i] as EntityAlive;
+                if (ea == null) continue;
+                bool isAnimal = IsAnimalClass(ea.entityClass);
+                bool isZombie = !isAnimal && ea is EntityZombie;
+                if (!isAnimal && !isZombie) continue;
+                if (ea.IsDead()) { deadCount++; continue; }
+                if (isZombie) nearbyZombies++;
+                else nearbyAnimals++;
+                float d = Vector3.Distance(ea.position, p.position);
+                if (d < closestDist) closestDist = d;
             }
-            ctx.Reply(string.Format("[ff8888]No target.[-] Nearby live zombies={0} (closest {1:F1}m), dead corpses={2}",
-                nearbyZombies, closestZombieDist == float.PositiveInfinity ? -1f : closestZombieDist, deadZombies));
+            ctx.Reply(string.Format("[ff8888]No target.[-] Nearby zombies={0} animals={1} (closest {2:F1}m), dead corpses={3}",
+                nearbyZombies, nearbyAnimals,
+                closestDist == float.PositiveInfinity ? -1f : closestDist, deadCount));
             ctx.Reply("Tip: aim within " + _cfg.ConeAngleDegrees + "° (very tight) and within " + _cfg.MaxRange + "m. Widen cone in config to test.");
         }
         else
@@ -436,9 +452,23 @@ public class StyxZombieHealth : StyxPlugin
             if (e == null || e == player) continue;
             if (e.IsDead()) continue;
 
-            // Type filter
-            if (e is EntityZombie)        { if (!_cfg.ShowZombies)       continue; }
-            else if (e is EntityAnimal)   { if (!_cfg.ShowAnimals)       continue; }
+            // Type filter. Order matters: check the "animal" tag BEFORE the
+            // EntityZombie type check, because a hybrid like a future
+            // "zombie animal" classed as EntityZombie but tagged "animal"
+            // should be filtered as animal. Today's vanilla / DS:Threats
+            // entities all classify cleanly though.
+            //
+            // The animal tag covers EntityAnimal (friendly), EntityEnemyAnimal
+            // (hostile + zombie ground variants — animalZombieDog etc.), and
+            // EntityVulture / EntityFlying (aerial — animalZombieVulture etc.).
+            // One tag check replaces three brittle type checks. Plain
+            // EntityZombie (humanoid zombies) doesn't have the animal tag so
+            // falls through to the second branch.
+            if (IsAnimalClass(e.entityClass))
+            {
+                if (!_cfg.ShowAnimals) continue;
+            }
+            else if (e is EntityZombie)   { if (!_cfg.ShowZombies)       continue; }
             else if (e is EntityPlayer)   { if (!_cfg.ShowOtherPlayers)  continue; }
             else                          { continue; }
 
@@ -508,6 +538,32 @@ public class StyxZombieHealth : StyxPlugin
     /// 0.4 = hips, 1.0 = chest, 1.6 = head. Together with the 0.7m hit
     /// radius these cover a humanoid capsule including arms.</summary>
     private static readonly float[] _sampleHeights = { 0.4f, 1.0f, 1.6f };
+
+    /// <summary>Tag set used to identify any animal entity. Vanilla applies
+    /// the "animal" tag to every animal-class entity (friendly: deer, rabbit,
+    /// chicken; hostile: coyote, wolf, bear; zombie: animalZombieDog,
+    /// animalZombieVulture, animalDireWolf). Modlets that extend those
+    /// classes inherit the tag, so DS:Threats canid / aerial variants
+    /// (dsHellhound, entityDsKamikazeVulture) get picked up without any
+    /// plugin-side coupling.
+    ///
+    /// Tag-based filter is more robust than C# type checks because animal
+    /// entities span multiple base classes — EntityAnimal (friendly),
+    /// EntityEnemyAnimal (hostile + zombie ground), EntityVulture / EntityFlying
+    /// (aerial). One tag check covers all of them.</summary>
+    private static readonly FastTags<TagGroup.Global> _animalTags =
+        FastTags<TagGroup.Global>.Parse("animal");
+
+    /// <summary>True when the entity's class carries the "animal" tag.
+    /// Catches friendly animals, hostile animals, and zombie animals
+    /// uniformly — useful because all of them can attack the player
+    /// (well, most can) and showing HP is the same use case.</summary>
+    private static bool IsAnimalClass(int entityClassHash)
+    {
+        if (!EntityClass.list.ContainsKey(entityClassHash)) return false;
+        var ec = EntityClass.list[entityClassHash];
+        return ec != null && ec.Tags.Test_AnySet(_animalTags);
+    }
 
     // ============================================================ name labels
 
