@@ -203,6 +203,22 @@ zombieDsSpecter, .35
 </buff>
 */
 
+/* @styx-patch entitygroups
+<!-- Specter into POI sleepers, blood-moon hordes, and wandering hordes.
+     starts-with / contains hits every gamestage tier of each pool in one
+     patch (the modlet patcher uses full .NET XPath 1.0). Skirmisher numbers
+     are fair in a horde, so moderate weight. -->
+<append xpath="/entitygroups/entitygroup[starts-with(@name,'sleeperHordeStageGS')]">
+    <entity name="zombieDsSpecter" prob=".06"/>
+</append>
+<append xpath="/entitygroups/entitygroup[starts-with(@name,'feralHordeStageGS')]">
+    <entity name="zombieDsSpecter" prob=".06"/>
+</append>
+<append xpath="/entitygroups/entitygroup[contains(@name,'wanderingHordeStageGS')]">
+    <entity name="zombieDsSpecter" prob=".05"/>
+</append>
+*/
+
 [Info("DsSpecterPrototype", "Doowkcol", "0.1.0")]
 public class DsSpecterPrototype : StyxPlugin
 {

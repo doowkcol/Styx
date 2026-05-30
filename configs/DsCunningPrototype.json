@@ -1,0 +1,12 @@
+{
+  "Enabled": true,
+  "MaxHealth": 300,
+  "OpenLockedDoors": false,
+  "DoorOpenRange": 2.0,
+  "DoorTickSeconds": 0.33,
+  "BountyEnabled": true,
+  "BountyChance": 0.5,
+  "BountyHour": 22,
+  "SpawnDistance": 35.0,
+  "Verbose": true
+}

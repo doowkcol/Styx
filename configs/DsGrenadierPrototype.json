@@ -1,0 +1,13 @@
+{
+  "Enabled": true,
+  "MaxHealth": 0,
+  "FuseSeconds": 2.5,
+  "SoundDistance": 30,
+  "BlastPower": 18,
+  "BlockDamage": 30.0,
+  "BlockRadius": 1.0,
+  "EntityDamage": 65.0,
+  "EntityRadius": 4,
+  "ParticleIndex": 13,
+  "Verbose": true
+}

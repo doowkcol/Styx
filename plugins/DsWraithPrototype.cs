@@ -180,6 +180,17 @@ zombieDsWraith, .25
      from the plugin.) -->
 */
 
+/* @styx-patch entitygroups
+<!-- Wraith into POI sleepers (med) and blood-moon hordes (low). Ambusher,
+     so fewer in a horde to keep it a surprise rather than a wall. -->
+<append xpath="/entitygroups/entitygroup[starts-with(@name,'sleeperHordeStageGS')]">
+    <entity name="zombieDsWraith" prob=".05"/>
+</append>
+<append xpath="/entitygroups/entitygroup[starts-with(@name,'feralHordeStageGS')]">
+    <entity name="zombieDsWraith" prob=".04"/>
+</append>
+*/
+
 [Info("DsWraithPrototype", "Doowkcol", "0.1.0")]
 public class DsWraithPrototype : StyxPlugin
 {

@@ -194,6 +194,17 @@ entityDsKamikazeVulture, .5
 </buff>
 */
 
+/* @styx-patch entitygroups
+<!-- Kamikaze bomber into blood-moon hordes and wandering hordes (low). A
+     flying suicide bomber adds vertical chaos to a horde night. -->
+<append xpath="/entitygroups/entitygroup[starts-with(@name,'feralHordeStageGS')]">
+    <entity name="entityDsKamikazeVulture" prob=".04"/>
+</append>
+<append xpath="/entitygroups/entitygroup[contains(@name,'wanderingHordeStageGS')]">
+    <entity name="entityDsKamikazeVulture" prob=".04"/>
+</append>
+*/
+
 [Info("DsKamikazeVulturePrototype", "Doowkcol", "0.1.0")]
 public class DsKamikazeVulturePrototype : StyxPlugin
 {

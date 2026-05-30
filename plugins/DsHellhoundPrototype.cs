@@ -215,6 +215,15 @@ dsHellhound, 1
 </buff>
 */
 
+/* @styx-patch entitygroups
+<!-- Hellhound into blood-moon hordes (med) so fire dogs run with the horde.
+     Wandering is already covered: Hellhound is in ZombieDogGroup, which
+     WanderingHorde references. Biome is covered by the DsCanidsBiome cohort. -->
+<append xpath="/entitygroups/entitygroup[starts-with(@name,'feralHordeStageGS')]">
+    <entity name="dsHellhound" prob=".06"/>
+</append>
+*/
+
 [Info("DsHellhoundPrototype", "Doowkcol", "0.1.0")]
 public class DsHellhoundPrototype : StyxPlugin
 {
