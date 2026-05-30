@@ -148,6 +148,9 @@ public class StyxWebDashboard : StyxPlugin
   body{margin:0;background:var(--bg);color:var(--txt);font:14px/1.4 'Segoe UI',system-ui,sans-serif}
   header{display:flex;align-items:center;gap:18px;padding:12px 18px;background:var(--panel);border-bottom:1px solid var(--line)}
   header h1{font-size:18px;margin:0;color:var(--accent);letter-spacing:1px}
+  .navlink{color:var(--dim);text-decoration:none;padding:6px 11px;border-radius:6px;font-size:13px}
+  .navlink:hover{color:var(--txt);background:#1f2630}
+  .navlink.active{color:var(--accent);background:#1f2630}
   header .stat{color:var(--dim)} header .stat b{color:var(--txt)}
   .badge{padding:3px 9px;border-radius:10px;font-size:12px;font-weight:600}
   .bm-on{background:var(--bad);color:#fff} .bm-off{background:#223;color:var(--dim)}
@@ -173,6 +176,10 @@ public class StyxWebDashboard : StyxPlugin
 <body>
 <header>
   <h1>STYX</h1>
+  <a class='navlink active' href='/styx/dashboard'>Dashboard</a>
+  <a class='navlink' href='/styx/map'>Map</a>
+  <a class='navlink' href='/styx/perms'>Permissions</a>
+  <a class='navlink' href='/styx/configs'>Configs</a>
   <span class='stat'>v<b id='ver'>-</b></span>
   <span class='stat'>Day <b id='day'>-</b></span>
   <span class='stat'>Time <b id='time'>--:--</b></span>
